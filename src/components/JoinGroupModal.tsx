@@ -22,14 +22,19 @@ export function JoinGroupModal({ isOpen, onClose, onSuccess }: JoinGroupModalPro
 
     setLoading(true);
     try {
-      // Find group by invite code
-      const { data: group, error: groupError } = await supabase
-        .from("groups")
-        .select("id, name")
-        .eq("invite_code", code.trim().toUpperCase())
-        .single();
+      // Find group by invite code using RPC function to bypass RLS
+      const { data, error: groupError } = await supabase
+        .rpc("lookup_group_by_invite_code", { code: code.trim() });
 
-      if (groupError || !group) {
+      if (groupError) {
+        console.error("Error looking up group:", groupError);
+        toast.error("Ogiltig kod", { description: "Ingen grupp hittades med den koden." });
+        setLoading(false);
+        return;
+      }
+
+      const group = data?.[0];
+      if (!group) {
         toast.error("Ogiltig kod", { description: "Ingen grupp hittades med den koden." });
         setLoading(false);
         return;
