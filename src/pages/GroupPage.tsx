@@ -48,8 +48,13 @@ const GroupPage = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container py-12">
+          <div className="h-6 w-32 rounded bg-secondary animate-pulse mb-4" />
           <div className="h-8 w-48 rounded bg-secondary animate-pulse mb-8" />
-          <div className="h-32 rounded-md bg-secondary animate-pulse" />
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-12 rounded bg-secondary animate-pulse" />
+            ))}
+          </div>
         </main>
       </div>
     );
@@ -60,8 +65,8 @@ const GroupPage = () => {
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container py-12">
-          <p className="text-muted-foreground">Gruppen hittades inte.</p>
-          <Link to="/" className="text-sm text-foreground hover:underline mt-4 inline-block">
+          <p className="text-muted-foreground mb-4">Gruppen hittades inte.</p>
+          <Link to="/" className="text-sm text-foreground hover:underline">
             ← Tillbaka
           </Link>
         </main>
@@ -125,6 +130,8 @@ const GroupPage = () => {
     setIsSettleModalOpen(false);
   };
 
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -135,48 +142,59 @@ const GroupPage = () => {
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← Tillbaka
           </Link>
-          <div className="flex items-center gap-3 mt-4">
-            <h1 className="text-2xl font-medium text-foreground">{group.name}</h1>
+          <div className="flex items-baseline gap-3 mt-4">
+            <h1 className="text-2xl font-semibold text-foreground">{group.name}</h1>
             {group.is_temporary && (
               <span className="text-xs text-muted-foreground">tillfällig</span>
             )}
           </div>
         </div>
 
-        {/* Balance */}
-        <div className="mb-12 pb-8 border-b border-border">
-          <p className="text-sm text-muted-foreground mb-2">
-            {group.members.length === 1 ? "Totalt" : "Balans"}
-          </p>
+        {/* Balance Summary */}
+        <div className="mb-10 pb-8 border-b border-border">
           {group.members.length === 1 ? (
-            <p className="text-lg text-foreground">
-              {expenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString("sv-SE")} kr
-            </p>
-          ) : oweAmount > 0 && negativeUser && positiveUser ? (
-            <div className="flex items-center justify-between">
-              <p className="text-lg text-foreground">
-                {negativeUser.name} är skyldig {positiveUser.name} {Math.round(oweAmount).toLocaleString("sv-SE")} kr
+            <div>
+              <p className="text-sm text-muted-foreground mb-1">Totalt</p>
+              <p className="text-3xl font-semibold text-foreground tabular-nums">
+                {totalExpenses.toLocaleString("sv-SE")} kr
               </p>
-              <Button variant="outline" onClick={() => setIsSettleModalOpen(true)}>
-                Avräkna
-              </Button>
             </div>
           ) : (
-            <p className="text-lg text-foreground">Ni är kvitt</p>
+            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+              <div>
+                <p className="text-sm text-muted-foreground mb-1">Balans</p>
+                {oweAmount > 0 && negativeUser && positiveUser ? (
+                  <p className="text-lg text-foreground">
+                    <span className="font-medium">{negativeUser.name}</span>
+                    <span className="text-muted-foreground mx-2">→</span>
+                    <span className="font-medium">{positiveUser.name}</span>
+                    <span className="ml-3 text-2xl font-semibold tabular-nums">
+                      {Math.round(oweAmount).toLocaleString("sv-SE")} kr
+                    </span>
+                  </p>
+                ) : (
+                  <p className="text-lg text-foreground">Kvitt ✓</p>
+                )}
+              </div>
+              {oweAmount > 0 && (
+                <Button variant="outline" onClick={() => setIsSettleModalOpen(true)}>
+                  Avräkna
+                </Button>
+              )}
+            </div>
           )}
 
           {/* Per-person breakdown */}
           {group.members.length > 1 && (
-            <div className="flex gap-8 mt-6 text-sm">
+            <div className="flex gap-6 mt-6 text-sm">
               {balances.map((b) => {
                 const member = group.members.find((u) => u.user_id === b.userId);
                 const isPositive = b.balance >= 0;
                 return (
-                  <div key={b.userId}>
+                  <div key={b.userId} className="flex items-center gap-2">
                     <span className="text-muted-foreground">{member?.name || "Okänd"}</span>
-                    <span className={`ml-2 ${isPositive ? "text-foreground" : "text-muted-foreground"}`}>
-                      {isPositive ? "+" : ""}
-                      {Math.round(b.balance).toLocaleString("sv-SE")} kr
+                    <span className={isPositive ? "text-foreground font-medium" : "text-muted-foreground"}>
+                      {isPositive ? "+" : ""}{Math.round(b.balance).toLocaleString("sv-SE")} kr
                     </span>
                   </div>
                 );
@@ -187,24 +205,14 @@ const GroupPage = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="expenses" className="w-full">
-          <TabsList className="mb-8 bg-transparent border-b border-border rounded-none w-full justify-start gap-4 p-0">
-            <TabsTrigger 
-              value="expenses" 
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent px-0 pb-2"
-            >
-              Utgifter
-            </TabsTrigger>
-            <TabsTrigger 
-              value="history"
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent px-0 pb-2"
-            >
-              Historik
-            </TabsTrigger>
+          <TabsList className="w-full justify-start">
+            <TabsTrigger value="expenses">Utgifter</TabsTrigger>
+            <TabsTrigger value="history">Historik</TabsTrigger>
           </TabsList>
 
           <TabsContent value="expenses">
             {expenses.length > 0 ? (
-              <div className="space-y-1">
+              <div className="divide-y divide-border">
                 {expenses.map((expense, index) => (
                   <ExpenseItem
                     key={expense.id}
@@ -218,16 +226,14 @@ const GroupPage = () => {
                 ))}
               </div>
             ) : (
-              <div className="py-8">
-                <p className="text-muted-foreground mb-4">
-                  Inga utgifter ännu
-                </p>
-              </div>
+              <p className="text-muted-foreground py-8">
+                Inga utgifter ännu
+              </p>
             )}
 
-            <div className="mt-8 flex gap-4">
+            <div className="mt-6 flex gap-3">
               <Button variant="ghost" onClick={() => setIsAddModalOpen(true)} className="text-muted-foreground">
-                + Lägg till utgift
+                + Lägg till
               </Button>
               <Button variant="ghost" onClick={() => setIsImportModalOpen(true)} className="text-muted-foreground">
                 Importera
