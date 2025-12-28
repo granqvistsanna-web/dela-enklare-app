@@ -104,7 +104,7 @@ const Auth = () => {
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="w-full max-w-xs">
         <div className="text-center mb-10">
-          <h1 className="text-xl font-semibold text-foreground tracking-tight">Delarätt</h1>
+          <h1 className="text-xl font-semibold text-foreground tracking-tight">päronsplit</h1>
         </div>
 
         <div className="space-y-6">
