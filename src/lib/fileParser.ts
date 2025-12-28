@@ -117,20 +117,43 @@ function parseTable(rawRows: string[][]): ParsedTransaction[] {
   const header = rows[headerRowIndex] ?? [];
   const dataRows = rows.slice(headerRowIndex + 1);
 
-  const { dateCol, amountCol, descCol } = inferColumns(header, dataRows);
-  if (dateCol == null || amountCol == null) return [];
+  const { dateCol, amountCol, descCol, debitCol, creditCol } = inferColumns(header, dataRows);
+
+  // Need either a single amount column OR both debit/credit columns
+  if (dateCol == null) return [];
+  if (amountCol == null && (debitCol == null || creditCol == null)) return [];
 
   const transactions: ParsedTransaction[] = [];
 
   for (let i = 0; i < dataRows.length; i++) {
     const r = dataRows[i];
     const dateStr = r[dateCol] ?? "";
-    const amountStr = r[amountCol] ?? "";
 
     const date = parseSwedishDate(dateStr);
     if (!date) continue;
 
-    const amount = parseSwedishAmount(amountStr);
+    // Get amount from either single column or debit/credit columns
+    let amount = 0;
+    if (amountCol != null) {
+      const amountStr = r[amountCol] ?? "";
+      amount = parseSwedishAmount(amountStr);
+    } else if (debitCol != null && creditCol != null) {
+      // Try debit column first (expenses)
+      const debitStr = r[debitCol] ?? "";
+      const debitAmount = parseSwedishAmount(debitStr);
+
+      // Try credit column (income/refunds)
+      const creditStr = r[creditCol] ?? "";
+      const creditAmount = parseSwedishAmount(creditStr);
+
+      // Use whichever is non-zero (or debit if both are non-zero)
+      if (!Number.isNaN(debitAmount) && debitAmount !== 0) {
+        amount = Math.abs(debitAmount);
+      } else if (!Number.isNaN(creditAmount) && creditAmount !== 0) {
+        amount = Math.abs(creditAmount);
+      }
+    }
+
     if (!amount || Number.isNaN(amount)) continue;
 
     const description = (r[descCol ?? -1] ?? "").toString().trim();
@@ -138,7 +161,7 @@ function parseTable(rawRows: string[][]): ParsedTransaction[] {
 
     // Keep both + and - amounts; user can deselect in review.
     transactions.push({
-      id: `${headerRowIndex + 1 + i}-${Date.now()}`,
+      id: `${headerRowIndex + 1 + i}-${Date.now()}-${Math.random()}`,
       date,
       description,
       amount: Math.abs(amount),
@@ -159,8 +182,8 @@ function findHeaderRowIndex(rows: string[][]): number {
   for (let i = 0; i < maxScan; i++) {
     const cells = rows[i].map((c) => c.toLowerCase());
     const score =
-      containsAny(cells, ["datum", "date", "bokför", "transaktions"]) ? 2 : 0 +
-      (containsAny(cells, ["belopp", "amount", "summa", "debet", "kredit"]) ? 2 : 0) +
+      (containsAny(cells, ["datum", "date", "bokför", "transaktions"]) ? 2 : 0) +
+      (containsAny(cells, ["belopp", "amount", "debet", "kredit"]) ? 2 : 0) +
       (containsAny(cells, ["beskriv", "text", "mottag", "rubrik", "meddel"]) ? 1 : 0);
 
     if (score > bestScore) {
@@ -177,6 +200,8 @@ function inferColumns(header: string[], dataRows: string[][]): {
   dateCol: number | null;
   amountCol: number | null;
   descCol: number | null;
+  debitCol?: number;
+  creditCol?: number;
 } {
   // 1) Try header-based indices
   const headerLower = header.map((h) => (h ?? "").toString().toLowerCase());
@@ -184,9 +209,20 @@ function inferColumns(header: string[], dataRows: string[][]): {
   const dateColHeader = headerLower.findIndex((h) =>
     ["datum", "date", "bokföringsdag", "transaktionsdatum"].some((k) => h.includes(k))
   );
-  const amountColHeader = headerLower.findIndex((h) =>
-    ["belopp", "amount", "summa", "debet", "kredit"].some((k) => h.includes(k))
+
+  // Look for debit/credit columns separately (common in Swedish bank exports)
+  const debitColHeader = headerLower.findIndex((h) =>
+    ["debet", "utbetalning", "utgift"].some((k) => h.includes(k))
   );
+  const creditColHeader = headerLower.findIndex((h) =>
+    ["kredit", "inbetalning", "inkomst"].some((k) => h.includes(k))
+  );
+
+  // Look for a single amount column (excluding saldo/balance)
+  const amountColHeader = headerLower.findIndex((h) =>
+    ["belopp", "amount"].some((k) => h.includes(k)) && !h.includes("saldo") && !h.includes("balance")
+  );
+
   const descColHeader = headerLower.findIndex((h) =>
     ["beskrivning", "text", "mottagare", "description", "meddelande", "rubrik"].some((k) => h.includes(k))
   );
@@ -196,15 +232,27 @@ function inferColumns(header: string[], dataRows: string[][]): {
 
   // 2) If missing, infer from content
   const dateCol = dateColHeader >= 0 ? dateColHeader : inferDateColumn(sample, colCount);
-  const amountCol = amountColHeader >= 0 ? amountColHeader : inferAmountColumn(sample, colCount);
 
-  let descCol = descColHeader >= 0 ? descColHeader : inferDescriptionColumn(sample, colCount, [dateCol, amountCol]);
+  // Use debit/credit columns if found, otherwise look for single amount column
+  let amountCol: number | null = null;
+  let debitCol: number | undefined = debitColHeader >= 0 ? debitColHeader : undefined;
+  let creditCol: number | undefined = creditColHeader >= 0 ? creditColHeader : undefined;
+
+  if (amountColHeader >= 0) {
+    amountCol = amountColHeader;
+  } else if (debitCol === undefined && creditCol === undefined) {
+    amountCol = inferAmountColumn(sample, colCount);
+  }
+
+  let descCol = descColHeader >= 0 ? descColHeader : inferDescriptionColumn(sample, colCount, [dateCol, amountCol, debitCol, creditCol].filter(c => c != null) as number[]);
   if (descCol == null) descCol = 1; // fallback
 
   return {
     dateCol: dateCol ?? null,
     amountCol: amountCol ?? null,
     descCol,
+    debitCol,
+    creditCol,
   };
 }
 
