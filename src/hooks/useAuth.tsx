@@ -20,6 +20,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
+  updateProfile: (name: string) => Promise<{ error: Error | null }>;
   deleteAccount: () => Promise<{ error: Error | null }>;
   refreshProfile: () => Promise<void>;
 }
@@ -135,7 +136,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { error } = await supabase.auth.updateUser({
       password: newPassword
     });
-    
+
+    return { error: error as Error | null };
+  };
+
+  const updateProfile = async (name: string) => {
+    if (!user) {
+      return { error: new Error("Ingen användare är inloggad") };
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ name, updated_at: new Date().toISOString() })
+      .eq("user_id", user.id);
+
+    if (!error) {
+      await refreshProfile();
+    }
+
     return { error: error as Error | null };
   };
 
@@ -162,6 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signOut,
       updatePassword,
+      updateProfile,
       deleteAccount,
       refreshProfile
     }}>
