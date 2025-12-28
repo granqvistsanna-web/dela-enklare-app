@@ -32,12 +32,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (sessionUser: User) => {
     const { data, error } = await supabase
       .from("profiles")
       .select("*")
-      .eq("user_id", userId)
-      .single();
+      .eq("user_id", sessionUser.id)
+      .maybeSingle();
+
+    // If no profile exists yet, create one (allowed by RLS: user inserts own profile)
+    if (!error && !data) {
+      const displayName =
+        (sessionUser.user_metadata as any)?.name ||
+        sessionUser.email?.split("@")[0] ||
+        "Användare";
+
+      const { data: inserted, error: insertError } = await supabase
+        .from("profiles")
+        .insert({
+          user_id: sessionUser.id,
+          name: displayName,
+          email: sessionUser.email ?? "",
+        })
+        .select("*")
+        .maybeSingle();
+
+      if (!insertError && inserted) setProfile(inserted);
+      return;
+    }
 
     if (!error && data) {
       setProfile(data);
@@ -54,7 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Defer profile fetch to avoid deadlock
         if (session?.user) {
           setTimeout(() => {
-            fetchProfile(session.user.id);
+            fetchProfile(session.user);
           }, 0);
         } else {
           setProfile(null);
@@ -70,7 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        fetchProfile(session.user.id);
+        fetchProfile(session.user);
       }
       
       setLoading(false);
@@ -127,7 +148,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const refreshProfile = async () => {
     if (user) {
-      await fetchProfile(user.id);
+      await fetchProfile(user);
     }
   };
 
