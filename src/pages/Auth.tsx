@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -109,10 +108,8 @@ const Auth = () => {
         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40"></div>
         <div className="relative z-10 max-w-md text-white">
           <div className="mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl mb-6">
-              <span className="text-4xl">💰</span>
-            </div>
-            <h1 className="text-4xl font-bold mb-4 tracking-tight">Delarätt</h1>
+            <img src={logo} alt="Päronsplit" className="h-20 mb-6" />
+            <h1 className="text-4xl font-bold mb-4 tracking-tight">Päronsplit</h1>
             <p className="text-lg text-white/90 leading-relaxed">
               Dela utgifter rättvist och enkelt med vänner, familj och partners
             </p>
@@ -154,10 +151,8 @@ const Auth = () => {
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex items-center justify-center w-14 h-14 bg-primary/10 rounded-2xl mb-3">
-              <span className="text-3xl">💰</span>
-            </div>
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">Delarätt</h1>
+            <img src={logo} alt="Päronsplit" className="h-16 mx-auto mb-3" />
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Päronsplit</h1>
           </div>
 
           {/* Auth card */}
@@ -168,13 +163,32 @@ const Auth = () => {
               </h2>
               <p className="text-muted-foreground mt-2">
                 {mode === "login"
-                  ? "Välkommen tillbaka till Delarätt"
+                  ? "Välkommen tillbaka till Päronsplit"
                   : "Börja dela utgifter rättvist idag"}
               </p>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-5">
-            {mode === "signup" && (
+              {mode === "signup" && (
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium text-foreground">
+                    Namn
+                  </Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="Ditt namn"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    autoComplete="name"
+                    className="h-11"
+                  />
+                  {errors.name && (
+                    <p className="text-xs text-destructive mt-1">{errors.name}</p>
+                  )}
+                </div>
+              )}
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-foreground">
                   E-postadress
@@ -231,34 +245,6 @@ const Auth = () => {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                {mode === "login" ? "Har du inget konto?" : "Har du redan ett konto?"}
-              </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === "login" ? "signup" : "login");
-                  setErrors({});
-                  setEmail("");
-                  setPassword("");
-                  setName("");
-                }}
-                className="mt-2 text-sm font-medium text-foreground hover:underline transition-all"
-              >
-                {mode === "login" ? "Skapa ett nytt konto" : "Logga in här"}
-              </button>
-            </div>
-          </CardContent>
-        </Card>
-
-              <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
-                {isSubmitting
-                  ? (mode === "login" ? "Loggar in..." : "Skapar...")
-                  : (mode === "login" ? "Logga in" : "Skapa konto")}
-              </Button>
-            </form>
-
             <div className="mt-6 pt-6 border-t border-border">
               <p className="text-sm text-center text-muted-foreground">
                 {mode === "login" ? "Inget konto?" : "Har du redan ett konto?"}
@@ -268,6 +254,9 @@ const Auth = () => {
                   onClick={() => {
                     setMode(mode === "login" ? "signup" : "login");
                     setErrors({});
+                    setEmail("");
+                    setPassword("");
+                    setName("");
                   }}
                   className="text-primary font-medium hover:underline"
                 >

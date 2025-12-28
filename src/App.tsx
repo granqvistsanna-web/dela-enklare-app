@@ -1,4 +1,4 @@
-import { Toaster as Sonner } from "@/components/ui/sonner";
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
@@ -50,7 +50,6 @@ const App = () => (
       <TooltipProvider>
         <AuthProvider>
           <Toaster />
-          <Sonner />
           <OfflineIndicator />
           <BrowserRouter>
             <Routes>
