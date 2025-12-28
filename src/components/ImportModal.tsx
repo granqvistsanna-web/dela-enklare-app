@@ -1,11 +1,11 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Upload, FileText, Check, Loader2 } from "lucide-react";
+import { X, Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { parseCSV, ParsedTransaction } from "@/lib/csvParser";
+import { parseFile, ParsedTransaction } from "@/lib/fileParser";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -33,23 +33,33 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
   const [isDragging, setIsDragging] = useState(false);
 
   const handleFileUpload = useCallback(async (file: File) => {
-    if (!file.name.endsWith('.csv')) {
+    const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
+    const isCsv = file.name.endsWith('.csv');
+    
+    if (!isExcel && !isCsv) {
       toast({
         title: "Fel filformat",
-        description: "Endast CSV-filer stöds just nu.",
+        description: "Endast CSV- och Excel-filer stöds.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const content = await file.text();
-      const parsed = parseCSV(content);
+      let parsed: ParsedTransaction[];
+      
+      if (isExcel) {
+        const buffer = await file.arrayBuffer();
+        parsed = parseFile(buffer, file.name);
+      } else {
+        const content = await file.text();
+        parsed = parseFile(content, file.name);
+      }
       
       if (parsed.length === 0) {
         toast({
           title: "Inga transaktioner hittades",
-          description: "Kontrollera att CSV-filen har rätt format.",
+          description: "Kontrollera att filen har rätt format.",
           variant: "destructive",
         });
         return;
@@ -197,10 +207,7 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
           >
             <Card className="border-border shadow-lg flex flex-col w-full max-w-2xl max-h-[calc(100vh-2rem)] overflow-hidden">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 shrink-0">
-                <CardTitle className="text-xl flex items-center gap-2">
-                  <FileText size={22} className="text-primary" />
-                  Importera transaktioner
-                </CardTitle>
+                <CardTitle className="text-lg">Importera transaktioner</CardTitle>
                 <Button variant="ghost" size="icon" onClick={handleClose}>
                   <X size={20} />
                 </Button>
@@ -221,25 +228,25 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
                       <Upload size={28} className="text-muted-foreground" />
                     </div>
                     <p className="text-lg font-medium text-foreground mb-2">
-                      Dra och släpp din CSV-fil här
+                      Dra och släpp din fil här
                     </p>
                     <p className="text-sm text-muted-foreground mb-4">
-                      Eller klicka för att välja fil
+                      CSV eller Excel (.xlsx)
                     </p>
                     <input
                       type="file"
-                      accept=".csv"
+                      accept=".csv,.xlsx,.xls"
                       onChange={handleFileSelect}
                       className="hidden"
-                      id="csv-upload"
+                      id="file-upload"
                     />
-                    <label htmlFor="csv-upload">
+                    <label htmlFor="file-upload">
                       <Button variant="outline" className="cursor-pointer" asChild>
-                        <span>Välj CSV-fil</span>
+                        <span>Välj fil</span>
                       </Button>
                     </label>
                     <p className="text-xs text-muted-foreground mt-4">
-                      Stödjer de flesta svenska bankformat (Swedbank, SEB, Nordea, etc.)
+                      Stödjer de flesta svenska bankformat
                     </p>
                   </div>
                 )}
@@ -288,7 +295,6 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
                         onClick={handleImport}
                         disabled={selectedCount === 0}
                       >
-                        <Check size={18} />
                         Importera {selectedCount} utgifter
                       </Button>
                     </div>
