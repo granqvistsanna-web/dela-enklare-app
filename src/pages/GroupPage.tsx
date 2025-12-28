@@ -27,6 +27,7 @@ import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { SettlementModal } from "@/components/SettlementModal";
 import { SettlementHistory } from "@/components/SettlementHistory";
 import { ImportModal } from "@/components/ImportModal";
+import { AddMembersModal } from "@/components/AddMembersModal";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useSettlements } from "@/hooks/useSettlements";
@@ -49,7 +50,7 @@ const GroupPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { groups, loading: groupsLoading, deleteGroup } = useGroups();
+  const { groups, loading: groupsLoading, deleteGroup, addMembers, refetch } = useGroups();
   const { expenses, loading: expensesLoading, addExpense, updateExpense, deleteExpense } = useExpenses(id);
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(id);
 
@@ -60,6 +61,7 @@ const GroupPage = () => {
   const [isSettleModalOpen, setIsSettleModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
 
@@ -177,6 +179,12 @@ const GroupPage = () => {
     navigate("/dashboard");
   };
 
+  const handleAddMembers = async (userIds: string[]) => {
+    if (!id) return;
+    await addMembers(id, userIds);
+    await refetch();
+  };
+
   const handleCopyCode = async () => {
     if (!group?.invite_code) return;
 
@@ -260,6 +268,11 @@ const GroupPage = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setIsAddMembersModalOpen(true)}>
+                      <Users size={14} className="mr-2" />
+                      Lägg till medlemmar
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => setIsDeleteDialogOpen(true)}
                       className="text-destructive focus:text-destructive"
@@ -507,6 +520,13 @@ const GroupPage = () => {
           amount={oweAmount}
         />
       )}
+
+      <AddMembersModal
+        isOpen={isAddMembersModalOpen}
+        onClose={() => setIsAddMembersModalOpen(false)}
+        onSubmit={handleAddMembers}
+        currentMembers={group?.members || []}
+      />
 
       <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <AlertDialogContent>

@@ -20,8 +20,8 @@ const Index = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const loading = groupsLoading || expensesLoading;
-  const handleCreateGroup = async (name: string, isTemporary: boolean) => {
-    await createGroup(name, isTemporary);
+  const handleCreateGroup = async (name: string, isTemporary: boolean, selectedUserIds: string[]) => {
+    await createGroup(name, isTemporary, selectedUserIds);
     setIsCreateModalOpen(false);
   };
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);

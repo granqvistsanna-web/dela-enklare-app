@@ -1,36 +1,32 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAllUsers } from "@/hooks/useAllUsers";
 import { useAuth } from "@/hooks/useAuth";
+import { GroupMember } from "@/hooks/useGroups";
 
-interface CreateGroupModalProps {
+interface AddMembersModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, isTemporary: boolean, selectedUserIds: string[]) => void;
+  onSubmit: (selectedUserIds: string[]) => Promise<void>;
+  currentMembers: GroupMember[];
 }
 
-export function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGroupModalProps) {
+export function AddMembersModal({ isOpen, onClose, onSubmit, currentMembers }: AddMembersModalProps) {
   const { user } = useAuth();
   const { users, loading: usersLoading } = useAllUsers();
-  const [name, setName] = useState("");
-  const [isTemporary, setIsTemporary] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (selectedUserIds.length === 0) return;
 
     setIsSubmitting(true);
     try {
-      await onSubmit(name.trim(), isTemporary, selectedUserIds);
-      setName("");
-      setIsTemporary(false);
+      await onSubmit(selectedUserIds);
       setSelectedUserIds([]);
       onClose();
     } finally {
@@ -46,8 +42,16 @@ export function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGroupModal
     );
   };
 
-  // Filter out current user from the list
-  const availableUsers = users.filter(u => u.user_id !== user?.id);
+  const handleClose = () => {
+    setSelectedUserIds([]);
+    onClose();
+  };
+
+  // Filter out current members and current user
+  const currentMemberIds = currentMembers.map(m => m.user_id);
+  const availableUsers = users.filter(
+    u => !currentMemberIds.includes(u.user_id) && u.user_id !== user?.id
+  );
 
   return (
     <AnimatePresence>
@@ -58,7 +62,7 @@ export function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGroupModal
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-50 bg-foreground/10 backdrop-blur-sm"
-            onClick={onClose}
+            onClick={handleClose}
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.98 }}
@@ -69,47 +73,19 @@ export function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGroupModal
           >
             <div className="bg-background border border-border rounded-md w-full max-w-md p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-medium text-foreground">Ny grupp</h2>
-                <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+                <h2 className="text-lg font-medium text-foreground">Lägg till medlemmar</h2>
+                <button onClick={handleClose} className="text-muted-foreground hover:text-foreground">
                   ✕
                 </button>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="groupName" className="text-sm text-muted-foreground">
-                    Namn
-                  </Label>
-                  <Input
-                    id="groupName"
-                    placeholder="t.ex. Hushåll"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
-                    autoFocus
-                  />
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div>
-                    <Label htmlFor="temporary" className="text-sm text-foreground">Tillfällig</Label>
-                    <p className="text-xs text-muted-foreground">
-                      För resor eller engångsprojekt
-                    </p>
-                  </div>
-                  <Switch
-                    id="temporary"
-                    checked={isTemporary}
-                    onCheckedChange={setIsTemporary}
-                  />
-                </div>
-
-                {availableUsers.length > 0 && (
+                {availableUsers.length > 0 ? (
                   <div className="space-y-3">
                     <Label className="text-sm text-foreground">
-                      Lägg till medlemmar (valfritt)
+                      Välj medlemmar att lägga till
                     </Label>
-                    <div className="border border-border rounded-md max-h-48 overflow-y-auto">
+                    <div className="border border-border rounded-md max-h-64 overflow-y-auto">
                       {usersLoading ? (
                         <div className="p-4 text-sm text-muted-foreground text-center">
                           Laddar användare...
@@ -143,15 +119,31 @@ export function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGroupModal
                       </p>
                     )}
                   </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <p className="text-sm text-muted-foreground">
+                      Alla registrerade användare är redan medlemmar i denna grupp.
+                    </p>
+                  </div>
                 )}
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isSubmitting || !name.trim()}
-                >
-                  {isSubmitting ? "Skapar..." : "Skapa"}
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleClose}
+                    className="flex-1"
+                  >
+                    Avbryt
+                  </Button>
+                  <Button
+                    type="submit"
+                    className="flex-1"
+                    disabled={isSubmitting || selectedUserIds.length === 0}
+                  >
+                    {isSubmitting ? "Lägger till..." : "Lägg till"}
+                  </Button>
+                </div>
               </form>
             </div>
           </motion.div>

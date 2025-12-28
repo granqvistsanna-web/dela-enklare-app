@@ -139,7 +139,7 @@ export function useGroups() {
     fetchGroups();
   }, [fetchGroups]);
 
-  const createGroup = async (name: string, isTemporary: boolean = false) => {
+  const createGroup = async (name: string, isTemporary: boolean = false, selectedUserIds: string[] = []) => {
     if (!user) {
       toast.error("Du måste vara inloggad");
       return null;
@@ -161,6 +161,23 @@ export function useGroups() {
       if (groupError) {
         console.error("Group creation error:", groupError.code, groupError.message);
         throw groupError;
+      }
+
+      // Add selected users as members
+      if (selectedUserIds.length > 0) {
+        const membersToAdd = selectedUserIds.map(userId => ({
+          group_id: groupData.id,
+          user_id: userId,
+        }));
+
+        const { error: membersError } = await supabase
+          .from("group_members")
+          .insert(membersToAdd);
+
+        if (membersError) {
+          console.error("Error adding members:", membersError);
+          toast.error("Grupp skapad men kunde inte lägga till alla medlemmar");
+        }
       }
 
       await fetchGroups();
@@ -191,11 +208,33 @@ export function useGroups() {
     }
   };
 
+  const addMembers = async (groupId: string, userIds: string[]) => {
+    try {
+      const membersToAdd = userIds.map(userId => ({
+        group_id: groupId,
+        user_id: userId,
+      }));
+
+      const { error } = await supabase
+        .from("group_members")
+        .insert(membersToAdd);
+
+      if (error) throw error;
+
+      await fetchGroups();
+      toast.success(`${userIds.length} ${userIds.length === 1 ? 'medlem' : 'medlemmar'} tillagd${userIds.length === 1 ? '' : 'a'}!`);
+    } catch (error) {
+      console.error("Error adding members:", error);
+      toast.error("Kunde inte lägga till medlemmar");
+    }
+  };
+
   return {
     groups,
     loading,
     createGroup,
     deleteGroup,
+    addMembers,
     refetch: fetchGroups,
   };
 }
