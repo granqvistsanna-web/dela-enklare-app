@@ -119,7 +119,7 @@ const Settings = () => {
 
       <main className="container py-12">
         <div className="mb-10">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← Tillbaka
           </Link>
           <h1 className="text-2xl font-semibold text-foreground mt-4">Inställningar</h1>
