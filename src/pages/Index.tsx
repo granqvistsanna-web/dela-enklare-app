@@ -28,37 +28,37 @@ const Index = () => {
   return <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-16 max-w-4xl mx-auto">
+      <main className="container py-8 sm:py-12 md:py-16 max-w-4xl mx-auto px-4 sm:px-6">
         {/* Hero Section */}
-        <div className="mb-16">
-          <h1 className="text-4xl font-semibold text-foreground mb-3 tracking-tight">
+        <div className="mb-8 sm:mb-12 md:mb-16">
+          <h1 className="text-3xl sm:text-4xl font-semibold text-foreground mb-3 tracking-tight">
             Dina grupper
           </h1>
-          <p className="text-lg text-muted-foreground">Skapa grupper och hantera gemensamma utgifter.</p>
+          <p className="text-base sm:text-lg text-muted-foreground">Skapa grupper och hantera gemensamma utgifter.</p>
         </div>
 
         {/* Stats Cards */}
-        {!loading && groups.length > 0 && <div className="grid grid-cols-2 gap-4 mb-12">
-            <div className="bg-secondary/50 rounded-lg p-6 border border-border hover:bg-secondary transition-colors">
+        {!loading && groups.length > 0 && <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-8 sm:mb-12">
+            <div className="bg-secondary/50 rounded-lg p-5 sm:p-6 border border-border hover:bg-secondary transition-colors">
               <p className="text-sm text-muted-foreground mb-2 font-medium">Totala utgifter</p>
-              <p className="text-3xl font-semibold text-foreground tabular-nums">
+              <p className="text-2xl sm:text-3xl font-semibold text-foreground tabular-nums">
                 {totalExpenses.toLocaleString("sv-SE")} kr
               </p>
             </div>
-            <div className="bg-secondary/50 rounded-lg p-6 border border-border hover:bg-secondary transition-colors">
+            <div className="bg-secondary/50 rounded-lg p-5 sm:p-6 border border-border hover:bg-secondary transition-colors">
               <p className="text-sm text-muted-foreground mb-2 font-medium">Aktiva grupper</p>
-              <p className="text-3xl font-semibold text-foreground tabular-nums">
+              <p className="text-2xl sm:text-3xl font-semibold text-foreground tabular-nums">
                 {groups.length}
               </p>
             </div>
           </div>}
 
         {/* Action Buttons */}
-        {!loading && <div className="flex gap-3 mb-8">
-            <Button onClick={() => setIsCreateModalOpen(true)} className="bg-foreground text-background hover:bg-foreground/90 font-medium">
+        {!loading && <div className="flex flex-col sm:flex-row gap-3 mb-8">
+            <Button onClick={() => setIsCreateModalOpen(true)} className="bg-foreground text-background hover:bg-foreground/90 font-medium w-full sm:w-auto">
               + Skapa ny grupp
             </Button>
-            <Button variant="outline" onClick={() => setIsJoinModalOpen(true)} className="font-medium">
+            <Button variant="outline" onClick={() => setIsJoinModalOpen(true)} className="font-medium w-full sm:w-auto">
               Gå med i grupp
             </Button>
           </div>}
