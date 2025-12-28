@@ -350,11 +350,27 @@ function parseSwedishAmount(str: string): number {
   // Handle parentheses for negative (e.g. (123,45))
   const isParensNeg = /^\(.*\)$/.test(s);
 
-  const cleaned = s
-    .replace(/^\(|\)$/g, "")
-    .replace(/\s/g, "")
-    .replace(/\./g, "")
-    .replace(",", ".");
+  let cleaned = s.replace(/^\(|\)$/g, "").replace(/\s/g, "");
+
+  // Detect format by finding last occurrence of . or ,
+  const lastDot = cleaned.lastIndexOf(".");
+  const lastComma = cleaned.lastIndexOf(",");
+
+  if (lastDot > lastComma) {
+    // Format: "1,234.56" or "1234.56" - dot is decimal separator
+    // Remove commas (thousand separators), keep dots
+    cleaned = cleaned.replace(/,/g, "");
+  } else if (lastComma > lastDot) {
+    // Format: "1.234,56" or "1234,56" - comma is decimal separator
+    // Remove dots (thousand separators), replace comma with dot
+    cleaned = cleaned.replace(/\./g, "").replace(",", ".");
+  } else if (lastDot >= 0) {
+    // Only dot exists: "1234.56" - dot is decimal
+    // Keep as is
+  } else if (lastComma >= 0) {
+    // Only comma exists: "1234,56" - comma is decimal
+    cleaned = cleaned.replace(",", ".");
+  }
 
   const n = parseFloat(cleaned);
   if (Number.isNaN(n)) return NaN;
