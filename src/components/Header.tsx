@@ -1,6 +1,7 @@
 import { Link, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import logo from "@/assets/logo.png";
 
 export function Header() {
   const location = useLocation();
@@ -8,9 +9,9 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
-      <div className="container flex h-16 items-center justify-between max-w-6xl mx-auto">
-        <Link to="/" className="text-base font-semibold text-foreground hover:text-muted-foreground transition-colors">
-          Delarätt
+      <div className="container flex h-16 items-center justify-between max-w-6xl mx-auto px-4">
+        <Link to="/" className="hover:opacity-80 transition-opacity">
+          <img src={logo} alt="Päronsplit" className="h-10 w-auto" />
         </Link>
 
         <nav className="flex items-center gap-8">
