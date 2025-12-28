@@ -36,7 +36,7 @@ const Settings = () => {
     e.preventDefault();
 
     if (newName.trim().length < 2) {
-      toast.error("Namnet måste vara minst 2 tecken");
+      toast.error("Namn måste vara minst 2 tecken");
       return;
     }
 
@@ -57,19 +57,19 @@ const Settings = () => {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (newPassword.length < 6) {
       toast.error("Lösenord måste vara minst 6 tecken");
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       toast.error("Lösenorden matchar inte");
       return;
     }
-    
+
     setIsChangingPassword(true);
-    
+
     try {
       const { error } = await updatePassword(newPassword);
       if (error) {
@@ -125,11 +125,11 @@ const Settings = () => {
             <h2 className="text-sm font-medium text-muted-foreground mb-4">Profil</h2>
             {profile && (
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-sm font-medium text-foreground">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-semibold text-primary">
                   {profile.name?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">{profile.name}</p>
+                  <p className="text-base font-medium text-foreground">{profile.name}</p>
                   <p className="text-sm text-muted-foreground">{profile.email}</p>
                 </div>
               </div>
@@ -140,7 +140,7 @@ const Settings = () => {
 
           {/* Change Name */}
           <section>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">Ändra namn</h2>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">Byt namn</h2>
             <form onSubmit={handleNameChange} className="space-y-4 max-w-sm">
               <div className="space-y-2">
                 <Label htmlFor="newName" className="text-sm text-muted-foreground">
@@ -155,7 +155,7 @@ const Settings = () => {
                 />
               </div>
               <Button type="submit" variant="outline" disabled={isChangingName}>
-                {isChangingName ? "Sparar..." : "Uppdatera"}
+                {isChangingName ? "Sparar..." : "Uppdatera namn"}
               </Button>
             </form>
           </section>

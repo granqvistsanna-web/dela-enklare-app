@@ -1,10 +1,9 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { parseFile, ParsedTransaction } from "@/lib/fileParser";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -27,7 +26,6 @@ interface ImportModalProps {
 type ImportStep = "upload" | "categorizing" | "review";
 
 export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId }: ImportModalProps) {
-  const { toast } = useToast();
   const [step, setStep] = useState<ImportStep>("upload");
   const [transactions, setTransactions] = useState<ParsedTransaction[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -35,13 +33,9 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
   const handleFileUpload = useCallback(async (file: File) => {
     const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
     const isCsv = file.name.endsWith('.csv');
-    
+
     if (!isExcel && !isCsv) {
-      toast({
-        title: "Fel filformat",
-        description: "Endast CSV- och Excel-filer stöds.",
-        variant: "destructive",
-      });
+      toast.error("Endast CSV- och Excel-filer stöds");
       return;
     }
 
@@ -63,20 +57,14 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
       }
       
       if (parsed.length === 0) {
-        toast({
-          title: "Inga transaktioner hittades",
-          description: isExcel
-            ? "Filen verkar vara en layoutad bank-export. Prova att exportera som CSV, eller spara om som riktig .xlsx."
-            : "Kontrollera att filen innehåller datum + belopp. Ibland ligger rubriken längre ner i filen.",
-          variant: "destructive",
-        });
+        const message = isExcel
+          ? "Inga transaktioner hittades. Filen verkar vara en layoutad bank-export. Prova att exportera som CSV, eller spara om som riktig .xlsx."
+          : "Inga transaktioner hittades. Kontrollera att filen innehåller datum + belopp. Ibland ligger rubriken längre ner i filen.";
+        toast.error(message);
         return;
       }
 
-      toast({
-        title: `${parsed.length} transaktioner hittades`,
-        description: "Kategoriserar med AI...",
-      });
+      toast.success(`${parsed.length} transaktioner hittades. Kategoriserar med AI...`);
 
       setTransactions(parsed);
       setStep("categorizing");
@@ -112,15 +100,12 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
 
     } catch (err: any) {
       console.error("File parsing error:", err);
-      toast({
-        title: "Fel vid import",
-        description:
-          err?.message ||
-          "Kunde inte läsa filen. Om det är en bank-Excel, prova exportera som CSV eller spara om som .xlsx.",
-        variant: "destructive",
-      });
+      toast.error(
+        err?.message ||
+        "Kunde inte läsa filen. Om det är en bank-Excel, prova exportera som CSV eller spara om som .xlsx."
+      );
     }
-  }, [toast]);
+  }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -155,13 +140,9 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
 
   const handleImport = () => {
     const selected = transactions.filter(t => t.selected && t.isShared);
-    
+
     if (selected.length === 0) {
-      toast({
-        title: "Inga transaktioner valda",
-        description: "Välj minst en delad utgift att importera.",
-        variant: "destructive",
-      });
+      toast.error("Välj minst en delad utgift att importera");
       return;
     }
 
@@ -175,11 +156,8 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
     }));
 
     onImport(expenses);
-    
-    toast({
-      title: `${expenses.length} utgifter importerade`,
-      description: "Transaktionerna har lagts till i gruppen.",
-    });
+
+    toast.success(`${expenses.length} utgifter importerade`);
 
     setStep("upload");
     setTransactions([]);
