@@ -5,6 +5,10 @@ export type Category = {
   color: string;
 };
 
+export type ExpenseSplit = {
+  [userId: string]: number;
+};
+
 export type Expense = {
   id: string;
   groupId: string;
@@ -14,6 +18,7 @@ export type Expense = {
   description: string;
   date: string;
   createdAt: string;
+  splits?: ExpenseSplit | null;
 };
 
 export type Settlement = {
