@@ -45,7 +45,7 @@ const Landing = () => {
       <nav className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="päronsplit" className="h-10" />
+            <img src={logo} alt="Päronsplit" className="h-10" />
           </div>
           <Button
             variant="ghost"
@@ -73,7 +73,7 @@ const Landing = () => {
           </h1>
 
           <p className="text-xl md:text-2xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            päronsplit gör det enkelt att dela utgifter med vänner, familj och kollegor.
+            Päronsplit gör det enkelt att dela utgifter med vänner, familj och kollegor.
             Transparent, snabbt och alltid rättvist.
           </p>
 
@@ -220,7 +220,7 @@ const Landing = () => {
         <div className="container max-w-6xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="text-muted-foreground text-sm">
-              © 2025 päronsplit. Dela utgifter enkelt.
+              © 2025 Päronsplit. Dela utgifter enkelt.
             </div>
             <div className="text-sm text-muted-foreground">
               Gjort med ❤️ i Sverige
