@@ -71,7 +71,7 @@ const Settings = () => {
       
       await signOut();
       toast.success("Konto raderat");
-      navigate("/auth");
+      navigate("/");
     } catch (error) {
       toast.error("Kunde inte radera kontot");
     } finally {
@@ -110,7 +110,7 @@ const Settings = () => {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate("/auth");
+    navigate("/");
   };
 
   return (
