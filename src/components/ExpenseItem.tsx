@@ -31,17 +31,19 @@ export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId 
   const hasCustomSplit = expense.splits && Object.keys(expense.splits).length > 0;
 
   return (
-    <div className="group flex items-center justify-between py-3 hover:bg-secondary -mx-3 px-3 rounded-md transition-colors">
-      <div className="flex items-center gap-3 min-w-0 flex-1">
-        <span className="text-base shrink-0">{category?.icon || "📦"}</span>
+    <div className="group flex items-center justify-between py-4 px-6 hover:bg-secondary/30 transition-colors">
+      <div className="flex items-center gap-4 min-w-0 flex-1">
+        <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-muted/50 shrink-0">
+          <span className="text-lg">{category?.icon || "📦"}</span>
+        </div>
         <div className="min-w-0 flex-1">
-          <p className="text-sm text-foreground truncate">{expense.description || "Utgift"}</p>
-          <p className="text-xs text-muted-foreground">
+          <p className="text-sm font-medium text-foreground truncate">{expense.description || "Utgift"}</p>
+          <p className="text-xs text-muted-foreground mt-0.5">
             {payer?.name || "Okänd"} · {formattedDate}
             {hasCustomSplit && <span className="ml-1 text-primary">· Anpassad delning</span>}
           </p>
           {hasCustomSplit && (
-            <div className="mt-1 text-xs text-muted-foreground flex flex-wrap gap-x-2">
+            <div className="mt-2 text-xs text-muted-foreground flex flex-wrap gap-x-3">
               {Object.entries(expense.splits!).map(([userId, amount]) => {
                 const member = members.find((m) => m.user_id === userId);
                 return (
@@ -55,8 +57,8 @@ export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId 
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
-        <span className="text-sm text-foreground tabular-nums">
+      <div className="flex items-center gap-3">
+        <span className="text-sm font-semibold text-foreground tabular-nums">
           {expense.amount.toLocaleString("sv-SE")} kr
         </span>
 
@@ -66,12 +68,12 @@ export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId 
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
+                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
               >
                 ⋮
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[120px]">
+            <DropdownMenuContent align="end" className="min-w-[140px]">
               {onEdit && (
                 <DropdownMenuItem onClick={() => onEdit(expense)} className="text-sm">
                   Redigera

@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   AlertDialog,
@@ -13,6 +14,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { ExpenseItem } from "@/components/ExpenseItem";
 import { AddExpenseModal } from "@/components/AddExpenseModal";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
@@ -24,7 +32,18 @@ import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateBalance } from "@/lib/balanceUtils";
-import { Trash2 } from "lucide-react";
+import {
+  Trash2,
+  Copy,
+  Check,
+  Plus,
+  Upload,
+  MoreHorizontal,
+  ArrowRight,
+  TrendingUp,
+  Users
+} from "lucide-react";
+import { toast } from "sonner";
 
 const GroupPage = () => {
   const { id } = useParams();
@@ -42,6 +61,7 @@ const GroupPage = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [copiedCode, setCopiedCode] = useState(false);
 
   const loading = groupsLoading || expensesLoading || settlementsLoading;
 
@@ -149,93 +169,185 @@ const GroupPage = () => {
     navigate("/dashboard");
   };
 
+  const handleCopyCode = async () => {
+    if (!group?.invite_code) return;
+    await navigator.clipboard.writeText(group.invite_code);
+    setCopiedCode(true);
+    toast.success("Kod kopierad!");
+    setTimeout(() => setCopiedCode(false), 2000);
+  };
+
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-12">
+      <main className="container max-w-4xl py-8 px-4 sm:px-6">
         {/* Back & Title */}
-        <div className="mb-8">
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+        <div className="mb-10">
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+          >
             ← Tillbaka
           </Link>
-          <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 mt-4">
-            <div className="flex items-baseline gap-3">
-              <h1 className="text-2xl font-semibold text-foreground">{group.name}</h1>
-              {group.is_temporary && (
-                <span className="text-xs text-muted-foreground">tillfällig</span>
-              )}
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground">Kod:</span>
-                <code className="text-sm font-mono bg-secondary px-2 py-0.5 rounded select-all">
-                  {group.invite_code}
-                </code>
+
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-3">
+                <h1 className="text-3xl font-semibold text-foreground">{group.name}</h1>
+                {group.is_temporary && (
+                  <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                    Tillfällig
+                  </span>
+                )}
               </div>
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Users size={16} />
+                <span>{group.members.length} {group.members.length === 1 ? 'medlem' : 'medlemmar'}</span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleCopyCode}
+                className="gap-2"
+              >
+                {copiedCode ? (
+                  <>
+                    <Check size={14} />
+                    <span className="hidden sm:inline">Kopierad</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy size={14} />
+                    <span className="hidden sm:inline">Kod: {group.invite_code}</span>
+                    <span className="sm:hidden">{group.invite_code}</span>
+                  </>
+                )}
+              </Button>
+
               {user?.id === group.created_by && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsDeleteDialogOpen(true)}
-                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                >
-                  <Trash2 size={16} />
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
+                      <MoreHorizontal size={18} />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem
+                      onClick={() => setIsDeleteDialogOpen(true)}
+                      className="text-destructive focus:text-destructive"
+                    >
+                      <Trash2 size={14} className="mr-2" />
+                      Radera grupp
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             </div>
           </div>
         </div>
 
         {/* Balance Summary */}
-        <div className="mb-10 pb-8 border-b border-border">
-          {group.members.length === 1 ? (
-            <div>
-              <p className="text-sm text-muted-foreground mb-1">Totalt</p>
-              <p className="text-3xl font-semibold text-foreground tabular-nums">
-                {totalExpenses.toLocaleString("sv-SE")} kr
-              </p>
-            </div>
-          ) : (
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground mb-1">Balans</p>
-                {oweAmount > 0 && negativeUser && positiveUser ? (
-                  <p className="text-lg text-foreground">
-                    <span className="font-medium">{negativeUser.name}</span>
-                    <span className="text-muted-foreground mx-2">→</span>
-                    <span className="font-medium">{positiveUser.name}</span>
-                    <span className="ml-3 text-2xl font-semibold tabular-nums">
-                      {Math.round(oweAmount).toLocaleString("sv-SE")} kr
-                    </span>
-                  </p>
-                ) : (
-                  <p className="text-lg text-foreground">Kvitt ✓</p>
-                )}
-              </div>
-              {oweAmount > 0 && (
-                <Button variant="outline" onClick={() => setIsSettleModalOpen(true)}>
-                  Avräkna
-                </Button>
-              )}
-            </div>
-          )}
+        <div className="mb-10">
+          <div className="grid gap-4 md:grid-cols-2 mb-6">
+            {/* Total Expenses Card */}
+            <Card className="border-border/50">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-primary/10">
+                    <TrendingUp size={18} className="text-primary" />
+                  </div>
+                  <p className="text-sm font-medium text-muted-foreground">Totala utgifter</p>
+                </div>
+                <p className="text-3xl font-semibold text-foreground tabular-nums">
+                  {totalExpenses.toLocaleString("sv-SE")} kr
+                </p>
+              </CardContent>
+            </Card>
+
+            {/* Balance Card */}
+            {group.members.length > 1 ? (
+              <Card className="border-border/50">
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-3">
+                      <div className={`p-2 rounded-lg ${oweAmount > 0 ? 'bg-orange-500/10' : 'bg-green-500/10'}`}>
+                        <ArrowRight size={18} className={oweAmount > 0 ? 'text-orange-600' : 'text-green-600'} />
+                      </div>
+                      <p className="text-sm font-medium text-muted-foreground">Balans</p>
+                    </div>
+                    {oweAmount > 0 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setIsSettleModalOpen(true)}
+                        className="text-xs h-7"
+                      >
+                        Avräkna
+                      </Button>
+                    )}
+                  </div>
+                  {oweAmount > 0 && negativeUser && positiveUser ? (
+                    <div>
+                      <p className="text-base text-muted-foreground mb-1">
+                        <span className="font-medium text-foreground">{negativeUser.name}</span>
+                        <span className="mx-2">→</span>
+                        <span className="font-medium text-foreground">{positiveUser.name}</span>
+                      </p>
+                      <p className="text-2xl font-semibold text-foreground tabular-nums">
+                        {Math.round(oweAmount).toLocaleString("sv-SE")} kr
+                      </p>
+                    </div>
+                  ) : (
+                    <p className="text-2xl font-semibold text-green-600">Kvitt ✓</p>
+                  )}
+                </CardContent>
+              </Card>
+            ) : null}
+          </div>
 
           {/* Per-person breakdown */}
           {group.members.length > 1 && (
-            <div className="flex gap-6 mt-6 text-sm">
+            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
               {balances.map((b) => {
                 const member = group.members.find((u) => u.user_id === b.userId);
                 const isPositive = b.balance >= 0;
+                const isZero = b.balance === 0;
                 return (
-                  <div key={b.userId} className="flex items-center gap-2">
-                    <span className="text-muted-foreground">{member?.name || "Okänd"}</span>
-                    <span className={isPositive ? "text-foreground font-medium" : "text-muted-foreground"}>
-                      {isPositive ? "+" : ""}{Math.round(b.balance).toLocaleString("sv-SE")} kr
-                    </span>
-                  </div>
+                  <Card key={b.userId} className="border-border/50">
+                    <CardContent className="p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold ${
+                            isPositive && !isZero
+                              ? 'bg-green-100 text-green-700'
+                              : isZero
+                              ? 'bg-gray-100 text-gray-600'
+                              : 'bg-orange-100 text-orange-700'
+                          }`}>
+                            {member?.name?.charAt(0).toUpperCase() || "?"}
+                          </div>
+                          <span className="text-sm font-medium text-foreground">
+                            {member?.name || "Okänd"}
+                          </span>
+                        </div>
+                        <span className={`text-sm font-semibold tabular-nums ${
+                          isPositive && !isZero
+                            ? 'text-green-600'
+                            : isZero
+                            ? 'text-muted-foreground'
+                            : 'text-orange-600'
+                        }`}>
+                          {isPositive && !isZero ? "+" : ""}{Math.round(b.balance).toLocaleString("sv-SE")} kr
+                        </span>
+                      </div>
+                    </CardContent>
+                  </Card>
                 );
               })}
             </div>
@@ -244,44 +356,93 @@ const GroupPage = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="expenses" className="w-full">
-          <TabsList className="w-full justify-start">
-            <TabsTrigger value="expenses">Utgifter</TabsTrigger>
-            <TabsTrigger value="history">Historik</TabsTrigger>
-          </TabsList>
+          <div className="flex items-center justify-between mb-6">
+            <TabsList className="h-10">
+              <TabsTrigger value="expenses" className="gap-2">
+                Utgifter
+                {expenses.length > 0 && (
+                  <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                    {expenses.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="history" className="gap-2">
+                Historik
+                {settlements.length > 0 && (
+                  <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                    {settlements.length}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="expenses">
-            <div className="mb-6 flex gap-3">
-              <Button variant="ghost" onClick={() => setIsAddModalOpen(true)} className="text-muted-foreground">
-                + Lägg till
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setIsImportModalOpen(true)}
+                className="gap-2"
+              >
+                <Upload size={14} />
+                <span className="hidden sm:inline">Importera</span>
               </Button>
-              <Button variant="ghost" onClick={() => setIsImportModalOpen(true)} className="text-muted-foreground">
-                Importera
+              <Button
+                size="sm"
+                onClick={() => setIsAddModalOpen(true)}
+                className="gap-2"
+              >
+                <Plus size={14} />
+                Lägg till
               </Button>
             </div>
+          </div>
 
+          <TabsContent value="expenses" className="mt-0">
             {expenses.length > 0 ? (
-              <div className="divide-y divide-border">
-                {expenses.map((expense, index) => (
-                  <ExpenseItem
-                    key={expense.id}
-                    expense={expense}
-                    members={group.members}
-                    index={index}
-                    onEdit={handleEditExpense}
-                    onDelete={handleDeleteExpense}
-                    currentUserId={user?.id}
-                  />
-                ))}
-              </div>
+              <Card className="border-border/50">
+                <CardContent className="p-0">
+                  <div className="divide-y divide-border/50">
+                    {expenses.map((expense, index) => (
+                      <ExpenseItem
+                        key={expense.id}
+                        expense={expense}
+                        members={group.members}
+                        index={index}
+                        onEdit={handleEditExpense}
+                        onDelete={handleDeleteExpense}
+                        currentUserId={user?.id}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
             ) : (
-              <p className="text-muted-foreground py-8">
-                Inga utgifter ännu
-              </p>
+              <Card className="border-border/50 border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <div className="rounded-full bg-muted p-3 mb-4">
+                    <TrendingUp size={24} className="text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">Inga utgifter ännu</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="gap-2"
+                  >
+                    <Plus size={14} />
+                    Lägg till första utgiften
+                  </Button>
+                </CardContent>
+              </Card>
             )}
           </TabsContent>
 
-          <TabsContent value="history">
-            <SettlementHistory settlements={settlements} members={group.members} />
+          <TabsContent value="history" className="mt-0">
+            <Card className="border-border/50">
+              <CardContent className="p-6">
+                <SettlementHistory settlements={settlements} members={group.members} />
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>
