@@ -1,8 +1,18 @@
 import { useState, useMemo } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { ExpenseItem } from "@/components/ExpenseItem";
 import { AddExpenseModal } from "@/components/AddExpenseModal";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
@@ -14,20 +24,23 @@ import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateBalance } from "@/lib/balanceUtils";
+import { Trash2 } from "lucide-react";
 
 const GroupPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { user } = useAuth();
-  const { groups, loading: groupsLoading } = useGroups();
+  const { groups, loading: groupsLoading, deleteGroup } = useGroups();
   const { expenses, loading: expensesLoading, addExpense, updateExpense, deleteExpense } = useExpenses(id);
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(id);
 
   const group = groups.find((g) => g.id === id);
-  
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSettleModalOpen, setIsSettleModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
   const loading = groupsLoading || expensesLoading || settlementsLoading;
@@ -130,6 +143,12 @@ const GroupPage = () => {
     setIsSettleModalOpen(false);
   };
 
+  const handleDeleteGroup = async () => {
+    if (!id) return;
+    await deleteGroup(id);
+    navigate("/");
+  };
+
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
 
   return (
@@ -149,11 +168,23 @@ const GroupPage = () => {
                 <span className="text-xs text-muted-foreground">tillfällig</span>
               )}
             </div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-muted-foreground">Kod:</span>
-              <code className="text-sm font-mono bg-secondary px-2 py-0.5 rounded select-all">
-                {group.invite_code}
-              </code>
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-muted-foreground">Kod:</span>
+                <code className="text-sm font-mono bg-secondary px-2 py-0.5 rounded select-all">
+                  {group.invite_code}
+                </code>
+              </div>
+              {user?.id === group.created_by && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsDeleteDialogOpen(true)}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  <Trash2 size={16} />
+                </Button>
+              )}
             </div>
           </div>
         </div>
@@ -293,6 +324,26 @@ const GroupPage = () => {
           amount={oweAmount}
         />
       )}
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Radera grupp</AlertDialogTitle>
+            <AlertDialogDescription>
+              Är du säker på att du vill radera gruppen "{group.name}"? Detta kommer permanent ta bort gruppen och alla dess utgifter och avräkningar. Denna åtgärd kan inte ångras.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Avbryt</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteGroup}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Radera
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

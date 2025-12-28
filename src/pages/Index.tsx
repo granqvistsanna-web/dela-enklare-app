@@ -26,44 +26,65 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-12">
-        {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-2xl font-semibold text-foreground mb-1">
-            Grupper
+      <main className="container py-16 max-w-4xl mx-auto">
+        {/* Hero Section */}
+        <div className="mb-16">
+          <h1 className="text-4xl font-semibold text-foreground mb-3 tracking-tight">
+            Dina grupper
           </h1>
-          <p className="text-muted-foreground">
-            Hantera gemensamma utgifter
+          <p className="text-lg text-muted-foreground">
+            Hantera gemensamma utgifter enkelt och transparent
           </p>
         </div>
 
-        {/* Stats */}
-        <div className="flex gap-8 mb-10 pb-8 border-b border-border">
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Totalt</p>
-            <p className="text-2xl font-semibold text-foreground tabular-nums">
-              {loading ? "–" : `${totalExpenses.toLocaleString("sv-SE")} kr`}
-            </p>
+        {/* Stats Cards */}
+        {!loading && groups.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 mb-12">
+            <div className="bg-secondary/50 rounded-lg p-6 border border-border hover:bg-secondary transition-colors">
+              <p className="text-sm text-muted-foreground mb-2 font-medium">Totala utgifter</p>
+              <p className="text-3xl font-semibold text-foreground tabular-nums">
+                {totalExpenses.toLocaleString("sv-SE")} kr
+              </p>
+            </div>
+            <div className="bg-secondary/50 rounded-lg p-6 border border-border hover:bg-secondary transition-colors">
+              <p className="text-sm text-muted-foreground mb-2 font-medium">Aktiva grupper</p>
+              <p className="text-3xl font-semibold text-foreground tabular-nums">
+                {groups.length}
+              </p>
+            </div>
           </div>
-          <div>
-            <p className="text-sm text-muted-foreground mb-1">Grupper</p>
-            <p className="text-2xl font-semibold text-foreground tabular-nums">
-              {loading ? "–" : groups.length}
-            </p>
+        )}
+
+        {/* Action Buttons */}
+        {!loading && (
+          <div className="flex gap-3 mb-8">
+            <Button
+              onClick={() => setIsCreateModalOpen(true)}
+              className="bg-foreground text-background hover:bg-foreground/90 font-medium"
+            >
+              + Skapa ny grupp
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => setIsJoinModalOpen(true)}
+              className="font-medium"
+            >
+              Gå med i grupp
+            </Button>
           </div>
-        </div>
+        )}
 
         {/* Groups List */}
         {loading ? (
-          <div className="space-y-1">
-            {[1, 2].map((i) => (
-              <div key={i} className="h-14 rounded bg-secondary animate-pulse" />
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-32 rounded-lg bg-secondary/50 animate-pulse" />
             ))}
           </div>
         ) : (
           <>
             {groups.length > 0 ? (
-              <div className="divide-y divide-border">
+              <div className="space-y-3">
                 {groups.map((group) => (
                   <GroupCard
                     key={group.id}
@@ -73,19 +94,34 @@ const Index = () => {
                 ))}
               </div>
             ) : (
-              <p className="text-muted-foreground py-8">
-                Inga grupper ännu
-              </p>
+              <div className="text-center py-20 px-6">
+                <div className="max-w-md mx-auto">
+                  <h3 className="text-xl font-semibold text-foreground mb-3">
+                    Välkommen till Delarätt
+                  </h3>
+                  <p className="text-muted-foreground mb-8 leading-relaxed">
+                    Skapa din första grupp för att börja dela utgifter med vänner,
+                    familj eller kollegor. Eller gå med i en befintlig grupp om någon
+                    bjudit in dig.
+                  </p>
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                    <Button
+                      onClick={() => setIsCreateModalOpen(true)}
+                      className="bg-foreground text-background hover:bg-foreground/90 font-medium"
+                    >
+                      + Skapa din första grupp
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsJoinModalOpen(true)}
+                      className="font-medium"
+                    >
+                      Gå med i grupp
+                    </Button>
+                  </div>
+                </div>
+              </div>
             )}
-
-            <div className="mt-8 flex gap-3">
-              <Button variant="ghost" onClick={() => setIsCreateModalOpen(true)} className="text-muted-foreground">
-                + Ny grupp
-              </Button>
-              <Button variant="ghost" onClick={() => setIsJoinModalOpen(true)} className="text-muted-foreground">
-                Gå med i grupp
-              </Button>
-            </div>
           </>
         )}
       </main>
@@ -95,7 +131,7 @@ const Index = () => {
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateGroup}
       />
-      
+
       <JoinGroupModal
         isOpen={isJoinModalOpen}
         onClose={() => setIsJoinModalOpen(false)}
