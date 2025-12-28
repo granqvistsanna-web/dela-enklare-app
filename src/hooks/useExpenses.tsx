@@ -113,6 +113,14 @@ export function useExpenses(groupId?: string) {
 
   const deleteExpense = async (expenseId: string) => {
     try {
+      // Find the expense to delete (for potential undo)
+      const expenseToDelete = expenses.find(e => e.id === expenseId);
+      if (!expenseToDelete) {
+        toast.error("Utgiften hittades inte");
+        return;
+      }
+
+      // Delete from database
       const { error } = await supabase
         .from("expenses")
         .delete()
@@ -121,7 +129,42 @@ export function useExpenses(groupId?: string) {
       if (error) throw error;
 
       await fetchExpenses();
-      toast.success("Utgift borttagen!");
+
+      // Show toast with undo action
+      let undoClicked = false;
+
+      toast.success("Utgift borttagen!", {
+        duration: 5000,
+        action: {
+          label: "Ångra",
+          onClick: async () => {
+            undoClicked = true;
+            try {
+              // Restore the expense
+              const { error: restoreError } = await supabase
+                .from("expenses")
+                .insert({
+                  id: expenseToDelete.id,
+                  group_id: expenseToDelete.group_id,
+                  amount: expenseToDelete.amount,
+                  paid_by: expenseToDelete.paid_by,
+                  category: expenseToDelete.category,
+                  description: expenseToDelete.description,
+                  date: expenseToDelete.date,
+                  splits: expenseToDelete.splits,
+                });
+
+              if (restoreError) throw restoreError;
+
+              await fetchExpenses();
+              toast.success("Utgift återställd!");
+            } catch (restoreError) {
+              console.error("Error restoring expense:", restoreError);
+              toast.error("Kunde inte återställa utgift");
+            }
+          },
+        },
+      });
     } catch (error) {
       console.error("Error deleting expense:", error);
       toast.error("Kunde inte ta bort utgift");
