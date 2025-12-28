@@ -23,12 +23,26 @@ export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId 
   const category = DEFAULT_CATEGORIES.find((c) => c.id === expense.category);
   const canModify = currentUserId === expense.paid_by;
 
-  const formattedDate = new Date(expense.date).toLocaleDateString("sv-SE", {
-    day: "numeric",
-    month: "short",
-  });
+  // Safe date parsing with fallback
+  let formattedDate = "Ogiltigt datum";
+  try {
+    const date = new Date(expense.date);
+    if (!isNaN(date.getTime())) {
+      formattedDate = date.toLocaleDateString("sv-SE", {
+        day: "numeric",
+        month: "short",
+      });
+    }
+  } catch (error) {
+    console.warn("Invalid date for expense:", expense.id, expense.date);
+  }
 
   const hasCustomSplit = expense.splits && Object.keys(expense.splits).length > 0;
+
+  // Validate expense amount
+  const safeAmount = Number.isFinite(expense.amount) && expense.amount >= 0
+    ? expense.amount
+    : 0;
 
   return (
     <div className="group flex items-center justify-between py-4 px-6 hover:bg-secondary/30 transition-colors">
@@ -46,9 +60,10 @@ export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId 
             <div className="mt-2 text-xs text-muted-foreground flex flex-wrap gap-x-3">
               {Object.entries(expense.splits!).map(([userId, amount]) => {
                 const member = members.find((m) => m.user_id === userId);
+                const safeSplitAmount = Number.isFinite(amount) && amount >= 0 ? amount : 0;
                 return (
                   <span key={userId} className="whitespace-nowrap">
-                    {member?.name || "Okänd"}: {amount.toLocaleString("sv-SE")} kr
+                    {member?.name || "Okänd"}: {safeSplitAmount.toLocaleString("sv-SE")} kr
                   </span>
                 );
               })}
@@ -59,7 +74,7 @@ export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId 
 
       <div className="flex items-center gap-3">
         <span className="text-sm font-semibold text-foreground tabular-nums">
-          {expense.amount.toLocaleString("sv-SE")} kr
+          {safeAmount.toLocaleString("sv-SE")} kr
         </span>
 
         {canModify && (onEdit || onDelete) && (

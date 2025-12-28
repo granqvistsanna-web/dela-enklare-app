@@ -168,14 +168,19 @@ function parseTable(rawRows: string[][]): ParsedTransaction[] {
       }
     }
 
-    if (!amount || Number.isNaN(amount)) continue;
+    if (!amount || Number.isNaN(amount) || !Number.isFinite(amount) || amount === 0) continue;
 
     const description = (r[descCol ?? -1] ?? "").toString().trim();
     if (!description) continue;
 
     // Keep both + and - amounts; user can deselect in review.
+    // Use crypto.randomUUID if available, otherwise fallback to timestamp + random
+    const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `${headerRowIndex + 1 + i}-${Date.now()}-${Math.random()}`;
+
     transactions.push({
-      id: `${headerRowIndex + 1 + i}-${Date.now()}-${Math.random()}`,
+      id: uniqueId,
       date,
       description,
       amount: Math.abs(amount),
