@@ -126,36 +126,27 @@ export function useGroups() {
     }
 
     try {
-      // Create the group
+      // Create the group - member is auto-added via database trigger
       const { data: groupData, error: groupError } = await supabase
         .from("groups")
-        .insert(
-          {
-            name,
-            is_temporary: isTemporary,
-          } as any
-        )
+        .insert({
+          name,
+          is_temporary: isTemporary,
+        })
         .select()
         .single();
 
-      if (groupError) throw groupError;
-
-      // Add creator as a member
-      const { error: memberError } = await supabase
-        .from("group_members")
-        .insert({
-          group_id: groupData.id,
-          user_id: user.id,
-        });
-
-      if (memberError) throw memberError;
+      if (groupError) {
+        console.error("Group creation error:", groupError.code, groupError.message);
+        throw groupError;
+      }
 
       await fetchGroups();
       toast.success("Grupp skapad!");
       return groupData;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating group:", error);
-      toast.error("Kunde inte skapa grupp");
+      toast.error(error?.message || "Kunde inte skapa grupp");
       return null;
     }
   };
