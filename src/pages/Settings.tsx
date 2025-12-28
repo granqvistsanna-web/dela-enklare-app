@@ -94,17 +94,28 @@ const Settings = () => {
 
       await signOut();
       toast.success("Konto raderat");
-      navigate("/auth");
+      // Navigation will be handled automatically by the auth state listener
     } catch (error) {
+      console.error("Error deleting account:", error);
       toast.error("Kunde inte radera kontot");
+      // Force navigation if there's an error
+      navigate("/auth");
     } finally {
       setIsDeletingAccount(false);
     }
   };
 
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/auth");
+    try {
+      await signOut();
+      // Navigation will be handled automatically by the auth state listener
+      // and the ProtectedRoute/PublicRoute components
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      toast.error("Kunde inte logga ut");
+      // Force navigation even if signOut fails
+      navigate("/auth");
+    }
   };
 
   return (
