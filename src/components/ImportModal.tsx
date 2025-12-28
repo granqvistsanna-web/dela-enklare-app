@@ -51,6 +51,12 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
       if (isExcel) {
         const buffer = await file.arrayBuffer();
         parsed = parseFile(buffer, file.name);
+
+        // Fallback: some banks export ".xls" that is actually HTML/text
+        if (parsed.length === 0) {
+          const text = await file.text();
+          parsed = parseFile(text, file.name);
+        }
       } else {
         const content = await file.text();
         parsed = parseFile(content, file.name);
@@ -59,7 +65,9 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
       if (parsed.length === 0) {
         toast({
           title: "Inga transaktioner hittades",
-          description: "Kontrollera att filen har rätt format.",
+          description: isExcel
+            ? "Filen verkar vara en layoutad bank-export. Prova att exportera som CSV, eller spara om som riktig .xlsx."
+            : "Kontrollera att filen innehåller datum + belopp. Ibland ligger rubriken längre ner i filen.",
           variant: "destructive",
         });
         return;
@@ -106,7 +114,9 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
       console.error("File parsing error:", err);
       toast({
         title: "Fel vid import",
-        description: err?.message || "Kunde inte läsa filen. Kontrollera formatet.",
+        description:
+          err?.message ||
+          "Kunde inte läsa filen. Om det är en bank-Excel, prova exportera som CSV eller spara om som .xlsx.",
         variant: "destructive",
       });
     }
