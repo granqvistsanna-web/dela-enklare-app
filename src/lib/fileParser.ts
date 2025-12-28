@@ -1,4 +1,4 @@
-import * as XLSX from "xlsx";
+import * as ExcelJS from "exceljs";
 
 export interface ParsedTransaction {
   id: string;
@@ -14,7 +14,7 @@ export interface ParsedTransaction {
 
 // Parses CSV and "Excel" exports from Swedish banks.
 // Banks often export for readability (blank rows, unnamed columns, header not on first row).
-export function parseFile(content: string | ArrayBuffer, fileName: string): ParsedTransaction[] {
+export async function parseFile(content: string | ArrayBuffer, fileName: string): Promise<ParsedTransaction[]> {
   const name = fileName.toLowerCase();
   const isExcel = name.endsWith(".xlsx") || name.endsWith(".xls");
 
@@ -22,7 +22,7 @@ export function parseFile(content: string | ArrayBuffer, fileName: string): Pars
     // 1) Real Excel (binary)
     if (content instanceof ArrayBuffer) {
       try {
-        return parseExcelArrayBuffer(content);
+        return await parseExcelArrayBuffer(content);
       } catch (err) {
         console.error("Excel parsing failed (arrayBuffer):", err);
         // Fall through: many banks ship HTML/CSV with .xls extension.
@@ -32,7 +32,8 @@ export function parseFile(content: string | ArrayBuffer, fileName: string): Pars
 
     // 2) Sometimes .xls is actually HTML/CSV text
     if (typeof content === "string") {
-      return parseExcelText(content) || parseCSV(content);
+      const excelResult = await parseExcelText(content);
+      return excelResult || parseCSV(content);
     }
 
     return [];
@@ -45,13 +46,14 @@ export function parseFile(content: string | ArrayBuffer, fileName: string): Pars
 
 // --- Excel -------------------------------------------------------------------
 
-function parseExcelArrayBuffer(buffer: ArrayBuffer): ParsedTransaction[] {
-  // NOTE: If the file isn't a real zip/xlsx, xlsx will throw (e.g. "Bad compressed size").
-  const workbook = XLSX.read(buffer, { type: "array" });
+async function parseExcelArrayBuffer(buffer: ArrayBuffer): Promise<ParsedTransaction[]> {
+  // NOTE: If the file isn't a real zip/xlsx, ExcelJS will throw an error.
+  const workbook = new ExcelJS.Workbook();
+  await workbook.xlsx.load(buffer);
   return parseWorkbook(workbook);
 }
 
-function parseExcelText(text: string): ParsedTransaction[] | null {
+async function parseExcelText(text: string): Promise<ParsedTransaction[] | null> {
   const trimmed = text.trimStart();
 
   // Heuristic: HTML exports often begin with '<' or contain '<table'
@@ -59,27 +61,39 @@ function parseExcelText(text: string): ParsedTransaction[] | null {
   if (!looksLikeHtml) return null;
 
   try {
-    const workbook = XLSX.read(text, { type: "string" });
-    return parseWorkbook(workbook);
+    // For HTML tables, we'll parse as CSV instead since ExcelJS doesn't handle HTML well
+    // Fall back to CSV parsing for HTML content
+    return null;
   } catch (err) {
     console.error("Excel parsing failed (html/text):", err);
     return null;
   }
 }
 
-function parseWorkbook(workbook: XLSX.WorkBook): ParsedTransaction[] {
-  const sheetName = workbook.SheetNames?.[0];
-  if (!sheetName) return [];
+function parseWorkbook(workbook: ExcelJS.Workbook): ParsedTransaction[] {
+  const worksheet = workbook.worksheets?.[0];
+  if (!worksheet) return [];
 
-  const sheet = workbook.Sheets[sheetName];
-
-  // 2D array: rows x cols, keep blanks as "" so indices stay stable.
-  const rows = XLSX.utils.sheet_to_json(sheet, {
-    header: 1,
-    raw: false,
-    defval: "",
-    blankrows: false,
-  }) as unknown as string[][];
+  // Convert ExcelJS worksheet to 2D array: rows x cols
+  const rows: string[][] = [];
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    const rowValues: string[] = [];
+    row.eachCell({ includeEmpty: true }, (cell, colNumber) => {
+      // Get cell value as string, handle various cell types
+      let value = "";
+      if (cell.value !== null && cell.value !== undefined) {
+        if (typeof cell.value === "object" && "text" in cell.value) {
+          value = cell.value.text;
+        } else if (cell.value instanceof Date) {
+          value = cell.value.toISOString().split("T")[0];
+        } else {
+          value = cell.value.toString();
+        }
+      }
+      rowValues[colNumber - 1] = value;
+    });
+    rows.push(rowValues);
+  });
 
   return parseTable(rows);
 }

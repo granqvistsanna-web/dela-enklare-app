@@ -50,16 +50,16 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
       
       if (isExcel) {
         const buffer = await file.arrayBuffer();
-        parsed = parseFile(buffer, file.name);
+        parsed = await parseFile(buffer, file.name);
 
         // Fallback: some banks export ".xls" that is actually HTML/text
         if (parsed.length === 0) {
           const text = await file.text();
-          parsed = parseFile(text, file.name);
+          parsed = await parseFile(text, file.name);
         }
       } else {
         const content = await file.text();
-        parsed = parseFile(content, file.name);
+        parsed = await parseFile(content, file.name);
       }
       
       if (parsed.length === 0) {
