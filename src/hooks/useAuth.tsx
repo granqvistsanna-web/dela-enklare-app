@@ -2,6 +2,11 @@ import { useState, useEffect, createContext, useContext, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+interface UserMetadata {
+  name?: string;
+  [key: string]: unknown;
+}
+
 interface Profile {
   id: string;
   user_id: string;
@@ -41,8 +46,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // If no profile exists yet, create one (allowed by RLS: user inserts own profile)
     if (!error && !data) {
+      const metadata = sessionUser.user_metadata as UserMetadata;
       const displayName =
-        (sessionUser.user_metadata as any)?.name ||
+        metadata?.name ||
         sessionUser.email?.split("@")[0] ||
         "Användare";
 

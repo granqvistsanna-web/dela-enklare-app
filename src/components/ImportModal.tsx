@@ -9,6 +9,16 @@ import { parseFile, ParsedTransaction } from "@/lib/fileParser";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
+interface Categorization {
+  index: number;
+  category: string;
+  isShared: boolean;
+}
+
+interface CategorizationResponse {
+  categorizations: Categorization[];
+}
+
 interface ImportModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -97,8 +107,9 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
         console.error("Categorization error:", error);
         setTransactions(parsed.map(t => ({ ...t, category: "ovrigt", isShared: true })));
       } else if (data?.categorizations) {
+        const response = data as CategorizationResponse;
         const categorized = parsed.map((t, i) => {
-          const cat = data.categorizations.find((c: any) => c.index === i);
+          const cat = response.categorizations.find((c) => c.index === i);
           return {
             ...t,
             category: cat?.category || "ovrigt",
@@ -110,12 +121,13 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
 
       setStep("review");
 
-    } catch (err: any) {
+    } catch (err) {
       console.error("File parsing error:", err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
       toast({
         title: "Fel vid import",
         description:
-          err?.message ||
+          errorMessage ||
           "Kunde inte läsa filen. Om det är en bank-Excel, prova exportera som CSV eller spara om som .xlsx.",
         variant: "destructive",
       });
