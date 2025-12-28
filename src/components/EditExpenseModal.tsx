@@ -1,23 +1,24 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, DollarSign, Tag, User as UserIcon, FileText } from "lucide-react";
+import { X, Calendar, DollarSign, Tag, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Expense, DEFAULT_CATEGORIES } from "@/lib/types";
+import { GroupMember } from "@/hooks/useGroups";
+import { Expense } from "@/hooks/useExpenses";
+import { DEFAULT_CATEGORIES } from "@/lib/types";
 
 interface EditExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (expense: Expense) => void;
   expense: Expense | null;
-  users: User[];
+  members: GroupMember[];
 }
 
-export function EditExpenseModal({ isOpen, onClose, onSave, expense, users }: EditExpenseModalProps) {
+export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: EditExpenseModalProps) {
   const [amount, setAmount] = useState("");
-  const [paidBy, setPaidBy] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
@@ -25,21 +26,19 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, users }: Ed
   useEffect(() => {
     if (expense) {
       setAmount(expense.amount.toString());
-      setPaidBy(expense.paidBy);
       setCategory(expense.category);
-      setDescription(expense.description);
+      setDescription(expense.description || "");
       setDate(expense.date);
     }
   }, [expense]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!expense || !amount || !paidBy || !category || !description) return;
+    if (!expense || !amount || !category || !description) return;
 
     onSave({
       ...expense,
       amount: parseFloat(amount),
-      paidBy,
       category,
       description,
       date,
@@ -47,6 +46,8 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, users }: Ed
 
     onClose();
   };
+
+  const payer = members.find((m) => m.user_id === expense?.paid_by);
 
   return (
     <AnimatePresence>
@@ -92,27 +93,13 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, users }: Ed
                     />
                   </div>
 
-                  {/* Paid by */}
+                  {/* Paid by - read only */}
                   <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm font-medium">
-                      <UserIcon size={16} className="text-muted-foreground" />
-                      Vem betalade?
+                    <Label className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
+                      Betalades av
                     </Label>
-                    <div className="flex gap-2">
-                      {users.map((user) => (
-                        <button
-                          key={user.id}
-                          type="button"
-                          onClick={() => setPaidBy(user.id)}
-                          className={`flex-1 rounded-lg border-2 py-3 px-4 font-medium transition-all ${
-                            paidBy === user.id
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border bg-secondary/50 text-foreground hover:border-primary/30"
-                          }`}
-                        >
-                          {user.name}
-                        </button>
-                      ))}
+                    <div className="rounded-lg border border-border bg-secondary/50 py-3 px-4 font-medium text-foreground">
+                      {payer?.name || "Okänd"}
                     </div>
                   </div>
 

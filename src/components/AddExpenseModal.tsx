@@ -1,35 +1,42 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Calendar, DollarSign, Tag, User as UserIcon, FileText } from "lucide-react";
+import { X, Calendar, DollarSign, Tag, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Expense, DEFAULT_CATEGORIES } from "@/lib/types";
+import { GroupMember } from "@/hooks/useGroups";
+import { DEFAULT_CATEGORIES } from "@/lib/types";
 
 interface AddExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (expense: Omit<Expense, "id" | "createdAt">) => void;
+  onAdd: (expense: {
+    group_id: string;
+    amount: number;
+    paid_by: string;
+    category: string;
+    description: string;
+    date: string;
+  }) => void;
   groupId: string;
-  users: User[];
+  members: GroupMember[];
 }
 
-export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, users }: AddExpenseModalProps) {
+export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: AddExpenseModalProps) {
   const [amount, setAmount] = useState("");
-  const [paidBy, setPaidBy] = useState(users[0]?.id || "");
   const [category, setCategory] = useState(DEFAULT_CATEGORIES[0].id);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || !paidBy || !category || !description) return;
+    if (!amount || !category || !description) return;
 
     onAdd({
-      groupId,
+      group_id: groupId,
       amount: parseFloat(amount),
-      paidBy,
+      paid_by: "", // Will be set by the hook
       category,
       description,
       date,
@@ -84,30 +91,6 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, users }: AddE
                       className="text-lg font-semibold h-12"
                       required
                     />
-                  </div>
-
-                  {/* Paid by */}
-                  <div className="space-y-2">
-                    <Label className="flex items-center gap-2 text-sm font-medium">
-                      <UserIcon size={16} className="text-muted-foreground" />
-                      Vem betalade?
-                    </Label>
-                    <div className="flex gap-2">
-                      {users.map((user) => (
-                        <button
-                          key={user.id}
-                          type="button"
-                          onClick={() => setPaidBy(user.id)}
-                          className={`flex-1 rounded-lg border-2 py-3 px-4 font-medium transition-all ${
-                            paidBy === user.id
-                              ? "border-primary bg-primary/10 text-primary"
-                              : "border-border bg-secondary/50 text-foreground hover:border-primary/30"
-                          }`}
-                        >
-                          {user.name}
-                        </button>
-                      ))}
-                    </div>
                   </div>
 
                   {/* Category */}

@@ -2,25 +2,24 @@ import { motion } from "framer-motion";
 import { ArrowRight, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
-import { Group, Expense, User } from "@/lib/types";
-import { calculateBalance } from "@/lib/mockData";
+import { Group } from "@/hooks/useGroups";
+import { Expense } from "@/hooks/useExpenses";
+import { calculateBalance } from "@/lib/balanceUtils";
 
 interface GroupCardProps {
   group: Group;
   expenses: Expense[];
-  users: User[];
 }
 
-export function GroupCard({ group, expenses, users }: GroupCardProps) {
-  const groupExpenses = expenses.filter((e) => e.groupId === group.id);
-  const balances = calculateBalance(groupExpenses, users);
+export function GroupCard({ group, expenses }: GroupCardProps) {
+  const balances = calculateBalance(expenses, group.members);
   
   const positiveBalance = balances.find((b) => b.balance > 0);
-  const positiveUser = users.find((u) => u.id === positiveBalance?.userId);
+  const positiveUser = group.members.find((u) => u.user_id === positiveBalance?.userId);
   const negativeBalance = balances.find((b) => b.balance < 0);
-  const negativeUser = users.find((u) => u.id === negativeBalance?.userId);
+  const negativeUser = group.members.find((u) => u.user_id === negativeBalance?.userId);
 
-  const totalExpenses = groupExpenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
   const oweAmount = Math.abs(negativeBalance?.balance || 0);
 
   return (
@@ -38,7 +37,7 @@ export function GroupCard({ group, expenses, users }: GroupCardProps) {
                   <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
                     {group.name}
                   </h3>
-                  {group.isTemporary && (
+                  {group.is_temporary && (
                     <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">
                       Tillfällig
                     </span>
@@ -46,7 +45,11 @@ export function GroupCard({ group, expenses, users }: GroupCardProps) {
                 </div>
                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                   <Users size={14} />
-                  <span>{users.map((u) => u.name).join(" & ")}</span>
+                  <span>
+                    {group.members.length > 0
+                      ? group.members.map((u) => u.name).join(" & ")
+                      : "Inga medlemmar"}
+                  </span>
                 </div>
               </div>
               <ArrowRight

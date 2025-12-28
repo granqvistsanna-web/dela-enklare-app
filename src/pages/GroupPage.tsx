@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowLeft, Plus, Scale, History, TrendingUp, TrendingDown, Upload } from "lucide-react";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExpenseItem } from "@/components/ExpenseItem";
 import { AddExpenseModal } from "@/components/AddExpenseModal";
@@ -12,37 +12,51 @@ import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { SettlementModal } from "@/components/SettlementModal";
 import { SettlementHistory } from "@/components/SettlementHistory";
 import { ImportModal } from "@/components/ImportModal";
-import { mockGroups, mockExpenses, mockUsers, mockSettlements, calculateBalance } from "@/lib/mockData";
-import { Expense } from "@/lib/types";
-import { toast } from "sonner";
+import { useGroups } from "@/hooks/useGroups";
+import { useExpenses, Expense } from "@/hooks/useExpenses";
+import { useSettlements } from "@/hooks/useSettlements";
+import { useAuth } from "@/hooks/useAuth";
+import { calculateBalance } from "@/lib/balanceUtils";
 
 const GroupPage = () => {
   const { id } = useParams();
-  const group = mockGroups.find((g) => g.id === id);
+  const { user } = useAuth();
+  const { groups, loading: groupsLoading } = useGroups();
+  const { expenses, loading: expensesLoading, addExpense, updateExpense, deleteExpense } = useExpenses(id);
+  const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(id);
+
+  const group = groups.find((g) => g.id === id);
   
-  const [expenses, setExpenses] = useState<Expense[]>(mockExpenses);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSettleModalOpen, setIsSettleModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
-  const groupExpenses = useMemo(
-    () => expenses.filter((e) => e.groupId === id).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()),
-    [expenses, id]
+  const loading = groupsLoading || expensesLoading || settlementsLoading;
+
+  const balances = useMemo(
+    () => (group ? calculateBalance(expenses, group.members) : []),
+    [expenses, group]
   );
 
-  const groupSettlements = mockSettlements.filter((s) => s.groupId === id);
-  
-  const balances = calculateBalance(groupExpenses, mockUsers);
   const positiveBalance = balances.find((b) => b.balance > 0);
   const negativeBalance = balances.find((b) => b.balance < 0);
-  const positiveUser = mockUsers.find((u) => u.id === positiveBalance?.userId);
-  const negativeUser = mockUsers.find((u) => u.id === negativeBalance?.userId);
+  const positiveUser = group?.members.find((u) => u.user_id === positiveBalance?.userId);
+  const negativeUser = group?.members.find((u) => u.user_id === negativeBalance?.userId);
   const oweAmount = Math.abs(negativeBalance?.balance || 0);
 
-  // Default to first user for now (would be current logged in user)
-  const currentUserId = mockUsers[0].id;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container py-8">
+          <div className="h-48 rounded-xl bg-secondary animate-pulse mb-6" />
+          <div className="h-96 rounded-xl bg-secondary animate-pulse" />
+        </main>
+      </div>
+    );
+  }
 
   if (!group) {
     return (
@@ -61,22 +75,28 @@ const GroupPage = () => {
     );
   }
 
-  const handleAddExpense = (newExpense: Omit<Expense, "id" | "createdAt">) => {
-    const expense: Expense = {
-      ...newExpense,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-    };
-    setExpenses((prev) => [...prev, expense]);
+  const handleAddExpense = async (newExpense: {
+    group_id: string;
+    amount: number;
+    paid_by: string;
+    category: string;
+    description: string;
+    date: string;
+  }) => {
+    await addExpense(newExpense);
   };
 
-  const handleImportExpenses = (newExpenses: Omit<Expense, "id" | "createdAt">[]) => {
-    const expensesWithIds = newExpenses.map((e, i) => ({
-      ...e,
-      id: `import-${Date.now()}-${i}`,
-      createdAt: new Date().toISOString(),
-    }));
-    setExpenses((prev) => [...prev, ...expensesWithIds]);
+  const handleImportExpenses = async (newExpenses: {
+    group_id: string;
+    amount: number;
+    paid_by: string;
+    category: string;
+    description: string;
+    date: string;
+  }[]) => {
+    for (const expense of newExpenses) {
+      await addExpense(expense);
+    }
   };
 
   const handleEditExpense = (expense: Expense) => {
@@ -84,20 +104,30 @@ const GroupPage = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleSaveExpense = (updatedExpense: Expense) => {
-    setExpenses((prev) =>
-      prev.map((e) => (e.id === updatedExpense.id ? updatedExpense : e))
-    );
-    toast.success("Utgift uppdaterad");
+  const handleSaveExpense = async (updatedExpense: Expense) => {
+    await updateExpense(updatedExpense.id, {
+      amount: updatedExpense.amount,
+      category: updatedExpense.category,
+      description: updatedExpense.description,
+      date: updatedExpense.date,
+    });
+    setIsEditModalOpen(false);
+    setEditingExpense(null);
   };
 
-  const handleDeleteExpense = (expenseId: string) => {
-    setExpenses((prev) => prev.filter((e) => e.id !== expenseId));
-    toast.success("Utgift borttagen");
+  const handleDeleteExpense = async (expenseId: string) => {
+    await deleteExpense(expenseId);
   };
 
-  const handleSettle = () => {
-    // In a real app, this would save to the database
+  const handleSettle = async () => {
+    if (!negativeUser || !positiveUser || !id) return;
+
+    await addSettlement({
+      group_id: id,
+      from_user: negativeUser.user_id,
+      to_user: positiveUser.user_id,
+      amount: Math.round(oweAmount),
+    });
     setIsSettleModalOpen(false);
   };
 
@@ -121,7 +151,7 @@ const GroupPage = () => {
           </Link>
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold text-foreground">{group.name}</h1>
-            {group.isTemporary && (
+            {group.is_temporary && (
               <span className="rounded-full bg-accent/15 px-3 py-1 text-sm font-medium text-accent">
                 Tillfällig
               </span>
@@ -168,7 +198,7 @@ const GroupPage = () => {
               {/* Per-person breakdown */}
               <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-border">
                 {balances.map((b) => {
-                  const user = mockUsers.find((u) => u.id === b.userId);
+                  const member = group.members.find((u) => u.user_id === b.userId);
                   const isPositive = b.balance >= 0;
                   return (
                     <div key={b.userId} className="flex items-center gap-3">
@@ -177,10 +207,10 @@ const GroupPage = () => {
                           isPositive ? "bg-success/15 text-success" : "bg-accent/15 text-accent"
                         }`}
                       >
-                        {user?.name[0]}
+                        {member?.name[0] || "?"}
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">{user?.name}</p>
+                        <p className="font-medium text-foreground">{member?.name || "Okänd"}</p>
                         <p
                           className={`text-sm font-semibold flex items-center gap-1 ${
                             isPositive ? "text-success" : "text-accent"
@@ -214,7 +244,7 @@ const GroupPage = () => {
             <TabsContent value="expenses">
               <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
                 <h2 className="text-lg font-semibold text-foreground">
-                  Alla utgifter ({groupExpenses.length})
+                  Alla utgifter ({expenses.length})
                 </h2>
                 <Button variant="secondary" onClick={() => setIsImportModalOpen(true)}>
                   <Upload size={18} />
@@ -222,16 +252,17 @@ const GroupPage = () => {
                 </Button>
               </div>
 
-              {groupExpenses.length > 0 ? (
+              {expenses.length > 0 ? (
                 <div className="space-y-3">
-                  {groupExpenses.map((expense, index) => (
+                  {expenses.map((expense, index) => (
                     <ExpenseItem
                       key={expense.id}
                       expense={expense}
-                      users={mockUsers}
+                      members={group.members}
                       index={index}
                       onEdit={handleEditExpense}
                       onDelete={handleDeleteExpense}
+                      currentUserId={user?.id}
                     />
                   ))}
                 </div>
@@ -262,7 +293,7 @@ const GroupPage = () => {
                 <History size={20} className="text-muted-foreground" />
                 <h2 className="text-lg font-semibold text-foreground">Avräkningshistorik</h2>
               </div>
-              <SettlementHistory settlements={groupSettlements} users={mockUsers} />
+              <SettlementHistory settlements={settlements} members={group.members} />
             </TabsContent>
           </Tabs>
         </motion.div>
@@ -274,7 +305,7 @@ const GroupPage = () => {
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddExpense}
         groupId={group.id}
-        users={mockUsers}
+        members={group.members}
       />
 
       <ImportModal
@@ -282,7 +313,7 @@ const GroupPage = () => {
         onClose={() => setIsImportModalOpen(false)}
         onImport={handleImportExpenses}
         groupId={group.id}
-        currentUserId={currentUserId}
+        currentUserId={user?.id || ""}
       />
 
       <EditExpenseModal
@@ -293,7 +324,7 @@ const GroupPage = () => {
         }}
         onSave={handleSaveExpense}
         expense={editingExpense}
-        users={mockUsers}
+        members={group.members}
       />
 
       {negativeUser && positiveUser && (

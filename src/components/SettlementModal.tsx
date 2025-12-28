@@ -2,14 +2,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, ArrowRight, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { User } from "@/lib/types";
+import { GroupMember } from "@/hooks/useGroups";
 
 interface SettlementModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
-  fromUser: User;
-  toUser: User;
+  fromUser: GroupMember;
+  toUser: GroupMember;
   amount: number;
 }
 

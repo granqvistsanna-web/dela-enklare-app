@@ -1,7 +1,7 @@
-import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { Pencil, Trash2, MoreVertical } from "lucide-react";
-import { Expense, User } from "@/lib/types";
+import { Expense } from "@/hooks/useExpenses";
+import { GroupMember } from "@/hooks/useGroups";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,15 +13,17 @@ import {
 
 interface ExpenseItemProps {
   expense: Expense;
-  users: User[];
+  members: GroupMember[];
   index: number;
   onEdit?: (expense: Expense) => void;
   onDelete?: (expenseId: string) => void;
+  currentUserId?: string;
 }
 
-export function ExpenseItem({ expense, users, index, onEdit, onDelete }: ExpenseItemProps) {
-  const payer = users.find((u) => u.id === expense.paidBy);
+export function ExpenseItem({ expense, members, index, onEdit, onDelete, currentUserId }: ExpenseItemProps) {
+  const payer = members.find((u) => u.user_id === expense.paid_by);
   const category = DEFAULT_CATEGORIES.find((c) => c.id === expense.category);
+  const canModify = currentUserId === expense.paid_by;
 
   const formattedDate = new Date(expense.date).toLocaleDateString("sv-SE", {
     day: "numeric",
@@ -43,9 +45,9 @@ export function ExpenseItem({ expense, users, index, onEdit, onDelete }: Expense
       </div>
 
       <div className="flex-1 min-w-0">
-        <p className="font-medium text-foreground truncate">{expense.description}</p>
+        <p className="font-medium text-foreground truncate">{expense.description || "Utgift"}</p>
         <p className="text-sm text-muted-foreground">
-          {payer?.name} betalade • {formattedDate}
+          {payer?.name || "Okänd"} betalade • {formattedDate}
         </p>
       </div>
 
@@ -56,7 +58,7 @@ export function ExpenseItem({ expense, users, index, onEdit, onDelete }: Expense
         <p className="text-xs text-muted-foreground">{category?.name}</p>
       </div>
 
-      {(onEdit || onDelete) && (
+      {canModify && (onEdit || onDelete) && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
