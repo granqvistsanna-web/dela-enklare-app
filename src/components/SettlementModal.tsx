@@ -35,9 +35,9 @@ export function SettlementModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="fixed left-1/2 top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-background border border-border rounded-md p-6">
+            <div className="bg-background border border-border rounded-md p-6 w-full max-w-sm">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium text-foreground">Avräkning</h2>
                 <button onClick={onClose} className="text-muted-foreground hover:text-foreground">

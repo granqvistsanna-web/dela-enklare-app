@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
@@ -84,24 +82,25 @@ export function JoinGroupModal({ isOpen, onClose, onSuccess }: JoinGroupModalPro
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-foreground/20 backdrop-blur-sm"
+            className="fixed inset-0 z-50 bg-foreground/10 backdrop-blur-sm"
             onClick={handleClose}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: "spring", duration: 0.5, bounce: 0.3 }}
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <Card className="w-full max-w-sm">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                <CardTitle className="text-lg">Gå med i grupp</CardTitle>
-                <Button variant="ghost" size="icon" onClick={handleClose}>
-                  <X size={18} />
-                </Button>
-              </CardHeader>
-              <CardContent className="space-y-4">
+            <div className="bg-background border border-border rounded-md w-full max-w-sm p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-medium text-foreground">Gå med i grupp</h2>
+                <button onClick={handleClose} className="text-muted-foreground hover:text-foreground">
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-4">
                 <div>
                   <label className="text-sm text-muted-foreground block mb-2">
                     Ange gruppkod
@@ -121,8 +120,8 @@ export function JoinGroupModal({ isOpen, onClose, onSuccess }: JoinGroupModalPro
                 >
                   {loading ? "Går med..." : "Gå med"}
                 </Button>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </motion.div>
         </>
       )}
