@@ -18,74 +18,70 @@ const Index = () => {
     setIsCreateModalOpen(false);
   };
 
+  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
       <main className="container py-12">
-        <div className="mb-12">
-          <h1 className="text-2xl font-medium text-foreground mb-1">
-            Dina grupper
+        {/* Header */}
+        <div className="mb-10">
+          <h1 className="text-2xl font-semibold text-foreground mb-1">
+            Grupper
           </h1>
           <p className="text-muted-foreground">
-            Håll koll på gemensamma utgifter
+            Hantera gemensamma utgifter
           </p>
         </div>
 
         {/* Stats */}
-        <div className="flex gap-8 mb-12 text-sm">
+        <div className="flex gap-8 mb-10 pb-8 border-b border-border">
           <div>
-            <span className="text-muted-foreground">Utgifter</span>
-            <span className="ml-2 text-foreground font-medium">
-              {loading ? "–" : expenses.length}
-            </span>
+            <p className="text-sm text-muted-foreground mb-1">Totalt</p>
+            <p className="text-2xl font-semibold text-foreground tabular-nums">
+              {loading ? "–" : `${totalExpenses.toLocaleString("sv-SE")} kr`}
+            </p>
           </div>
           <div>
-            <span className="text-muted-foreground">Grupper</span>
-            <span className="ml-2 text-foreground font-medium">
+            <p className="text-sm text-muted-foreground mb-1">Grupper</p>
+            <p className="text-2xl font-semibold text-foreground tabular-nums">
               {loading ? "–" : groups.length}
-            </span>
+            </p>
           </div>
         </div>
 
         {/* Groups List */}
         {loading ? (
-          <div className="space-y-4">
+          <div className="space-y-1">
             {[1, 2].map((i) => (
-              <div key={i} className="h-20 rounded-md bg-secondary animate-pulse" />
+              <div key={i} className="h-14 rounded bg-secondary animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="space-y-1">
-            {groups.map((group) => (
-              <GroupCard
-                key={group.id}
-                group={group}
-                expenses={expenses.filter((e) => e.group_id === group.id)}
-              />
-            ))}
-          </div>
-        )}
+          <>
+            {groups.length > 0 ? (
+              <div className="divide-y divide-border">
+                {groups.map((group) => (
+                  <GroupCard
+                    key={group.id}
+                    group={group}
+                    expenses={expenses.filter((e) => e.group_id === group.id)}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-muted-foreground py-8">
+                Inga grupper ännu
+              </p>
+            )}
 
-        {/* Empty State */}
-        {!loading && groups.length === 0 && (
-          <div className="py-12">
-            <p className="text-muted-foreground mb-4">
-              Inga grupper ännu
-            </p>
-            <Button variant="outline" onClick={() => setIsCreateModalOpen(true)}>
-              Skapa grupp
-            </Button>
-          </div>
-        )}
-
-        {/* Add Group Button */}
-        {!loading && groups.length > 0 && (
-          <div className="mt-8">
-            <Button variant="ghost" onClick={() => setIsCreateModalOpen(true)} className="text-muted-foreground">
-              + Ny grupp
-            </Button>
-          </div>
+            <div className="mt-8">
+              <Button variant="ghost" onClick={() => setIsCreateModalOpen(true)} className="text-muted-foreground">
+                + Ny grupp
+              </Button>
+            </div>
+          </>
         )}
       </main>
 

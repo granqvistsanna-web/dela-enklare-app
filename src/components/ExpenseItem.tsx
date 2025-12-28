@@ -18,7 +18,7 @@ interface ExpenseItemProps {
   currentUserId?: string;
 }
 
-export function ExpenseItem({ expense, members, index, onEdit, onDelete, currentUserId }: ExpenseItemProps) {
+export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId }: ExpenseItemProps) {
   const payer = members.find((u) => u.user_id === expense.paid_by);
   const category = DEFAULT_CATEGORIES.find((c) => c.id === expense.category);
   const canModify = currentUserId === expense.paid_by;
@@ -29,9 +29,9 @@ export function ExpenseItem({ expense, members, index, onEdit, onDelete, current
   });
 
   return (
-    <div className="group flex items-center justify-between py-3 px-2 -mx-2 rounded-md hover:bg-secondary transition-colors">
-      <div className="flex items-center gap-4 min-w-0">
-        <span className="text-lg shrink-0">{category?.icon || "📦"}</span>
+    <div className="group flex items-center justify-between py-3 hover:bg-secondary -mx-3 px-3 rounded-md transition-colors">
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="text-base shrink-0">{category?.icon || "📦"}</span>
         <div className="min-w-0">
           <p className="text-sm text-foreground truncate">{expense.description || "Utgift"}</p>
           <p className="text-xs text-muted-foreground">
@@ -40,8 +40,8 @@ export function ExpenseItem({ expense, members, index, onEdit, onDelete, current
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        <span className="text-sm text-foreground">
+      <div className="flex items-center gap-2">
+        <span className="text-sm text-foreground tabular-nums">
           {expense.amount.toLocaleString("sv-SE")} kr
         </span>
 
@@ -51,21 +51,21 @@ export function ExpenseItem({ expense, members, index, onEdit, onDelete, current
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground"
               >
                 ⋮
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
+            <DropdownMenuContent align="end" className="min-w-[120px]">
               {onEdit && (
-                <DropdownMenuItem onClick={() => onEdit(expense)}>
+                <DropdownMenuItem onClick={() => onEdit(expense)} className="text-sm">
                   Redigera
                 </DropdownMenuItem>
               )}
               {onDelete && (
                 <DropdownMenuItem
                   onClick={() => onDelete(expense.id)}
-                  className="text-destructive focus:text-destructive"
+                  className="text-sm text-destructive focus:text-destructive"
                 >
                   Ta bort
                 </DropdownMenuItem>

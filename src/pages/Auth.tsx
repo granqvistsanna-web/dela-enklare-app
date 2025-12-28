@@ -72,7 +72,6 @@ const Auth = () => {
             toast.error(error.message);
           }
         } else {
-          toast.success("Välkommen tillbaka!");
           navigate("/");
         }
       } else {
@@ -84,7 +83,7 @@ const Auth = () => {
             toast.error(error.message);
           }
         } else {
-          toast.success("Konto skapat!");
+          toast.success("Konto skapat");
           navigate("/");
         }
       }
@@ -96,29 +95,31 @@ const Auth = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <p className="text-muted-foreground">Laddar...</p>
+        <p className="text-sm text-muted-foreground">Laddar...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm">
-        <div className="text-center mb-8">
-          <h1 className="text-xl font-medium text-foreground">Delarätt</h1>
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-xs">
+        <div className="text-center mb-10">
+          <h1 className="text-xl font-semibold text-foreground tracking-tight">Delarätt</h1>
         </div>
 
-        <div className="border border-border rounded-md p-6">
-          <h2 className="text-lg font-medium text-foreground mb-1">
-            {mode === "login" ? "Logga in" : "Skapa konto"}
-          </h2>
-          <p className="text-sm text-muted-foreground mb-6">
-            {mode === "login" 
-              ? "Välkommen tillbaka" 
-              : "Börja dela utgifter"}
-          </p>
+        <div className="space-y-6">
+          <div>
+            <h2 className="text-base font-medium text-foreground">
+              {mode === "login" ? "Logga in" : "Skapa konto"}
+            </h2>
+            <p className="text-sm text-muted-foreground mt-1">
+              {mode === "login" 
+                ? "Välkommen tillbaka" 
+                : "Börja dela utgifter"}
+            </p>
+          </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {mode === "signup" && (
               <div className="space-y-2">
                 <Label htmlFor="name" className="text-sm text-muted-foreground">
@@ -130,7 +131,7 @@ const Auth = () => {
                   placeholder="Erik Svensson"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className={errors.name ? "border-destructive" : ""}
+                  autoComplete="name"
                 />
                 {errors.name && (
                   <p className="text-xs text-destructive">{errors.name}</p>
@@ -148,7 +149,7 @@ const Auth = () => {
                 placeholder="erik@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className={errors.email ? "border-destructive" : ""}
+                autoComplete="email"
               />
               {errors.email && (
                 <p className="text-xs text-destructive">{errors.email}</p>
@@ -166,12 +167,12 @@ const Auth = () => {
                   placeholder="••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className={errors.password ? "border-destructive" : ""}
+                  autoComplete={mode === "login" ? "current-password" : "new-password"}
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-0 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground px-2"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? "Dölj" : "Visa"}
                 </button>
@@ -188,21 +189,20 @@ const Auth = () => {
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-muted-foreground">
-              {mode === "login" ? "Inget konto?" : "Har du konto?"}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === "login" ? "signup" : "login");
-                  setErrors({});
-                }}
-                className="ml-1 text-foreground hover:underline"
-              >
-                {mode === "login" ? "Skapa" : "Logga in"}
-              </button>
-            </p>
-          </div>
+          <p className="text-sm text-center text-muted-foreground">
+            {mode === "login" ? "Inget konto?" : "Har du konto?"}
+            {" "}
+            <button
+              type="button"
+              onClick={() => {
+                setMode(mode === "login" ? "signup" : "login");
+                setErrors({});
+              }}
+              className="text-foreground hover:underline"
+            >
+              {mode === "login" ? "Skapa" : "Logga in"}
+            </button>
+          </p>
         </div>
       </div>
     </div>

@@ -1,10 +1,7 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { ArrowLeft, Tag, Users, Plus, Lock, Trash2, Mail, LogOut, Loader2, Send } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
@@ -53,9 +50,9 @@ const Settings = () => {
     try {
       const { error } = await updatePassword(newPassword);
       if (error) {
-        toast.error("Kunde inte byta lösenord: " + error.message);
+        toast.error("Kunde inte byta lösenord");
       } else {
-        toast.success("Lösenord uppdaterat!");
+        toast.success("Lösenord uppdaterat");
         setNewPassword("");
         setConfirmPassword("");
       }
@@ -68,13 +65,12 @@ const Settings = () => {
     setIsDeletingAccount(true);
     
     try {
-      // Delete profile data first
       if (profile) {
         await supabase.from("profiles").delete().eq("user_id", profile.user_id);
       }
       
       await signOut();
-      toast.success("Ditt konto har raderats");
+      toast.success("Konto raderat");
       navigate("/auth");
     } catch (error) {
       toast.error("Kunde inte radera kontot");
@@ -97,18 +93,14 @@ const Settings = () => {
       const { error } = await supabase.from("invitations").insert({
         inviter_id: profile?.user_id,
         email: inviteEmail,
-        group_id: "hushalll", // Default group for now
+        group_id: "hushalll",
         status: "pending"
       });
       
       if (error) {
-        if (error.message.includes("duplicate")) {
-          toast.error("En inbjudan har redan skickats till denna e-post");
-        } else {
-          toast.error("Kunde inte skicka inbjudan");
-        }
+        toast.error("Kunde inte skicka inbjudan");
       } else {
-        toast.success(`Inbjudan skickad till ${inviteEmail}`);
+        toast.success(`Inbjudan skickad`);
         setInviteEmail("");
       }
     } finally {
@@ -125,272 +117,149 @@ const Settings = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mb-6"
-        >
-          <Link to="/">
-            <Button variant="ghost" size="sm" className="mb-4 -ml-2">
-              <ArrowLeft size={16} />
-              Tillbaka
-            </Button>
+      <main className="container py-12">
+        <div className="mb-10">
+          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+            ← Tillbaka
           </Link>
-          <h1 className="text-3xl font-bold text-foreground">Inställningar</h1>
-        </motion.div>
+          <h1 className="text-2xl font-semibold text-foreground mt-4">Inställningar</h1>
+        </div>
 
-        <div className="space-y-6">
+        <div className="space-y-10">
           {/* Profile */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.05 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Users size={20} />
-                  Din profil
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {profile && (
-                  <div className="flex items-center gap-4 rounded-lg border border-border p-4">
-                    <div className="h-12 w-12 rounded-full bg-primary/15 flex items-center justify-center text-xl font-bold text-primary">
-                      {profile.name?.[0]?.toUpperCase() || "U"}
-                    </div>
-                    <div>
-                      <p className="font-medium text-foreground">{profile.name}</p>
-                      <p className="text-sm text-muted-foreground">{profile.email}</p>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
+          <section>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">Profil</h2>
+            {profile && (
+              <div className="flex items-center gap-4">
+                <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-sm font-medium text-foreground">
+                  {profile.name?.[0]?.toUpperCase() || "?"}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">{profile.name}</p>
+                  <p className="text-sm text-muted-foreground">{profile.email}</p>
+                </div>
+              </div>
+            )}
+          </section>
+
+          <hr className="border-border" />
 
           {/* Invite Partner */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.1 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Send size={20} />
-                  Bjud in partner
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Bjud in din partner för att dela utgifter tillsammans.
-                </p>
-                <form onSubmit={handleInvitePartner} className="flex gap-2">
-                  <div className="flex-1">
-                    <Input
-                      type="email"
-                      placeholder="partner@example.com"
-                      value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
-                    />
-                  </div>
-                  <Button type="submit" disabled={isInviting}>
-                    {isInviting ? (
-                      <Loader2 size={16} className="animate-spin" />
-                    ) : (
-                      <Mail size={16} />
-                    )}
-                    Bjud in
-                  </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <section>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">Bjud in</h2>
+            <form onSubmit={handleInvitePartner} className="flex gap-3 max-w-md">
+              <Input
+                type="email"
+                placeholder="partner@example.com"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                className="flex-1"
+              />
+              <Button type="submit" variant="outline" disabled={isInviting}>
+                {isInviting ? "Skickar..." : "Bjud in"}
+              </Button>
+            </form>
+          </section>
+
+          <hr className="border-border" />
 
           {/* Categories */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.15 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Tag size={20} />
-                  Kategorier
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {DEFAULT_CATEGORIES.map((category) => (
-                    <div
-                      key={category.id}
-                      className="flex items-center gap-3 rounded-lg border border-border p-3"
-                    >
-                      <div
-                        className="h-10 w-10 rounded-lg flex items-center justify-center text-lg"
-                        style={{ backgroundColor: `${category.color}20` }}
-                      >
-                        {category.icon}
-                      </div>
-                      <span className="font-medium text-foreground">{category.name}</span>
-                    </div>
-                  ))}
+          <section>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">Kategorier</h2>
+            <div className="flex flex-wrap gap-2">
+              {DEFAULT_CATEGORIES.map((category) => (
+                <div
+                  key={category.id}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border text-sm"
+                >
+                  <span>{category.icon}</span>
+                  <span className="text-foreground">{category.name}</span>
                 </div>
-                <Button variant="outline" className="w-full mt-4">
-                  <Plus size={16} />
-                  Lägg till kategori
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
+              ))}
+            </div>
+          </section>
+
+          <hr className="border-border" />
 
           {/* Change Password */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
-          >
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg">
-                  <Lock size={20} />
-                  Byt lösenord
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <form onSubmit={handlePasswordChange} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">Nytt lösenord</Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      placeholder="••••••••"
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Bekräfta lösenord</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="••••••••"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                    />
-                  </div>
-                  <Button type="submit" disabled={isChangingPassword}>
-                    {isChangingPassword ? (
-                      <>
-                        <Loader2 size={16} className="animate-spin" />
-                        Sparar...
-                      </>
-                    ) : (
-                      "Byt lösenord"
-                    )}
+          <section>
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">Byt lösenord</h2>
+            <form onSubmit={handlePasswordChange} className="space-y-4 max-w-sm">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword" className="text-sm text-muted-foreground">
+                  Nytt lösenord
+                </Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  placeholder="••••••"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-sm text-muted-foreground">
+                  Bekräfta
+                </Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                />
+              </div>
+              <Button type="submit" variant="outline" disabled={isChangingPassword}>
+                {isChangingPassword ? "Sparar..." : "Uppdatera"}
+              </Button>
+            </form>
+          </section>
+
+          <hr className="border-border" />
+
+          {/* Sign Out & Delete */}
+          <section className="space-y-4">
+            <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground">
+              Logga ut
+            </Button>
+
+            <div className="pt-6">
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                    Radera konto
                   </Button>
-                </form>
-              </CardContent>
-            </Card>
-          </motion.div>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="border border-border">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Radera konto?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Detta raderar permanent ditt konto och all data.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="border-border">Avbryt</AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleDeleteAccount}
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      disabled={isDeletingAccount}
+                    >
+                      {isDeletingAccount ? "Raderar..." : "Radera"}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </section>
 
-          {/* Sign Out */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.25 }}
-          >
-            <Card>
-              <CardContent className="py-4">
-                <Button variant="outline" className="w-full" onClick={handleSignOut}>
-                  <LogOut size={16} />
-                  Logga ut
-                </Button>
-              </CardContent>
-            </Card>
-          </motion.div>
-
-          {/* Delete Account */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
-          >
-            <Card className="border-destructive/30">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg text-destructive">
-                  <Trash2 size={20} />
-                  Radera konto
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <p className="text-sm text-muted-foreground mb-4">
-                  Detta kommer permanent radera ditt konto och all data. Denna åtgärd kan inte ångras.
-                </p>
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button variant="destructive">
-                      <Trash2 size={16} />
-                      Radera mitt konto
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Är du säker?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Detta kommer permanent radera ditt konto och all din data. 
-                        Denna åtgärd kan inte ångras.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Avbryt</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleDeleteAccount}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                        disabled={isDeletingAccount}
-                      >
-                        {isDeletingAccount ? (
-                          <>
-                            <Loader2 size={16} className="animate-spin" />
-                            Raderar...
-                          </>
-                        ) : (
-                          "Ja, radera kontot"
-                        )}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <hr className="border-border" />
 
           {/* About */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: 0.35 }}
-          >
-            <Card>
-              <CardContent className="py-6">
-                <div className="text-center">
-                  <div className="flex items-center justify-center gap-2 mb-2">
-                    <div className="h-8 w-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                      D
-                    </div>
-                    <span className="text-lg font-bold text-foreground">Delarätt</span>
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    Version 1.0 • Dela utgifter enkelt
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
+          <section className="text-center py-4">
+            <p className="text-sm text-muted-foreground">
+              Delarätt · v1.0
+            </p>
+          </section>
         </div>
       </main>
     </div>
