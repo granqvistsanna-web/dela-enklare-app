@@ -2,6 +2,11 @@ import { useState, useEffect, createContext, useContext, ReactNode } from "react
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
+interface UserMetadata {
+  name?: string;
+  [key: string]: unknown;
+}
+
 interface Profile {
   id: string;
   user_id: string;

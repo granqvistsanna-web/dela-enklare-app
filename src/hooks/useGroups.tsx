@@ -9,6 +9,16 @@ export interface GroupMember {
   name: string;
 }
 
+interface PublicProfile {
+  id: string;
+  user_id: string;
+  name: string;
+}
+
+interface GroupInsert {
+  name: string;
+  is_temporary: boolean;
+}
 
 export interface Group {
   id: string;
@@ -75,8 +85,8 @@ export function useGroups() {
       if (profilesError) throw profilesError;
 
       // Map profiles to a lookup
-      const profileLookup = new Map(
-        (profiles || []).map((p: any) => [p.user_id, p])
+      const profileLookup = new Map<string, PublicProfile>(
+        (profiles || []).map((p) => [p.user_id, p as PublicProfile])
       );
 
       // Build groups with members
@@ -137,12 +147,14 @@ export function useGroups() {
 
     try {
       // Create the group - member and invite_code are auto-added via database triggers
+      const groupInsert: GroupInsert = {
+        name,
+        is_temporary: isTemporary,
+      };
+
       const { data: groupData, error: groupError } = await supabase
         .from("groups")
-        .insert({
-          name,
-          is_temporary: isTemporary,
-        } as any)
+        .insert(groupInsert)
         .select()
         .single();
 
@@ -154,9 +166,10 @@ export function useGroups() {
       await fetchGroups();
       toast.success("Grupp skapad!");
       return groupData;
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error creating group:", error);
-      toast.error(error?.message || "Kunde inte skapa grupp");
+      const errorMessage = error instanceof Error ? error.message : "Kunde inte skapa grupp";
+      toast.error(errorMessage);
       return null;
     }
   };

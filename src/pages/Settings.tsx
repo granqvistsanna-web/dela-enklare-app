@@ -6,8 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useGroups } from "@/hooks/useGroups";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -89,7 +97,16 @@ const Settings = () => {
 
     try {
       if (profile) {
-        await supabase.from("profiles").delete().eq("user_id", profile.user_id);
+        const { error: deleteError } = await supabase
+          .from("profiles")
+          .delete()
+          .eq("user_id", profile.user_id);
+
+        if (deleteError) {
+          toast.error("Kunde inte radera kontot");
+          setIsDeletingAccount(false);
+          return;
+        }
       }
 
       await signOut();
@@ -168,6 +185,9 @@ const Settings = () => {
               <Button type="submit" variant="outline" disabled={isChangingName} className="w-full sm:w-auto">
                 {isChangingName ? "Sparar..." : "Uppdatera namn"}
               </Button>
+              {groups.length === 0 && (
+                <p className="text-xs text-muted-foreground">Skapa en grupp först för att kunna bjuda in andra</p>
+              )}
             </form>
           </section>
 
