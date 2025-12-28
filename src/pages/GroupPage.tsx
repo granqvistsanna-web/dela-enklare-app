@@ -250,6 +250,15 @@ const GroupPage = () => {
           </TabsList>
 
           <TabsContent value="expenses">
+            <div className="mb-6 flex gap-3">
+              <Button variant="ghost" onClick={() => setIsAddModalOpen(true)} className="text-muted-foreground">
+                + Lägg till
+              </Button>
+              <Button variant="ghost" onClick={() => setIsImportModalOpen(true)} className="text-muted-foreground">
+                Importera
+              </Button>
+            </div>
+
             {expenses.length > 0 ? (
               <div className="divide-y divide-border">
                 {expenses.map((expense, index) => (
@@ -269,15 +278,6 @@ const GroupPage = () => {
                 Inga utgifter ännu
               </p>
             )}
-
-            <div className="mt-6 flex gap-3">
-              <Button variant="ghost" onClick={() => setIsAddModalOpen(true)} className="text-muted-foreground">
-                + Lägg till
-              </Button>
-              <Button variant="ghost" onClick={() => setIsImportModalOpen(true)} className="text-muted-foreground">
-                Importera
-              </Button>
-            </div>
           </TabsContent>
 
           <TabsContent value="history">
