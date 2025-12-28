@@ -1,5 +1,3 @@
-import { motion } from "framer-motion";
-import { Pencil, Trash2, MoreVertical } from "lucide-react";
 import { Expense } from "@/hooks/useExpenses";
 import { GroupMember } from "@/hooks/useGroups";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
@@ -31,63 +29,51 @@ export function ExpenseItem({ expense, members, index, onEdit, onDelete, current
   });
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.2, delay: index * 0.05 }}
-      className="group flex items-center gap-4 rounded-xl bg-card border border-border p-4 hover:shadow-md transition-all duration-200"
-    >
-      <div
-        className="flex h-11 w-11 items-center justify-center rounded-xl text-xl shrink-0"
-        style={{ backgroundColor: `${category?.color}20` }}
-      >
-        {category?.icon || "📦"}
+    <div className="group flex items-center justify-between py-3 px-2 -mx-2 rounded-md hover:bg-secondary transition-colors">
+      <div className="flex items-center gap-4 min-w-0">
+        <span className="text-lg shrink-0">{category?.icon || "📦"}</span>
+        <div className="min-w-0">
+          <p className="text-sm text-foreground truncate">{expense.description || "Utgift"}</p>
+          <p className="text-xs text-muted-foreground">
+            {payer?.name || "Okänd"} · {formattedDate}
+          </p>
+        </div>
       </div>
 
-      <div className="flex-1 min-w-0">
-        <p className="font-medium text-foreground truncate">{expense.description || "Utgift"}</p>
-        <p className="text-sm text-muted-foreground">
-          {payer?.name || "Okänd"} betalade • {formattedDate}
-        </p>
-      </div>
-
-      <div className="text-right mr-2">
-        <p className="font-semibold text-foreground">
+      <div className="flex items-center gap-3">
+        <span className="text-sm text-foreground">
           {expense.amount.toLocaleString("sv-SE")} kr
-        </p>
-        <p className="text-xs text-muted-foreground">{category?.name}</p>
-      </div>
+        </span>
 
-      {canModify && (onEdit || onDelete) && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-            >
-              <MoreVertical size={16} />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {onEdit && (
-              <DropdownMenuItem onClick={() => onEdit(expense)}>
-                <Pencil size={14} className="mr-2" />
-                Redigera
-              </DropdownMenuItem>
-            )}
-            {onDelete && (
-              <DropdownMenuItem
-                onClick={() => onDelete(expense.id)}
-                className="text-destructive focus:text-destructive"
+        {canModify && (onEdit || onDelete) && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
               >
-                <Trash2 size={14} className="mr-2" />
-                Ta bort
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-    </motion.div>
+                ⋮
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {onEdit && (
+                <DropdownMenuItem onClick={() => onEdit(expense)}>
+                  Redigera
+                </DropdownMenuItem>
+              )}
+              {onDelete && (
+                <DropdownMenuItem
+                  onClick={() => onDelete(expense.id)}
+                  className="text-destructive focus:text-destructive"
+                >
+                  Ta bort
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
+    </div>
   );
 }

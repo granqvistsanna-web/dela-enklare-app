@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
-import { Plus, Receipt } from "lucide-react";
 import { Header } from "@/components/Header";
 import { GroupCard } from "@/components/GroupCard";
 import { Button } from "@/components/ui/button";
@@ -24,113 +22,70 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-8">
-        {/* Hero Section */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-8"
-        >
-          <h1 className="text-3xl md:text-4xl font-bold text-foreground mb-2">
-            Välkommen tillbaka! 👋
+      <main className="container py-12">
+        <div className="mb-12">
+          <h1 className="text-2xl font-medium text-foreground mb-1">
+            Dina grupper
           </h1>
-          <p className="text-muted-foreground text-lg">
-            Håll koll på era gemensamma utgifter
+          <p className="text-muted-foreground">
+            Håll koll på gemensamma utgifter
           </p>
-        </motion.div>
+        </div>
 
-        {/* Quick Stats */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.1 }}
-          className="grid grid-cols-2 gap-4 mb-8"
-        >
-          <div className="rounded-xl bg-primary/10 border border-primary/20 p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
-                <Receipt size={20} className="text-primary" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-foreground">
-              {loading ? "-" : expenses.length}
-            </p>
-            <p className="text-sm text-muted-foreground">Utgifter denna månad</p>
+        {/* Stats */}
+        <div className="flex gap-8 mb-12 text-sm">
+          <div>
+            <span className="text-muted-foreground">Utgifter</span>
+            <span className="ml-2 text-foreground font-medium">
+              {loading ? "–" : expenses.length}
+            </span>
           </div>
-          <div className="rounded-xl bg-success/10 border border-success/20 p-5">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="h-10 w-10 rounded-lg bg-success/20 flex items-center justify-center">
-                <span className="text-lg">✓</span>
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-foreground">
-              {loading ? "-" : groups.length}
-            </p>
-            <p className="text-sm text-muted-foreground">Aktiva grupper</p>
+          <div>
+            <span className="text-muted-foreground">Grupper</span>
+            <span className="ml-2 text-foreground font-medium">
+              {loading ? "–" : groups.length}
+            </span>
           </div>
-        </motion.div>
-
-        {/* Groups Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className="flex items-center justify-between mb-4"
-        >
-          <h2 className="text-xl font-semibold text-foreground">Dina grupper</h2>
-          <Button variant="outline" size="sm" onClick={() => setIsCreateModalOpen(true)}>
-            <Plus size={16} />
-            Ny grupp
-          </Button>
-        </motion.div>
+        </div>
 
         {/* Groups List */}
         {loading ? (
           <div className="space-y-4">
             {[1, 2].map((i) => (
-              <div key={i} className="h-32 rounded-xl bg-secondary animate-pulse" />
+              <div key={i} className="h-20 rounded-md bg-secondary animate-pulse" />
             ))}
           </div>
         ) : (
-          <div className="space-y-4">
-            {groups.map((group, index) => (
-              <motion.div
+          <div className="space-y-1">
+            {groups.map((group) => (
+              <GroupCard
                 key={group.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
-              >
-                <GroupCard
-                  group={group}
-                  expenses={expenses.filter((e) => e.group_id === group.id)}
-                />
-              </motion.div>
+                group={group}
+                expenses={expenses.filter((e) => e.group_id === group.id)}
+              />
             ))}
           </div>
         )}
 
         {/* Empty State */}
         {!loading && groups.length === 0 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center py-12"
-          >
-            <div className="h-20 w-20 rounded-full bg-secondary flex items-center justify-center mx-auto mb-4">
-              <Receipt size={32} className="text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Inga grupper ännu
-            </h3>
+          <div className="py-12">
             <p className="text-muted-foreground mb-4">
-              Skapa din första grupp för att börja dela utgifter
+              Inga grupper ännu
             </p>
-            <Button onClick={() => setIsCreateModalOpen(true)}>
-              <Plus size={18} />
+            <Button variant="outline" onClick={() => setIsCreateModalOpen(true)}>
               Skapa grupp
             </Button>
-          </motion.div>
+          </div>
+        )}
+
+        {/* Add Group Button */}
+        {!loading && groups.length > 0 && (
+          <div className="mt-8">
+            <Button variant="ghost" onClick={() => setIsCreateModalOpen(true)} className="text-muted-foreground">
+              + Ny grupp
+            </Button>
+          </div>
         )}
       </main>
 
