@@ -66,35 +66,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
+    let isInitialLoad = true;
+
+    // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
-        
-        // Defer profile fetch to avoid deadlock
+
         if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user);
-          }, 0);
+          await fetchProfile(session.user);
         } else {
           setProfile(null);
         }
-        
+
         setLoading(false);
       }
     );
 
-    // THEN check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchProfile(session.user);
+    // Check for existing session on mount
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (isInitialLoad) {
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          await fetchProfile(session.user);
+        }
+
+        setLoading(false);
+        isInitialLoad = false;
       }
-      
-      setLoading(false);
     });
 
     return () => subscription.unsubscribe();

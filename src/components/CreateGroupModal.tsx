@@ -21,11 +21,14 @@ export function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGroupModal
     if (!name.trim()) return;
 
     setIsSubmitting(true);
-    await onSubmit(name.trim(), isTemporary);
-    setIsSubmitting(false);
-
-    setName("");
-    setIsTemporary(false);
+    try {
+      await onSubmit(name.trim(), isTemporary);
+      setName("");
+      setIsTemporary(false);
+      onClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

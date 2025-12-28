@@ -6,8 +6,16 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useGroups } from "@/hooks/useGroups";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,13 +31,15 @@ import {
 const Settings = () => {
   const navigate = useNavigate();
   const { profile, signOut, updatePassword } = useAuth();
-  
+  const { groups } = useGroups();
+
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
-  
+
   const [inviteEmail, setInviteEmail] = useState("");
+  const [selectedGroupId, setSelectedGroupId] = useState("");
   const [isInviting, setIsInviting] = useState(false);
 
   const handlePasswordChange = async (e: React.FormEvent) => {
@@ -63,12 +73,21 @@ const Settings = () => {
 
   const handleDeleteAccount = async () => {
     setIsDeletingAccount(true);
-    
+
     try {
       if (profile) {
-        await supabase.from("profiles").delete().eq("user_id", profile.user_id);
+        const { error: deleteError } = await supabase
+          .from("profiles")
+          .delete()
+          .eq("user_id", profile.user_id);
+
+        if (deleteError) {
+          toast.error("Kunde inte radera kontot");
+          setIsDeletingAccount(false);
+          return;
+        }
       }
-      
+
       await signOut();
       toast.success("Konto raderat");
       navigate("/");
@@ -81,22 +100,27 @@ const Settings = () => {
 
   const handleInvitePartner = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!inviteEmail || !inviteEmail.includes("@")) {
       toast.error("Ange en giltig e-postadress");
       return;
     }
-    
+
+    if (!selectedGroupId) {
+      toast.error("Välj en grupp att bjuda in till");
+      return;
+    }
+
     setIsInviting(true);
-    
+
     try {
       const { error } = await supabase.from("invitations").insert({
         inviter_id: profile?.user_id,
         email: inviteEmail,
-        group_id: "hushalll",
+        group_id: selectedGroupId,
         status: "pending"
       });
-      
+
       if (error) {
         toast.error("Kunde inte skicka inbjudan");
       } else {
@@ -147,17 +171,34 @@ const Settings = () => {
           {/* Invite Partner */}
           <section>
             <h2 className="text-sm font-medium text-muted-foreground mb-4">Bjud in</h2>
-            <form onSubmit={handleInvitePartner} className="flex gap-3 max-w-md">
-              <Input
-                type="email"
-                placeholder="partner@example.com"
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-                className="flex-1"
-              />
-              <Button type="submit" variant="outline" disabled={isInviting}>
+            <form onSubmit={handleInvitePartner} className="space-y-3 max-w-md">
+              <div className="flex gap-3">
+                <Input
+                  type="email"
+                  placeholder="partner@example.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                  className="flex-1"
+                />
+                <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Välj grupp" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {groups.map((group) => (
+                      <SelectItem key={group.id} value={group.id}>
+                        {group.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" variant="outline" disabled={isInviting || groups.length === 0}>
                 {isInviting ? "Skickar..." : "Bjud in"}
               </Button>
+              {groups.length === 0 && (
+                <p className="text-xs text-muted-foreground">Skapa en grupp först för att kunna bjuda in andra</p>
+              )}
             </form>
           </section>
 
