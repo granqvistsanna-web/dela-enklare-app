@@ -45,11 +45,11 @@ export function SettlementHistory({ settlements, members }: SettlementHistoryPro
           >
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-2">
-                <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center text-xs font-semibold text-green-700">
+                <div className="h-8 w-8 rounded-full bg-green-500/10 flex items-center justify-center text-xs font-semibold text-green-600 dark:text-green-400">
                   {fromUser?.name?.charAt(0).toUpperCase() || "?"}
                 </div>
                 <span className="text-sm text-muted-foreground">→</span>
-                <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-xs font-semibold text-blue-700">
+                <div className="h-8 w-8 rounded-full bg-blue-500/10 flex items-center justify-center text-xs font-semibold text-blue-600 dark:text-blue-400">
                   {toUser?.name?.charAt(0).toUpperCase() || "?"}
                 </div>
               </div>

@@ -304,7 +304,7 @@ const GroupPage = () => {
                       </p>
                     </div>
                   ) : (
-                    <p className="text-2xl font-semibold text-green-600">Kvitt ✓</p>
+                    <p className="text-2xl font-semibold text-green-600 dark:text-green-400">Kvitt ✓</p>
                   )}
                 </CardContent>
               </Card>
@@ -325,10 +325,10 @@ const GroupPage = () => {
                         <div className="flex items-center gap-2">
                           <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold ${
                             isPositive && !isZero
-                              ? 'bg-green-100 text-green-700'
+                              ? 'bg-green-500/10 text-green-600 dark:text-green-400'
                               : isZero
-                              ? 'bg-gray-100 text-gray-600'
-                              : 'bg-orange-100 text-orange-700'
+                              ? 'bg-muted text-muted-foreground'
+                              : 'bg-orange-500/10 text-orange-600 dark:text-orange-400'
                           }`}>
                             {member?.name?.charAt(0).toUpperCase() || "?"}
                           </div>
@@ -338,10 +338,10 @@ const GroupPage = () => {
                         </div>
                         <span className={`text-sm font-semibold tabular-nums ${
                           isPositive && !isZero
-                            ? 'text-green-600'
+                            ? 'text-green-600 dark:text-green-400'
                             : isZero
                             ? 'text-muted-foreground'
-                            : 'text-orange-600'
+                            : 'text-orange-600 dark:text-orange-400'
                         }`}>
                           {isPositive && !isZero ? "+" : ""}{Math.round(b.balance).toLocaleString("sv-SE")} kr
                         </span>
