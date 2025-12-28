@@ -28,15 +28,30 @@ export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId 
     month: "short",
   });
 
+  const hasCustomSplit = expense.splits && Object.keys(expense.splits).length > 0;
+
   return (
     <div className="group flex items-center justify-between py-3 hover:bg-secondary -mx-3 px-3 rounded-md transition-colors">
-      <div className="flex items-center gap-3 min-w-0">
+      <div className="flex items-center gap-3 min-w-0 flex-1">
         <span className="text-base shrink-0">{category?.icon || "📦"}</span>
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <p className="text-sm text-foreground truncate">{expense.description || "Utgift"}</p>
           <p className="text-xs text-muted-foreground">
             {payer?.name || "Okänd"} · {formattedDate}
+            {hasCustomSplit && <span className="ml-1 text-primary">· Anpassad delning</span>}
           </p>
+          {hasCustomSplit && (
+            <div className="mt-1 text-xs text-muted-foreground flex flex-wrap gap-x-2">
+              {Object.entries(expense.splits!).map(([userId, amount]) => {
+                const member = members.find((m) => m.user_id === userId);
+                return (
+                  <span key={userId} className="whitespace-nowrap">
+                    {member?.name || "Okänd"}: {amount.toLocaleString("sv-SE")} kr
+                  </span>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 

@@ -14,6 +14,7 @@ export type Expense = {
   description: string;
   date: string;
   createdAt: string;
+  splits?: { [userId: string]: number } | null;
 };
 
 export type Settlement = {

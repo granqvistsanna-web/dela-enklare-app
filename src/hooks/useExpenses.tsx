@@ -3,6 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
+export interface ExpenseSplit {
+  [userId: string]: number;
+}
+
 export interface Expense {
   id: string;
   group_id: string;
@@ -12,6 +16,7 @@ export interface Expense {
   description: string | null;
   date: string;
   created_at: string;
+  splits?: ExpenseSplit | null;
 }
 
 export function useExpenses(groupId?: string) {
@@ -57,6 +62,7 @@ export function useExpenses(groupId?: string) {
     category: string;
     description: string;
     date: string;
+    splits?: ExpenseSplit | null;
   }) => {
     if (!user) {
       toast.error("Du måste vara inloggad");

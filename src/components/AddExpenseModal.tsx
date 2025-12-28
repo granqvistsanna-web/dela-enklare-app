@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { GroupMember } from "@/hooks/useGroups";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
+import { ExpenseSplit } from "@/hooks/useExpenses";
+import { toast } from "sonner";
 
 interface AddExpenseModalProps {
   isOpen: boolean;
@@ -16,6 +18,7 @@ interface AddExpenseModalProps {
     category: string;
     description: string;
     date: string;
+    splits?: ExpenseSplit | null;
   }) => void;
   groupId: string;
   members: GroupMember[];
@@ -26,23 +29,81 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
   const [category, setCategory] = useState(DEFAULT_CATEGORIES[0].id);
   const [description, setDescription] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [useCustomSplit, setUseCustomSplit] = useState(false);
+  const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
+
+  // Initialize custom splits when toggled on or when members change
+  // Note: intentionally NOT reacting to amount changes to avoid resetting user's custom values
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (useCustomSplit && amount) {
+      const totalAmount = parseFloat(amount) || 0;
+      const perPerson = totalAmount / members.length;
+      const splits: Record<string, string> = {};
+      members.forEach((member) => {
+        if (!customSplits[member.user_id]) {
+          splits[member.user_id] = perPerson.toFixed(2);
+        } else {
+          splits[member.user_id] = customSplits[member.user_id];
+        }
+      });
+      setCustomSplits(splits);
+    }
+  }, [useCustomSplit, members]);
+
+  const handleSplitChange = (userId: string, value: string) => {
+    setCustomSplits((prev) => ({
+      ...prev,
+      [userId]: value,
+    }));
+  };
+
+  const calculateSplitSum = () => {
+    return Object.values(customSplits).reduce(
+      (sum, val) => sum + (parseFloat(val) || 0),
+      0
+    );
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || !category || !description) return;
 
+    const totalAmount = parseFloat(amount);
+
+    // Validate custom splits if enabled
+    if (useCustomSplit) {
+      const splitSum = calculateSplitSum();
+      if (Math.abs(splitSum - totalAmount) > 0.01) {
+        toast.error(`Summan av fördelningen (${splitSum.toFixed(2)} kr) måste vara lika med totala beloppet (${totalAmount.toFixed(2)} kr)`);
+        return;
+      }
+    }
+
+    // Build splits object
+    let splits: ExpenseSplit | null = null;
+    if (useCustomSplit) {
+      splits = {};
+      Object.entries(customSplits).forEach(([userId, value]) => {
+        splits![userId] = parseFloat(value) || 0;
+      });
+    }
+
     onAdd({
       group_id: groupId,
-      amount: parseFloat(amount),
+      amount: totalAmount,
       paid_by: "",
       category,
       description,
       date,
+      splits,
     });
 
     setAmount("");
     setDescription("");
     setDate(new Date().toISOString().split("T")[0]);
+    setUseCustomSplit(false);
+    setCustomSplits({});
     onClose();
   };
 
@@ -133,6 +194,62 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
                     onChange={(e) => setDate(e.target.value)}
                     required
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm text-muted-foreground">Fördelning</Label>
+                    <button
+                      type="button"
+                      onClick={() => setUseCustomSplit(!useCustomSplit)}
+                      className="text-sm text-primary hover:underline"
+                    >
+                      {useCustomSplit ? "Jämn delning" : "Anpassad delning"}
+                    </button>
+                  </div>
+
+                  {useCustomSplit && amount && (
+                    <div className="space-y-2 p-3 border border-border rounded-md bg-secondary/20">
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Fördela {parseFloat(amount).toFixed(2)} kr mellan gruppmedlemmar:
+                      </p>
+                      {members.map((member) => (
+                        <div key={member.user_id} className="flex items-center gap-2">
+                          <Label className="text-sm flex-1 text-foreground">
+                            {member.name}
+                          </Label>
+                          <Input
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="0.00"
+                            value={customSplits[member.user_id] || ""}
+                            onChange={(e) => handleSplitChange(member.user_id, e.target.value)}
+                            className="w-24"
+                          />
+                          <span className="text-sm text-muted-foreground">kr</span>
+                        </div>
+                      ))}
+                      <div className="pt-2 border-t border-border mt-2">
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground">Summa:</span>
+                          <span className={`font-medium ${
+                            Math.abs(calculateSplitSum() - (parseFloat(amount) || 0)) < 0.01
+                              ? "text-green-600"
+                              : "text-destructive"
+                          }`}>
+                            {calculateSplitSum().toFixed(2)} kr
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!useCustomSplit && (
+                    <p className="text-xs text-muted-foreground">
+                      Delas lika mellan alla gruppmedlemmar
+                    </p>
+                  )}
                 </div>
 
                 <Button type="submit" className="w-full">
