@@ -254,8 +254,8 @@ function inferColumns(header: string[], dataRows: string[][]): {
 
   // Use debit/credit columns if found, otherwise look for single amount column
   let amountCol: number | null = null;
-  let debitCol: number | undefined = debitColHeader >= 0 ? debitColHeader : undefined;
-  let creditCol: number | undefined = creditColHeader >= 0 ? creditColHeader : undefined;
+  const debitCol: number | undefined = debitColHeader >= 0 ? debitColHeader : undefined;
+  const creditCol: number | undefined = creditColHeader >= 0 ? creditColHeader : undefined;
 
   if (amountColHeader >= 0) {
     amountCol = amountColHeader;

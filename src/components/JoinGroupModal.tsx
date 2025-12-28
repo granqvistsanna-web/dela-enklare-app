@@ -60,7 +60,16 @@ export function JoinGroupModal({ isOpen, onClose, onSuccess }: JoinGroupModalPro
         .from("group_members")
         .insert([{ group_id: group.id, user_id: user.id }]);
 
-      if (memberError) throw memberError;
+      if (memberError) {
+        console.error("Error joining group:", memberError);
+        console.error("Error details:", {
+          code: memberError.code,
+          message: memberError.message,
+          details: memberError.details,
+          hint: memberError.hint,
+        });
+        throw memberError;
+      }
 
       toast.success(`Du gick med i ${group.name}`);
       setCode("");

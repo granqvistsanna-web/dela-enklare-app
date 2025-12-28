@@ -11,6 +11,11 @@ interface Transaction {
   amount: number;
 }
 
+interface TagRule {
+  pattern: string;
+  category: string;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -28,7 +33,7 @@ serve(async (req) => {
 
     const categories = ["mat", "boende", "transport", "noje", "ovrigt"];
     const rulesContext = existingRules?.length > 0 
-      ? `\n\nExisting tag rules to follow:\n${existingRules.map((r: any) => `- "${r.pattern}" → ${r.category}`).join("\n")}`
+      ? `\n\nExisting tag rules to follow:\n${(existingRules as TagRule[]).map((r) => `- "${r.pattern}" → ${r.category}`).join("\n")}`
       : "";
 
     const prompt = `You are a Swedish expense categorizer. Categorize these bank transactions into one of these categories: ${categories.join(", ")}.

@@ -219,13 +219,25 @@ export function useGroups() {
         .from("group_members")
         .insert(membersToAdd);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error adding members:", error);
+        console.error("Error details:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw error;
+      }
 
       await fetchGroups();
       toast.success(`${userIds.length} ${userIds.length === 1 ? 'medlem' : 'medlemmar'} tillagd${userIds.length === 1 ? '' : 'a'}!`);
     } catch (error) {
       console.error("Error adding members:", error);
-      toast.error("Kunde inte lägga till medlemmar");
+      const errorMessage = error instanceof Error 
+        ? error.message 
+        : "Kunde inte lägga till medlemmar";
+      toast.error(errorMessage);
     }
   };
 

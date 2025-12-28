@@ -48,7 +48,6 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
 
   // Initialize custom splits when toggled on
   // Note: customSplits intentionally not in deps to avoid infinite loop
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (useCustomSplit && amount && Object.keys(customSplits).length === 0 && members.length > 0) {
       const totalAmount = parseFloat(amount) || 0;
@@ -59,6 +58,7 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
       });
       setCustomSplits(splits);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useCustomSplit, amount, members]);
 
   const handleSplitChange = (userId: string, value: string) => {

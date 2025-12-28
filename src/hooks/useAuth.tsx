@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!data) {
         // Safely extract display name from user metadata or email
         const displayName =
-          (sessionUser.user_metadata as any)?.name ||
+          (sessionUser.user_metadata as UserMetadata)?.name ||
           (sessionUser.email ? sessionUser.email.split("@")[0] : null) ||
           "Användare";
 
