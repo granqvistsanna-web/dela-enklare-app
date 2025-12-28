@@ -24,67 +24,65 @@ export function GroupCard({ group, expenses }: GroupCardProps) {
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.2 }}
     >
       <Link to={`/grupp/${group.id}`}>
-        <Card className="group cursor-pointer hover:shadow-lg hover:border-primary/20 transition-all duration-300">
-          <CardContent className="p-5">
-            <div className="flex items-start justify-between">
+        <Card className="group cursor-pointer hover:bg-secondary/50 border-border transition-all duration-200">
+          <CardContent className="p-6">
+            <div className="flex items-start justify-between mb-4">
               <div className="flex-1">
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <h3 className="text-lg font-semibold text-foreground">
                     {group.name}
                   </h3>
                   {group.is_temporary && (
-                    <span className="rounded-full bg-accent/15 px-2 py-0.5 text-xs font-medium text-accent">
+                    <span className="rounded-md bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
                       Tillfällig
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                  <Users size={14} />
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Users size={15} />
                   <span>
                     {group.members.length > 0
-                      ? group.members.map((u) => u.name).join(" & ")
+                      ? group.members.map((u) => u.name).join(", ")
                       : "Inga medlemmar"}
                   </span>
                 </div>
               </div>
               <ArrowRight
-                size={20}
-                className="text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all"
+                size={18}
+                className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all mt-1"
               />
             </div>
 
-            <div className="mt-4 pt-4 border-t border-border">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wide mb-0.5">
-                    Total denna period
+            <div className="flex items-center justify-between pt-4 border-t border-border/50">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1 font-medium">
+                  Total
+                </p>
+                <p className="text-xl font-semibold text-foreground tabular-nums">
+                  {totalExpenses.toLocaleString("sv-SE")} kr
+                </p>
+              </div>
+
+              {oweAmount > 0 && negativeUser && positiveUser && (
+                <div className="text-right">
+                  <p className="text-xs text-muted-foreground mb-1 font-medium">
+                    Att göra upp
                   </p>
-                  <p className="text-lg font-semibold text-foreground">
-                    {totalExpenses.toLocaleString("sv-SE")} kr
+                  <p className="text-sm font-medium">
+                    <span className="text-muted-foreground">{negativeUser.name}</span>
+                    <span className="text-muted-foreground/50 mx-1">→</span>
+                    <span className="text-muted-foreground">{positiveUser.name}</span>
+                    <span className="text-foreground ml-2 font-semibold tabular-nums">
+                      {Math.round(oweAmount).toLocaleString("sv-SE")} kr
+                    </span>
                   </p>
                 </div>
-                
-                {oweAmount > 0 && negativeUser && positiveUser && (
-                  <div className="text-right">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide mb-0.5">
-                      Att göra upp
-                    </p>
-                    <p className="text-sm font-medium">
-                      <span className="text-accent">{negativeUser.name}</span>
-                      <span className="text-muted-foreground"> → </span>
-                      <span className="text-success">{positiveUser.name}</span>
-                      <span className="text-foreground ml-1.5 font-semibold">
-                        {Math.round(oweAmount).toLocaleString("sv-SE")} kr
-                      </span>
-                    </p>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>
