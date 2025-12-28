@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { GroupMember } from "@/hooks/useGroups";
 import { Expense, ExpenseSplit } from "@/hooks/useExpenses";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
+import { toast } from "sonner";
 
 interface EditExpenseModalProps {
   isOpen: boolean;
@@ -46,6 +47,8 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
   }, [expense]);
 
   // Initialize custom splits when toggled on
+  // Note: customSplits intentionally not in deps to avoid infinite loop
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (useCustomSplit && amount && Object.keys(customSplits).length === 0) {
       const totalAmount = parseFloat(amount) || 0;
@@ -82,7 +85,7 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
     if (useCustomSplit) {
       const splitSum = calculateSplitSum();
       if (Math.abs(splitSum - totalAmount) > 0.01) {
-        alert(`Summan av fördelningen (${splitSum.toFixed(2)} kr) måste vara lika med totala beloppet (${totalAmount.toFixed(2)} kr)`);
+        toast.error(`Summan av fördelningen (${splitSum.toFixed(2)} kr) måste vara lika med totala beloppet (${totalAmount.toFixed(2)} kr)`);
         return;
       }
     }
