@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { Users, Calculator, Receipt, Share2, Sparkles, Shield } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Landing = () => {
   const navigate = useNavigate();
@@ -44,9 +45,7 @@ const Landing = () => {
       <nav className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <div className="text-2xl font-semibold text-foreground tracking-tight">
-              päronsplit
-            </div>
+            <img src={logo} alt="päronsplit" className="h-10" />
           </div>
           <Button
             variant="ghost"
