@@ -25,6 +25,7 @@ interface AuthContextType {
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
   updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
+  updateProfile: (name: string) => Promise<{ error: Error | null }>;
   deleteAccount: () => Promise<{ error: Error | null }>;
   refreshProfile: () => Promise<void>;
 }
@@ -38,74 +39,104 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (sessionUser: User) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", sessionUser.id)
-      .maybeSingle();
-
-    // If no profile exists yet, create one (allowed by RLS: user inserts own profile)
-    if (!error && !data) {
-      const metadata = sessionUser.user_metadata as UserMetadata;
-      const displayName =
-        metadata?.name ||
-        sessionUser.email?.split("@")[0] ||
-        "Användare";
-
-      const { data: inserted, error: insertError } = await supabase
+    try {
+      const { data, error } = await supabase
         .from("profiles")
-        .insert({
-          user_id: sessionUser.id,
-          name: displayName,
-          email: sessionUser.email ?? "",
-        })
         .select("*")
+        .eq("user_id", sessionUser.id)
         .maybeSingle();
 
-      if (!insertError && inserted) setProfile(inserted);
-      return;
-    }
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
 
-    if (!error && data) {
+      // If no profile exists yet, create one (allowed by RLS: user inserts own profile)
+      if (!data) {
+        // Safely extract display name from user metadata or email
+        const displayName =
+          (sessionUser.user_metadata as any)?.name ||
+          (sessionUser.email ? sessionUser.email.split("@")[0] : null) ||
+          "Användare";
+
+        const { data: inserted, error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: sessionUser.id,
+            name: displayName,
+            email: sessionUser.email ?? "",
+          })
+          .select("*")
+          .maybeSingle();
+
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+          return;
+        }
+
+        if (inserted) {
+          setProfile(inserted);
+        }
+        return;
+      }
+
       setProfile(data);
+    } catch (error) {
+      console.error("Unexpected error in fetchProfile:", error);
     }
   };
 
   useEffect(() => {
-    let isInitialLoad = true;
+    let mounted = true;
 
-    // Set up auth state listener
+    // Initialize session state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+
+      setSession(session);
+      setUser(session?.user ?? null);
+
+      if (session?.user) {
+        fetchProfile(session.user);
+      }
+
+      setLoading(false);
+    });
+
+    // Set up auth state listener for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        if (!mounted) return;
+
+        console.log("Auth state changed:", event, session?.user?.id);
+
         setSession(session);
         setUser(session?.user ?? null);
 
+        // Handle profile based on session
         if (session?.user) {
-          await fetchProfile(session.user);
+          // Defer profile fetch to avoid blocking
+          setTimeout(() => {
+            if (mounted) {
+              fetchProfile(session.user);
+            }
+          }, 0);
         } else {
+          // Clear profile on sign out
           setProfile(null);
         }
 
-        setLoading(false);
+        // Only set loading to false on initial load
+        if (event === 'INITIAL_SESSION') {
+          setLoading(false);
+        }
       }
     );
 
-    // Check for existing session on mount
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (isInitialLoad) {
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        if (session?.user) {
-          await fetchProfile(session.user);
-        }
-
-        setLoading(false);
-        isInitialLoad = false;
-      }
-    });
-
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, name: string) => {
@@ -133,17 +164,51 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
+    try {
+      // Sign out from Supabase - this will trigger the auth state listener
+      // which will automatically clear user, session, and profile
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("Error signing out:", error);
+        throw error;
+      }
+
+      // Note: We don't manually clear state here because the
+      // onAuthStateChange listener will handle it automatically
+      // This prevents race conditions and ensures proper state synchronization
+    } catch (error) {
+      // If signOut fails, manually clear state as fallback
+      console.error("Sign out failed, clearing state manually:", error);
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      throw error;
+    }
   };
 
   const updatePassword = async (newPassword: string) => {
     const { error } = await supabase.auth.updateUser({
       password: newPassword
     });
-    
+
+    return { error: error as Error | null };
+  };
+
+  const updateProfile = async (name: string) => {
+    if (!user) {
+      return { error: new Error("Ingen användare är inloggad") };
+    }
+
+    const { error } = await supabase
+      .from("profiles")
+      .update({ name, updated_at: new Date().toISOString() })
+      .eq("user_id", user.id);
+
+    if (!error) {
+      await refreshProfile();
+    }
+
     return { error: error as Error | null };
   };
 
@@ -170,6 +235,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signIn,
       signOut,
       updatePassword,
+      updateProfile,
       deleteAccount,
       refreshProfile
     }}>

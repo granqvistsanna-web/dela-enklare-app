@@ -1,5 +1,6 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Moon, Sun, Monitor } from "lucide-react";
+import { Moon, Sun, Monitor, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 import { useTheme } from "@/hooks/useTheme";
@@ -16,15 +17,17 @@ export function Header() {
   const location = useLocation();
   const { profile } = useAuth();
   const { theme, setTheme } = useTheme();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between max-w-6xl mx-auto">
         <Link to="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img src={logo} alt="päronsplit" className="h-10" />
+          <img src={logo} alt="Päronsplit" className="h-12 sm:h-16 w-auto" />
         </Link>
 
-        <nav className="flex items-center gap-4">
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-4">
           <Link
             to="/dashboard"
             className={cn(
@@ -74,7 +77,92 @@ export function Header() {
             </span>
           )}
         </nav>
+
+        {/* Mobile Menu Button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="md:hidden h-10 w-10"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+        >
+          {isMobileMenuOpen ? (
+            <X className="h-5 w-5" />
+          ) : (
+            <Menu className="h-5 w-5" />
+          )}
+          <span className="sr-only">Meny</span>
+        </Button>
       </div>
+
+      {/* Mobile Navigation */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-border bg-background">
+          <nav className="container max-w-6xl mx-auto py-4 flex flex-col gap-4">
+            <Link
+              to="/dashboard"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={cn(
+                "text-base font-medium transition-colors py-2",
+                location.pathname === "/dashboard" ? "text-foreground" : "text-muted-foreground"
+              )}
+            >
+              Hem
+            </Link>
+            <Link
+              to="/installningar"
+              onClick={() => setIsMobileMenuOpen(false)}
+              className={cn(
+                "text-base font-medium transition-colors py-2",
+                location.pathname === "/installningar" ? "text-foreground" : "text-muted-foreground"
+              )}
+            >
+              Inställningar
+            </Link>
+
+            {/* Theme Selector for Mobile */}
+            <div className="py-2">
+              <p className="text-xs text-muted-foreground mb-2">Tema</p>
+              <div className="flex gap-2">
+                <Button
+                  variant={theme === "light" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setTheme("light")}
+                  className="flex-1"
+                >
+                  <Sun className="mr-2 h-4 w-4" />
+                  <span>Ljust</span>
+                </Button>
+                <Button
+                  variant={theme === "dark" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setTheme("dark")}
+                  className="flex-1"
+                >
+                  <Moon className="mr-2 h-4 w-4" />
+                  <span>Mörkt</span>
+                </Button>
+                <Button
+                  variant={theme === "system" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setTheme("system")}
+                  className="flex-1"
+                >
+                  <Monitor className="mr-2 h-4 w-4" />
+                  <span>System</span>
+                </Button>
+              </div>
+            </div>
+
+            {profile && (
+              <div className="py-2 border-t border-border">
+                <p className="text-sm text-muted-foreground">
+                  Inloggad som <span className="font-medium text-foreground">{profile.name}</span>
+                </p>
+              </div>
+            )}
+          </nav>
+        </div>
+      )}
     </header>
   );
 }

@@ -21,16 +21,25 @@ export function calculateBalance(
 
   // Process each expense
   expenses.forEach((expense) => {
+    // Validate expense amount
+    if (!expense.amount || expense.amount <= 0 || !Number.isFinite(expense.amount)) {
+      console.warn(`Invalid expense amount: ${expense.amount}, skipping expense ${expense.id}`);
+      return;
+    }
+
     // Credit the person who paid
     if (balances[expense.paid_by] !== undefined) {
       balances[expense.paid_by] += expense.amount;
+    } else {
+      // If paid_by user is not in the group, log warning
+      console.warn(`Expense ${expense.id} paid by user ${expense.paid_by} who is not in group`);
     }
 
     // Debit based on splits
     if (expense.splits) {
       // Custom splits specified
       Object.entries(expense.splits).forEach(([userId, amount]) => {
-        if (balances[userId] !== undefined) {
+        if (balances[userId] !== undefined && Number.isFinite(amount)) {
           balances[userId] -= amount;
         }
       });

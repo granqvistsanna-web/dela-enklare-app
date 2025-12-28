@@ -30,33 +30,54 @@ import {
 
 const Settings = () => {
   const navigate = useNavigate();
-  const { profile, signOut, updatePassword } = useAuth();
-  const { groups } = useGroups();
+  const { profile, signOut, updatePassword, updateProfile } = useAuth();
+
+  const [newName, setNewName] = useState("");
+  const [isChangingName, setIsChangingName] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
-  const [inviteEmail, setInviteEmail] = useState("");
-  const [selectedGroupId, setSelectedGroupId] = useState("");
-  const [isInviting, setIsInviting] = useState(false);
+  const handleNameChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (newName.trim().length < 2) {
+      toast.error("Namn måste vara minst 2 tecken");
+      return;
+    }
+
+    setIsChangingName(true);
+
+    try {
+      const { error } = await updateProfile(newName.trim());
+      if (error) {
+        toast.error("Kunde inte uppdatera namn");
+      } else {
+        toast.success("Namn uppdaterat");
+        setNewName("");
+      }
+    } finally {
+      setIsChangingName(false);
+    }
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (newPassword.length < 6) {
       toast.error("Lösenord måste vara minst 6 tecken");
       return;
     }
-    
+
     if (newPassword !== confirmPassword) {
       toast.error("Lösenorden matchar inte");
       return;
     }
-    
+
     setIsChangingPassword(true);
-    
+
     try {
       const { error } = await updatePassword(newPassword);
       if (error) {
@@ -90,76 +111,53 @@ const Settings = () => {
 
       await signOut();
       toast.success("Konto raderat");
-      navigate("/");
+      // Navigation will be handled automatically by the auth state listener
     } catch (error) {
+      console.error("Error deleting account:", error);
       toast.error("Kunde inte radera kontot");
+      // Force navigation if there's an error
+      navigate("/auth");
     } finally {
       setIsDeletingAccount(false);
     }
   };
 
-  const handleInvitePartner = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!inviteEmail || !inviteEmail.includes("@")) {
-      toast.error("Ange en giltig e-postadress");
-      return;
-    }
-
-    if (!selectedGroupId) {
-      toast.error("Välj en grupp att bjuda in till");
-      return;
-    }
-
-    setIsInviting(true);
-
-    try {
-      const { error } = await supabase.from("invitations").insert({
-        inviter_id: profile?.user_id,
-        email: inviteEmail,
-        group_id: selectedGroupId,
-        status: "pending"
-      });
-
-      if (error) {
-        toast.error("Kunde inte skicka inbjudan");
-      } else {
-        toast.success(`Inbjudan skickad`);
-        setInviteEmail("");
-      }
-    } finally {
-      setIsInviting(false);
-    }
-  };
-
   const handleSignOut = async () => {
-    await signOut();
-    navigate("/");
+    try {
+      await signOut();
+      // Navigation will be handled automatically by the auth state listener
+      // and the ProtectedRoute/PublicRoute components
+    } catch (error) {
+      console.error("Error during sign out:", error);
+      toast.error("Kunde inte logga ut");
+      // Force navigation even if signOut fails
+      navigate("/auth");
+    }
   };
 
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-12">
-        <div className="mb-10">
+      <main className="container py-8 sm:py-12 px-4 sm:px-6 max-w-3xl mx-auto">
+        <div className="mb-8 sm:mb-10">
           <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← Tillbaka
           </Link>
-          <h1 className="text-2xl font-semibold text-foreground mt-4">Inställningar</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mt-4">Inställningar</h1>
         </div>
 
-        <div className="space-y-10">
+        <div className="space-y-8 sm:space-y-10">
           {/* Profile */}
           <section>
             <h2 className="text-sm font-medium text-muted-foreground mb-4">Profil</h2>
             {profile && (
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center text-sm font-medium text-foreground">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-semibold text-primary">
                   {profile.name?.[0]?.toUpperCase() || "?"}
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-foreground">{profile.name}</p>
+                  <p className="text-base font-medium text-foreground">{profile.name}</p>
                   <p className="text-sm text-muted-foreground">{profile.email}</p>
                 </div>
               </div>
@@ -168,33 +166,24 @@ const Settings = () => {
 
           <hr className="border-border" />
 
-          {/* Invite Partner */}
+          {/* Change Name */}
           <section>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">Bjud in</h2>
-            <form onSubmit={handleInvitePartner} className="space-y-3 max-w-md">
-              <div className="flex gap-3">
+            <h2 className="text-sm font-medium text-muted-foreground mb-4">Byt namn</h2>
+            <form onSubmit={handleNameChange} className="space-y-4 max-w-full sm:max-w-sm">
+              <div className="space-y-2">
+                <Label htmlFor="newName" className="text-sm text-muted-foreground">
+                  Nytt namn
+                </Label>
                 <Input
-                  type="email"
-                  placeholder="partner@example.com"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  className="flex-1"
+                  id="newName"
+                  type="text"
+                  placeholder={profile?.name || "Ditt namn"}
+                  value={newName}
+                  onChange={(e) => setNewName(e.target.value)}
                 />
-                <Select value={selectedGroupId} onValueChange={setSelectedGroupId}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Välj grupp" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {groups.map((group) => (
-                      <SelectItem key={group.id} value={group.id}>
-                        {group.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
-              <Button type="submit" variant="outline" disabled={isInviting || groups.length === 0}>
-                {isInviting ? "Skickar..." : "Bjud in"}
+              <Button type="submit" variant="outline" disabled={isChangingName} className="w-full sm:w-auto">
+                {isChangingName ? "Sparar..." : "Uppdatera namn"}
               </Button>
               {groups.length === 0 && (
                 <p className="text-xs text-muted-foreground">Skapa en grupp först för att kunna bjuda in andra</p>
@@ -225,7 +214,7 @@ const Settings = () => {
           {/* Change Password */}
           <section>
             <h2 className="text-sm font-medium text-muted-foreground mb-4">Byt lösenord</h2>
-            <form onSubmit={handlePasswordChange} className="space-y-4 max-w-sm">
+            <form onSubmit={handlePasswordChange} className="space-y-4 max-w-full sm:max-w-sm">
               <div className="space-y-2">
                 <Label htmlFor="newPassword" className="text-sm text-muted-foreground">
                   Nytt lösenord
@@ -250,7 +239,7 @@ const Settings = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
-              <Button type="submit" variant="outline" disabled={isChangingPassword}>
+              <Button type="submit" variant="outline" disabled={isChangingPassword} className="w-full sm:w-auto">
                 {isChangingPassword ? "Sparar..." : "Uppdatera"}
               </Button>
             </form>
@@ -260,14 +249,14 @@ const Settings = () => {
 
           {/* Sign Out & Delete */}
           <section className="space-y-4">
-            <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground">
+            <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground w-full sm:w-auto justify-start sm:justify-center">
               Logga ut
             </Button>
 
             <div className="pt-6">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                  <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto justify-start sm:justify-center">
                     Radera konto
                   </Button>
                 </AlertDialogTrigger>
@@ -298,7 +287,7 @@ const Settings = () => {
           {/* About */}
           <section className="text-center py-4">
             <p className="text-sm text-muted-foreground">
-              päronsplit · v1.0
+              Päronsplit · v1.0
             </p>
           </section>
         </div>

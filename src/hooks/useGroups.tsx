@@ -98,14 +98,22 @@ export function useGroups() {
         const members: GroupMember[] = groupMemberUserIds
           .map((userId) => {
             const profile = profileLookup.get(userId);
-            if (!profile) return null;
+            if (!profile) {
+              console.warn(`Profile not found for user ${userId} in group ${group.id}`);
+              return null;
+            }
+            // Validate profile data
+            if (!profile.id || !profile.user_id || !profile.name) {
+              console.warn(`Invalid profile data for user ${userId}`, profile);
+              return null;
+            }
             return {
               id: profile.id,
               user_id: profile.user_id,
               name: profile.name,
             };
           })
-          .filter(Boolean) as GroupMember[];
+          .filter((member): member is GroupMember => member !== null);
 
         return {
           id: group.id,

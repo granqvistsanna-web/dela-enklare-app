@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -103,42 +102,73 @@ const Auth = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-accent/5 to-background flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        {/* Logo Section */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-6">
-            <img
-              src={logo}
-              alt="päronsplit"
-              className="h-20 w-auto"
-            />
+    <div className="min-h-screen bg-gradient-to-br from-background via-secondary/20 to-background flex">
+      {/* Left side - Branding (hidden on mobile) */}
+      <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-slate-900 to-slate-800 dark:from-slate-950 dark:to-slate-900 items-center justify-center p-12 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGRlZnM+PHBhdHRlcm4gaWQ9ImdyaWQiIHdpZHRoPSI2MCIgaGVpZ2h0PSI2MCIgcGF0dGVyblVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+PHBhdGggZD0iTSAxMCAwIEwgMCAwIDAgMTAiIGZpbGw9Im5vbmUiIHN0cm9rZT0id2hpdGUiIHN0cm9rZS1vcGFjaXR5PSIwLjA1IiBzdHJva2Utd2lkdGg9IjEiLz48L3BhdHRlcm4+PC9kZWZzPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9InVybCgjZ3JpZCkiLz48L3N2Zz4=')] opacity-40"></div>
+        <div className="relative z-10 max-w-md text-white">
+          <div className="mb-8">
+            <img src={logo} alt="Päronsplit" className="h-20 mb-6" />
+            <h1 className="text-4xl font-bold mb-4 tracking-tight">Päronsplit</h1>
+            <p className="text-lg text-white/90 leading-relaxed">
+              Dela utgifter rättvist och enkelt med vänner, familj och partners
+            </p>
           </div>
-          <h1 className="text-3xl font-bold text-foreground tracking-tight mb-2">
-            päronsplit
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            {mode === "login"
-              ? "Dela utgifter enkelt med vänner och familj"
-              : "Skapa ditt konto och börja dela utgifter"}
-          </p>
+          <div className="space-y-4 text-white/80">
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mt-0.5">
+                <span className="text-sm">✓</span>
+              </div>
+              <div>
+                <p className="font-medium text-white">Flexibel fördelning</p>
+                <p className="text-sm text-white/70">Anpassa hur utgifter delas mellan gruppmedlemmar</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mt-0.5">
+                <span className="text-sm">✓</span>
+              </div>
+              <div>
+                <p className="font-medium text-white">Automatisk balansering</p>
+                <p className="text-sm text-white/70">Se direkt vem som är skyldig vem pengar</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="flex-shrink-0 w-8 h-8 bg-white/20 rounded-lg flex items-center justify-center mt-0.5">
+                <span className="text-sm">✓</span>
+              </div>
+              <div>
+                <p className="font-medium text-white">Importera från bank</p>
+                <p className="text-sm text-white/70">Ladda upp CSV/Excel-filer för snabb registrering</p>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
 
-        {/* Auth Card */}
-        <Card className="border-border shadow-lg">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-2xl font-semibold">
-              {mode === "login" ? "Logga in" : "Skapa konto"}
-            </CardTitle>
-            <CardDescription className="text-base">
-              {mode === "login"
-                ? "Välkommen tillbaka! Fyll i dina uppgifter nedan"
-                : "Fyll i formuläret för att komma igång"}
-            </CardDescription>
-          </CardHeader>
+      {/* Right side - Auth form */}
+      <div className="flex-1 flex items-center justify-center px-4 py-12">
+        <div className="w-full max-w-md">
+          {/* Mobile logo */}
+          <div className="lg:hidden text-center mb-8">
+            <img src={logo} alt="Päronsplit" className="h-16 mx-auto mb-3" />
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">Päronsplit</h1>
+          </div>
 
-          <CardContent>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Auth card */}
+          <div className="bg-background/80 backdrop-blur-sm border border-border rounded-2xl shadow-lg p-8">
+            <div className="mb-8">
+              <h2 className="text-2xl font-semibold text-foreground">
+                {mode === "login" ? "Logga in" : "Skapa konto"}
+              </h2>
+              <p className="text-muted-foreground mt-2">
+                {mode === "login"
+                  ? "Välkommen tillbaka till Päronsplit"
+                  : "Börja dela utgifter rättvist idag"}
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-5">
               {mode === "signup" && (
                 <div className="space-y-2">
                   <Label htmlFor="name" className="text-sm font-medium text-foreground">
@@ -147,7 +177,7 @@ const Auth = () => {
                   <Input
                     id="name"
                     type="text"
-                    placeholder="Erik Svensson"
+                    placeholder="Ditt namn"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     autoComplete="name"
@@ -215,32 +245,26 @@ const Auth = () => {
               </Button>
             </form>
 
-            <div className="mt-6 text-center">
-              <p className="text-sm text-muted-foreground">
-                {mode === "login" ? "Har du inget konto?" : "Har du redan ett konto?"}
+            <div className="mt-6 pt-6 border-t border-border">
+              <p className="text-sm text-center text-muted-foreground">
+                {mode === "login" ? "Inget konto?" : "Har du redan ett konto?"}
+                {" "}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMode(mode === "login" ? "signup" : "login");
+                    setErrors({});
+                    setEmail("");
+                    setPassword("");
+                    setName("");
+                  }}
+                  className="text-primary font-medium hover:underline"
+                >
+                  {mode === "login" ? "Skapa ett gratis konto" : "Logga in här"}
+                </button>
               </p>
-              <button
-                type="button"
-                onClick={() => {
-                  setMode(mode === "login" ? "signup" : "login");
-                  setErrors({});
-                  setEmail("");
-                  setPassword("");
-                  setName("");
-                }}
-                className="mt-2 text-sm font-medium text-foreground hover:underline transition-all"
-              >
-                {mode === "login" ? "Skapa ett nytt konto" : "Logga in här"}
-              </button>
             </div>
-          </CardContent>
-        </Card>
-
-        {/* Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-xs text-muted-foreground">
-            Genom att fortsätta godkänner du att dela utgifter rättvist
-          </p>
+          </div>
         </div>
       </div>
     </div>

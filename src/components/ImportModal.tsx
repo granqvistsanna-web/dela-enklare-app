@@ -1,10 +1,9 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { parseFile, ParsedTransaction } from "@/lib/fileParser";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +36,6 @@ interface ImportModalProps {
 type ImportStep = "upload" | "categorizing" | "review";
 
 export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId }: ImportModalProps) {
-  const { toast } = useToast();
   const [step, setStep] = useState<ImportStep>("upload");
   const [transactions, setTransactions] = useState<ParsedTransaction[]>([]);
   const [isDragging, setIsDragging] = useState(false);
@@ -45,13 +43,9 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
   const handleFileUpload = useCallback(async (file: File) => {
     const isExcel = file.name.endsWith('.xlsx') || file.name.endsWith('.xls');
     const isCsv = file.name.endsWith('.csv');
-    
+
     if (!isExcel && !isCsv) {
-      toast({
-        title: "Fel filformat",
-        description: "Endast CSV- och Excel-filer stöds.",
-        variant: "destructive",
-      });
+      toast.error("Endast CSV- och Excel-filer stöds");
       return;
     }
 
@@ -73,20 +67,14 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
       }
       
       if (parsed.length === 0) {
-        toast({
-          title: "Inga transaktioner hittades",
-          description: isExcel
-            ? "Filen verkar vara en layoutad bank-export. Prova att exportera som CSV, eller spara om som riktig .xlsx."
-            : "Kontrollera att filen innehåller datum + belopp. Ibland ligger rubriken längre ner i filen.",
-          variant: "destructive",
-        });
+        const message = isExcel
+          ? "Inga transaktioner hittades. Filen verkar vara en layoutad bank-export. Prova att exportera som CSV, eller spara om som riktig .xlsx."
+          : "Inga transaktioner hittades. Kontrollera att filen innehåller datum + belopp. Ibland ligger rubriken längre ner i filen.";
+        toast.error(message);
         return;
       }
 
-      toast({
-        title: `${parsed.length} transaktioner hittades`,
-        description: "Kategoriserar med AI...",
-      });
+      toast.success(`${parsed.length} transaktioner hittades. Kategoriserar med AI...`);
 
       setTransactions(parsed);
       setStep("categorizing");
@@ -123,16 +111,12 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
 
     } catch (err) {
       console.error("File parsing error:", err);
-      const errorMessage = err instanceof Error ? err.message : "Unknown error";
-      toast({
-        title: "Fel vid import",
-        description:
-          errorMessage ||
-          "Kunde inte läsa filen. Om det är en bank-Excel, prova exportera som CSV eller spara om som .xlsx.",
-        variant: "destructive",
-      });
+      toast.error(
+        err?.message ||
+        "Kunde inte läsa filen. Om det är en bank-Excel, prova exportera som CSV eller spara om som .xlsx."
+      );
     }
-  }, [toast]);
+  }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
@@ -167,31 +151,51 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
 
   const handleImport = () => {
     const selected = transactions.filter(t => t.selected && t.isShared);
-    
+
     if (selected.length === 0) {
-      toast({
-        title: "Inga transaktioner valda",
-        description: "Välj minst en delad utgift att importera.",
-        variant: "destructive",
-      });
+      toast.error("Välj minst en delad utgift att importera");
       return;
     }
 
-    const expenses = selected.map(t => ({
-      group_id: groupId,
-      amount: t.amount,
-      paid_by: currentUserId,
-      category: t.category || "ovrigt",
-      description: t.description,
-      date: t.date,
-    }));
+    // Validate all selected transactions before importing
+    const expenses = selected
+      .filter(t => {
+        // Filter out invalid transactions
+        if (!Number.isFinite(t.amount) || t.amount <= 0) {
+          console.warn(`Skipping transaction with invalid amount: ${t.id}`, t);
+          return false;
+        }
+        if (!t.description || t.description.trim() === "") {
+          console.warn(`Skipping transaction with empty description: ${t.id}`, t);
+          return false;
+        }
+        if (!t.date) {
+          console.warn(`Skipping transaction with missing date: ${t.id}`, t);
+          return false;
+        }
+        return true;
+      })
+      .map(t => ({
+        group_id: groupId,
+        amount: t.amount,
+        paid_by: currentUserId,
+        category: t.category || "ovrigt",
+        description: t.description.trim(),
+        date: t.date,
+      }));
+
+    if (expenses.length === 0) {
+      toast.error("Inga giltiga utgifter att importera");
+      return;
+    }
+
+    if (expenses.length < selected.length) {
+      toast.warning(`${selected.length - expenses.length} ogiltiga transaktioner hoppades över`);
+    }
 
     onImport(expenses);
-    
-    toast({
-      title: `${expenses.length} utgifter importerade`,
-      description: "Transaktionerna har lagts till i gruppen.",
-    });
+
+    toast.success(`${expenses.length} utgifter importerade`);
 
     setStep("upload");
     setTransactions([]);
@@ -345,6 +349,22 @@ function TransactionRow({
   const category = DEFAULT_CATEGORIES.find(c => c.id === transaction.category);
   const isActive = transaction.selected && transaction.isShared;
 
+  // Safe date parsing with fallback
+  let formattedDate = "Ogiltigt datum";
+  try {
+    const date = new Date(transaction.date);
+    if (!isNaN(date.getTime())) {
+      formattedDate = date.toLocaleDateString("sv-SE");
+    }
+  } catch (error) {
+    console.warn("Invalid date in transaction:", transaction.id, transaction.date);
+  }
+
+  // Safe amount validation
+  const safeAmount = Number.isFinite(transaction.amount) && transaction.amount >= 0
+    ? transaction.amount
+    : 0;
+
   return (
     <div className={`
       flex items-center gap-3 rounded-lg border p-3 transition-all
@@ -360,7 +380,7 @@ function TransactionRow({
           {transaction.description}
         </p>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{new Date(transaction.date).toLocaleDateString("sv-SE")}</span>
+          <span>{formattedDate}</span>
           <span>•</span>
           <button
             onClick={onToggleShared}
@@ -388,7 +408,7 @@ function TransactionRow({
       </select>
 
       <p className="font-semibold text-foreground text-sm w-20 text-right">
-        {transaction.amount.toLocaleString("sv-SE")} kr
+        {safeAmount.toLocaleString("sv-SE")} kr
       </p>
     </div>
   );
