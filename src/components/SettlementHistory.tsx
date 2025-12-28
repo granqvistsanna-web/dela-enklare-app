@@ -1,14 +1,15 @@
 import { motion } from "framer-motion";
 import { ArrowRight, Check } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Settlement, User } from "@/lib/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { Settlement } from "@/hooks/useSettlements";
+import { GroupMember } from "@/hooks/useGroups";
 
 interface SettlementHistoryProps {
   settlements: Settlement[];
-  users: User[];
+  members: GroupMember[];
 }
 
-export function SettlementHistory({ settlements, users }: SettlementHistoryProps) {
+export function SettlementHistory({ settlements, members }: SettlementHistoryProps) {
   if (settlements.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -20,8 +21,8 @@ export function SettlementHistory({ settlements, users }: SettlementHistoryProps
   return (
     <div className="space-y-3">
       {settlements.map((settlement, index) => {
-        const fromUser = users.find((u) => u.id === settlement.fromUser);
-        const toUser = users.find((u) => u.id === settlement.toUser);
+        const fromUser = members.find((u) => u.user_id === settlement.from_user);
+        const toUser = members.find((u) => u.user_id === settlement.to_user);
 
         return (
           <motion.div
@@ -39,9 +40,9 @@ export function SettlementHistory({ settlements, users }: SettlementHistoryProps
                     </div>
                     <div>
                       <p className="font-medium text-foreground">
-                        {fromUser?.name}
+                        {fromUser?.name || "Okänd"}
                         <ArrowRight size={14} className="inline mx-1.5 text-muted-foreground" />
-                        {toUser?.name}
+                        {toUser?.name || "Okänd"}
                       </p>
                       <p className="text-sm text-muted-foreground">{settlement.month}</p>
                     </div>

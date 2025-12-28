@@ -1,12 +1,25 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Plus, Receipt } from "lucide-react";
-import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { GroupCard } from "@/components/GroupCard";
 import { Button } from "@/components/ui/button";
-import { mockGroups, mockExpenses, mockUsers } from "@/lib/mockData";
+import { useGroups } from "@/hooks/useGroups";
+import { useExpenses } from "@/hooks/useExpenses";
+import { CreateGroupModal } from "@/components/CreateGroupModal";
 
 const Index = () => {
+  const { groups, loading: groupsLoading, createGroup } = useGroups();
+  const { expenses, loading: expensesLoading } = useExpenses();
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const loading = groupsLoading || expensesLoading;
+
+  const handleCreateGroup = async (name: string, isTemporary: boolean) => {
+    await createGroup(name, isTemporary);
+    setIsCreateModalOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -41,7 +54,7 @@ const Index = () => {
               </div>
             </div>
             <p className="text-2xl font-bold text-foreground">
-              {mockExpenses.length}
+              {loading ? "-" : expenses.length}
             </p>
             <p className="text-sm text-muted-foreground">Utgifter denna månad</p>
           </div>
@@ -52,7 +65,7 @@ const Index = () => {
               </div>
             </div>
             <p className="text-2xl font-bold text-foreground">
-              {mockGroups.length}
+              {loading ? "-" : groups.length}
             </p>
             <p className="text-sm text-muted-foreground">Aktiva grupper</p>
           </div>
@@ -66,28 +79,39 @@ const Index = () => {
           className="flex items-center justify-between mb-4"
         >
           <h2 className="text-xl font-semibold text-foreground">Dina grupper</h2>
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" onClick={() => setIsCreateModalOpen(true)}>
             <Plus size={16} />
             Ny grupp
           </Button>
         </motion.div>
 
         {/* Groups List */}
-        <div className="space-y-4">
-          {mockGroups.map((group, index) => (
-            <motion.div
-              key={group.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
-            >
-              <GroupCard group={group} expenses={mockExpenses} users={mockUsers} />
-            </motion.div>
-          ))}
-        </div>
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2].map((i) => (
+              <div key={i} className="h-32 rounded-xl bg-secondary animate-pulse" />
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {groups.map((group, index) => (
+              <motion.div
+                key={group.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: 0.3 + index * 0.1 }}
+              >
+                <GroupCard
+                  group={group}
+                  expenses={expenses.filter((e) => e.group_id === group.id)}
+                />
+              </motion.div>
+            ))}
+          </div>
+        )}
 
-        {/* Empty State - hidden when groups exist */}
-        {mockGroups.length === 0 && (
+        {/* Empty State */}
+        {!loading && groups.length === 0 && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -102,13 +126,19 @@ const Index = () => {
             <p className="text-muted-foreground mb-4">
               Skapa din första grupp för att börja dela utgifter
             </p>
-            <Button>
+            <Button onClick={() => setIsCreateModalOpen(true)}>
               <Plus size={18} />
               Skapa grupp
             </Button>
           </motion.div>
         )}
       </main>
+
+      <CreateGroupModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateGroup}
+      />
     </div>
   );
 };

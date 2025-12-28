@@ -1,18 +1,25 @@
 import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Upload, FileText, Check, AlertCircle, Loader2, Trash2 } from "lucide-react";
+import { X, Upload, FileText, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { parseCSV, ParsedTransaction } from "@/lib/csvParser";
-import { DEFAULT_CATEGORIES, Expense } from "@/lib/types";
+import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { supabase } from "@/integrations/supabase/client";
 
 interface ImportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onImport: (expenses: Omit<Expense, "id" | "createdAt">[]) => void;
+  onImport: (expenses: {
+    group_id: string;
+    amount: number;
+    paid_by: string;
+    category: string;
+    description: string;
+    date: string;
+  }[]) => void;
   groupId: string;
   currentUserId: string;
 }
@@ -64,16 +71,14 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
             description: t.description,
             amount: t.amount,
           })),
-          existingRules: [], // Could load from localStorage or DB
+          existingRules: [],
         },
       });
 
       if (error) {
         console.error("Categorization error:", error);
-        // Continue with default categorization
         setTransactions(parsed.map(t => ({ ...t, category: "ovrigt", isShared: true })));
       } else if (data?.categorizations) {
-        // Apply categorizations
         const categorized = parsed.map((t, i) => {
           const cat = data.categorizations.find((c: any) => c.index === i);
           return {
@@ -141,9 +146,9 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
     }
 
     const expenses = selected.map(t => ({
-      groupId,
+      group_id: groupId,
       amount: t.amount,
-      paidBy: currentUserId,
+      paid_by: currentUserId,
       category: t.category || "ovrigt",
       description: t.description,
       date: t.date,
@@ -156,7 +161,6 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
       description: "Transaktionerna har lagts till i gruppen.",
     });
 
-    // Reset and close
     setStep("upload");
     setTransactions([]);
     onClose();
