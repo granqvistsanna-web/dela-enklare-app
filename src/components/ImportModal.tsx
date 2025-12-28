@@ -146,14 +146,41 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
       return;
     }
 
-    const expenses = selected.map(t => ({
-      group_id: groupId,
-      amount: t.amount,
-      paid_by: currentUserId,
-      category: t.category || "ovrigt",
-      description: t.description,
-      date: t.date,
-    }));
+    // Validate all selected transactions before importing
+    const expenses = selected
+      .filter(t => {
+        // Filter out invalid transactions
+        if (!Number.isFinite(t.amount) || t.amount <= 0) {
+          console.warn(`Skipping transaction with invalid amount: ${t.id}`, t);
+          return false;
+        }
+        if (!t.description || t.description.trim() === "") {
+          console.warn(`Skipping transaction with empty description: ${t.id}`, t);
+          return false;
+        }
+        if (!t.date) {
+          console.warn(`Skipping transaction with missing date: ${t.id}`, t);
+          return false;
+        }
+        return true;
+      })
+      .map(t => ({
+        group_id: groupId,
+        amount: t.amount,
+        paid_by: currentUserId,
+        category: t.category || "ovrigt",
+        description: t.description.trim(),
+        date: t.date,
+      }));
+
+    if (expenses.length === 0) {
+      toast.error("Inga giltiga utgifter att importera");
+      return;
+    }
+
+    if (expenses.length < selected.length) {
+      toast.warning(`${selected.length - expenses.length} ogiltiga transaktioner hoppades över`);
+    }
 
     onImport(expenses);
 
@@ -311,6 +338,22 @@ function TransactionRow({
   const category = DEFAULT_CATEGORIES.find(c => c.id === transaction.category);
   const isActive = transaction.selected && transaction.isShared;
 
+  // Safe date parsing with fallback
+  let formattedDate = "Ogiltigt datum";
+  try {
+    const date = new Date(transaction.date);
+    if (!isNaN(date.getTime())) {
+      formattedDate = date.toLocaleDateString("sv-SE");
+    }
+  } catch (error) {
+    console.warn("Invalid date in transaction:", transaction.id, transaction.date);
+  }
+
+  // Safe amount validation
+  const safeAmount = Number.isFinite(transaction.amount) && transaction.amount >= 0
+    ? transaction.amount
+    : 0;
+
   return (
     <div className={`
       flex items-center gap-3 rounded-lg border p-3 transition-all
@@ -326,7 +369,7 @@ function TransactionRow({
           {transaction.description}
         </p>
         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span>{new Date(transaction.date).toLocaleDateString("sv-SE")}</span>
+          <span>{formattedDate}</span>
           <span>•</span>
           <button
             onClick={onToggleShared}
@@ -354,7 +397,7 @@ function TransactionRow({
       </select>
 
       <p className="font-semibold text-foreground text-sm w-20 text-right">
-        {transaction.amount.toLocaleString("sv-SE")} kr
+        {safeAmount.toLocaleString("sv-SE")} kr
       </p>
     </div>
   );

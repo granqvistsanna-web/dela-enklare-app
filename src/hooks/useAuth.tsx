@@ -34,35 +34,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   const fetchProfile = async (sessionUser: User) => {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("user_id", sessionUser.id)
-      .maybeSingle();
-
-    // If no profile exists yet, create one (allowed by RLS: user inserts own profile)
-    if (!error && !data) {
-      const displayName =
-        (sessionUser.user_metadata as any)?.name ||
-        sessionUser.email?.split("@")[0] ||
-        "Användare";
-
-      const { data: inserted, error: insertError } = await supabase
+    try {
+      const { data, error } = await supabase
         .from("profiles")
-        .insert({
-          user_id: sessionUser.id,
-          name: displayName,
-          email: sessionUser.email ?? "",
-        })
         .select("*")
+        .eq("user_id", sessionUser.id)
         .maybeSingle();
 
-      if (!insertError && inserted) setProfile(inserted);
-      return;
-    }
+      if (error) {
+        console.error("Error fetching profile:", error);
+        return;
+      }
 
-    if (!error && data) {
+      // If no profile exists yet, create one (allowed by RLS: user inserts own profile)
+      if (!data) {
+        // Safely extract display name from user metadata or email
+        const displayName =
+          (sessionUser.user_metadata as any)?.name ||
+          (sessionUser.email ? sessionUser.email.split("@")[0] : null) ||
+          "Användare";
+
+        const { data: inserted, error: insertError } = await supabase
+          .from("profiles")
+          .insert({
+            user_id: sessionUser.id,
+            name: displayName,
+            email: sessionUser.email ?? "",
+          })
+          .select("*")
+          .maybeSingle();
+
+        if (insertError) {
+          console.error("Error creating profile:", insertError);
+          return;
+        }
+
+        if (inserted) {
+          setProfile(inserted);
+        }
+        return;
+      }
+
       setProfile(data);
+    } catch (error) {
+      console.error("Unexpected error in fetchProfile:", error);
     }
   };
 

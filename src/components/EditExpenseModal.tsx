@@ -50,7 +50,7 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
   // Note: customSplits intentionally not in deps to avoid infinite loop
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (useCustomSplit && amount && Object.keys(customSplits).length === 0) {
+    if (useCustomSplit && amount && Object.keys(customSplits).length === 0 && members.length > 0) {
       const totalAmount = parseFloat(amount) || 0;
       const perPerson = totalAmount / members.length;
       const splits: Record<string, string> = {};
@@ -81,9 +81,27 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
 
     const totalAmount = parseFloat(amount);
 
+    // Validate amount is a valid positive number
+    if (Number.isNaN(totalAmount) || !Number.isFinite(totalAmount) || totalAmount <= 0) {
+      toast.error("Ange ett giltigt belopp större än 0");
+      return;
+    }
+
     // Validate custom splits if enabled
     if (useCustomSplit) {
       const splitSum = calculateSplitSum();
+
+      // Validate all split values are valid numbers
+      const hasInvalidSplit = Object.values(customSplits).some(val => {
+        const num = parseFloat(val);
+        return Number.isNaN(num) || !Number.isFinite(num) || num < 0;
+      });
+
+      if (hasInvalidSplit) {
+        toast.error("Alla fördelningsvärden måste vara giltiga positiva tal");
+        return;
+      }
+
       if (Math.abs(splitSum - totalAmount) > 0.01) {
         toast.error(`Summan av fördelningen (${splitSum.toFixed(2)} kr) måste vara lika med totala beloppet (${totalAmount.toFixed(2)} kr)`);
         return;

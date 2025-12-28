@@ -72,9 +72,13 @@ const GroupPage = () => {
 
   const positiveBalance = balances.find((b) => b.balance > 0);
   const negativeBalance = balances.find((b) => b.balance < 0);
-  const positiveUser = group?.members.find((u) => u.user_id === positiveBalance?.userId);
-  const negativeUser = group?.members.find((u) => u.user_id === negativeBalance?.userId);
-  const oweAmount = Math.abs(negativeBalance?.balance || 0);
+  const positiveUser = positiveBalance
+    ? group?.members.find((u) => u.user_id === positiveBalance.userId)
+    : undefined;
+  const negativeUser = negativeBalance
+    ? group?.members.find((u) => u.user_id === negativeBalance.userId)
+    : undefined;
+  const oweAmount = negativeBalance ? Math.abs(negativeBalance.balance) : 0;
 
   if (loading) {
     return (
@@ -126,8 +130,12 @@ const GroupPage = () => {
     description: string;
     date: string;
   }[]) => {
-    for (const expense of newExpenses) {
-      await addExpense(expense);
+    // Process imports in parallel for better performance
+    try {
+      await Promise.all(newExpenses.map(expense => addExpense(expense)));
+    } catch (error) {
+      console.error("Error importing expenses:", error);
+      toast.error("Ett fel uppstod vid import av utgifter");
     }
   };
 
@@ -171,13 +179,27 @@ const GroupPage = () => {
 
   const handleCopyCode = async () => {
     if (!group?.invite_code) return;
-    await navigator.clipboard.writeText(group.invite_code);
-    setCopiedCode(true);
-    toast.success("Kod kopierad!");
-    setTimeout(() => setCopiedCode(false), 2000);
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(group.invite_code);
+        setCopiedCode(true);
+        toast.success("Kod kopierad!");
+        setTimeout(() => setCopiedCode(false), 2000);
+      } else {
+        // Fallback for browsers that don't support clipboard API
+        toast.error("Kopiering stöds inte i din webbläsare");
+      }
+    } catch (error) {
+      console.error("Failed to copy invite code:", error);
+      toast.error("Kunde inte kopiera kod");
+    }
   };
 
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+  const totalExpenses = expenses.reduce((sum, e) => {
+    const amount = Number.isFinite(e.amount) ? e.amount : 0;
+    return sum + amount;
+  }, 0);
 
   return (
     <div className="min-h-screen bg-background">
