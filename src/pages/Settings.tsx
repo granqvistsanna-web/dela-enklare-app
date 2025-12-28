@@ -256,7 +256,7 @@ const Settings = () => {
           {/* About */}
           <section className="text-center py-4">
             <p className="text-sm text-muted-foreground">
-              päronsplit · v1.0
+              Päronsplit · v1.0
             </p>
           </section>
         </div>

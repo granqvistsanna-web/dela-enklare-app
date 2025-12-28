@@ -72,7 +72,7 @@ const Index = () => {
               </div> : <div className="text-center py-20 px-6">
                 <div className="max-w-md mx-auto">
                   <h3 className="text-xl font-semibold text-foreground mb-3">
-                    Välkommen till päronsplit
+                    Välkommen till Päronsplit
                   </h3>
                   <p className="text-muted-foreground mb-8 leading-relaxed">
                     Skapa din första grupp för att börja dela utgifter med vänner,
