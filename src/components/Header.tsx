@@ -9,8 +9,8 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
       <div className="container flex h-16 items-center justify-between max-w-6xl mx-auto">
-        <Link to="/" className="text-base font-semibold text-foreground hover:text-muted-foreground transition-colors">
-          päronsplit
+        <Link to="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+          <img src="/logo.png" alt="päronsplit" className="h-10" />
         </Link>
 
         <nav className="flex items-center gap-8">
