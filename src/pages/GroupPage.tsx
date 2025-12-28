@@ -172,9 +172,13 @@ const GroupPage = () => {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <p className="text-sm text-muted-foreground uppercase tracking-wide mb-1">
-                    Aktuell balans
+                    {group.members.length === 1 ? "Dina utgifter" : "Aktuell balans"}
                   </p>
-                  {oweAmount > 0 && negativeUser && positiveUser ? (
+                  {group.members.length === 1 ? (
+                    <p className="text-xl font-semibold text-foreground">
+                      Totalt: {expenses.reduce((sum, e) => sum + e.amount, 0).toLocaleString("sv-SE")} kr
+                    </p>
+                  ) : oweAmount > 0 && negativeUser && positiveUser ? (
                     <p className="text-xl font-semibold text-foreground">
                       <span className="text-accent">{negativeUser.name}</span>
                       <span className="text-muted-foreground mx-2">är skyldig</span>
@@ -187,7 +191,7 @@ const GroupPage = () => {
                     <p className="text-xl font-semibold text-success">Ni är kvitt! ✓</p>
                   )}
                 </div>
-                {oweAmount > 0 && (
+                {group.members.length > 1 && oweAmount > 0 && (
                   <Button variant="accent" onClick={() => setIsSettleModalOpen(true)}>
                     <Scale size={18} />
                     Gör avräkning
@@ -196,6 +200,7 @@ const GroupPage = () => {
               </div>
 
               {/* Per-person breakdown */}
+              {group.members.length > 1 && (
               <div className="grid grid-cols-2 gap-4 mt-5 pt-5 border-t border-border">
                 {balances.map((b) => {
                   const member = group.members.find((u) => u.user_id === b.userId);
@@ -225,6 +230,7 @@ const GroupPage = () => {
                   );
                 })}
               </div>
+              )}
             </CardContent>
           </Card>
         </motion.div>
