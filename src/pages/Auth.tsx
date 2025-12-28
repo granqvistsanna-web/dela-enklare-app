@@ -3,9 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 import { z } from "zod";
+import logo from "@/assets/logo.png";
 
 const emailSchema = z.string().email("Ogiltig e-postadress");
 const passwordSchema = z.string().min(6, "Lösenord måste vara minst 6 tecken");
@@ -27,7 +29,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [user, loading, navigate]);
 
@@ -72,7 +74,7 @@ const Auth = () => {
             toast.error(error.message);
           }
         } else {
-          navigate("/");
+          navigate("/dashboard");
         }
       } else {
         const { error } = await signUp(email, password, name);
@@ -84,7 +86,7 @@ const Auth = () => {
           }
         } else {
           toast.success("Konto skapat");
-          navigate("/");
+          navigate("/dashboard");
         }
       }
     } finally {
@@ -174,65 +176,81 @@ const Auth = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
             {mode === "signup" && (
               <div className="space-y-2">
-                <Label htmlFor="name" className="text-sm text-muted-foreground">
-                  Namn
+                <Label htmlFor="email" className="text-sm font-medium text-foreground">
+                  E-postadress
                 </Label>
                 <Input
-                  id="name"
-                  type="text"
-                  placeholder="Erik Svensson"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  autoComplete="name"
+                  id="email"
+                  type="email"
+                  placeholder="erik@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  className="h-11"
                 />
-                {errors.name && (
-                  <p className="text-xs text-destructive">{errors.name}</p>
+                {errors.email && (
+                  <p className="text-xs text-destructive mt-1">{errors.email}</p>
                 )}
               </div>
-            )}
 
-            <div className="space-y-2">
-              <Label htmlFor="email" className="text-sm text-muted-foreground">
-                E-post
-              </Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="erik@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                autoComplete="email"
-              />
-              {errors.email && (
-                <p className="text-xs text-destructive">{errors.email}</p>
-              )}
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-sm text-muted-foreground">
-                Lösenord
-              </Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete={mode === "login" ? "current-password" : "new-password"}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                >
-                  {showPassword ? "Dölj" : "Visa"}
-                </button>
+              <div className="space-y-2">
+                <Label htmlFor="password" className="text-sm font-medium text-foreground">
+                  Lösenord
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Minst 6 tecken"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete={mode === "login" ? "current-password" : "new-password"}
+                    className="h-11 pr-20"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showPassword ? "Dölj" : "Visa"}
+                  </button>
+                </div>
+                {errors.password && (
+                  <p className="text-xs text-destructive mt-1">{errors.password}</p>
+                )}
               </div>
-              {errors.password && (
-                <p className="text-xs text-destructive">{errors.password}</p>
-              )}
+
+              <Button
+                type="submit"
+                className="w-full h-11 text-base font-medium mt-6"
+                disabled={isSubmitting}
+              >
+                {isSubmitting
+                  ? (mode === "login" ? "Loggar in..." : "Skapar konto...")
+                  : (mode === "login" ? "Logga in" : "Skapa konto")}
+              </Button>
+            </form>
+
+            <div className="mt-6 text-center">
+              <p className="text-sm text-muted-foreground">
+                {mode === "login" ? "Har du inget konto?" : "Har du redan ett konto?"}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setMode(mode === "login" ? "signup" : "login");
+                  setErrors({});
+                  setEmail("");
+                  setPassword("");
+                  setName("");
+                }}
+                className="mt-2 text-sm font-medium text-foreground hover:underline transition-all"
+              >
+                {mode === "login" ? "Skapa ett nytt konto" : "Logga in här"}
+              </button>
             </div>
+          </CardContent>
+        </Card>
 
               <Button type="submit" className="w-full h-11" disabled={isSubmitting}>
                 {isSubmitting

@@ -142,12 +142,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const updateProfile = async (name: string) => {
     if (!user) {
-      return { error: new Error("Ingen användare inloggad") };
+      return { error: new Error("Ingen användare är inloggad") };
     }
 
     const { error } = await supabase
       .from("profiles")
-      .update({ name })
+      .update({ name, updated_at: new Date().toISOString() })
       .eq("user_id", user.id);
 
     if (!error) {

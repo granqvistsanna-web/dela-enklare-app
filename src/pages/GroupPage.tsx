@@ -79,7 +79,7 @@ const GroupPage = () => {
         <Header />
         <main className="container py-12">
           <p className="text-muted-foreground mb-4">Gruppen hittades inte.</p>
-          <Link to="/" className="text-sm text-foreground hover:underline">
+          <Link to="/dashboard" className="text-sm text-foreground hover:underline">
             ← Tillbaka
           </Link>
         </main>
@@ -146,7 +146,7 @@ const GroupPage = () => {
   const handleDeleteGroup = async () => {
     if (!id) return;
     await deleteGroup(id);
-    navigate("/");
+    navigate("/dashboard");
   };
 
   const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
@@ -158,7 +158,7 @@ const GroupPage = () => {
       <main className="container py-12">
         {/* Back & Title */}
         <div className="mb-8">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← Tillbaka
           </Link>
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-2 mt-4">
@@ -250,6 +250,15 @@ const GroupPage = () => {
           </TabsList>
 
           <TabsContent value="expenses">
+            <div className="mb-6 flex gap-3">
+              <Button variant="ghost" onClick={() => setIsAddModalOpen(true)} className="text-muted-foreground">
+                + Lägg till
+              </Button>
+              <Button variant="ghost" onClick={() => setIsImportModalOpen(true)} className="text-muted-foreground">
+                Importera
+              </Button>
+            </div>
+
             {expenses.length > 0 ? (
               <div className="divide-y divide-border">
                 {expenses.map((expense, index) => (
@@ -269,15 +278,6 @@ const GroupPage = () => {
                 Inga utgifter ännu
               </p>
             )}
-
-            <div className="mt-6 flex gap-3">
-              <Button variant="ghost" onClick={() => setIsAddModalOpen(true)} className="text-muted-foreground">
-                + Lägg till
-              </Button>
-              <Button variant="ghost" onClick={() => setIsImportModalOpen(true)} className="text-muted-foreground">
-                Importera
-              </Button>
-            </div>
           </TabsContent>
 
           <TabsContent value="history">

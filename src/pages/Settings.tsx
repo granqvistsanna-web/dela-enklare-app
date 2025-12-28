@@ -86,12 +86,12 @@ const Settings = () => {
 
   const handleDeleteAccount = async () => {
     setIsDeletingAccount(true);
-    
+
     try {
       if (profile) {
         await supabase.from("profiles").delete().eq("user_id", profile.user_id);
       }
-      
+
       await signOut();
       toast.success("Konto raderat");
       navigate("/auth");
@@ -113,7 +113,7 @@ const Settings = () => {
 
       <main className="container py-12">
         <div className="mb-10">
-          <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← Tillbaka
           </Link>
           <h1 className="text-2xl font-semibold text-foreground mt-4">Inställningar</h1>
@@ -256,7 +256,7 @@ const Settings = () => {
           {/* About */}
           <section className="text-center py-4">
             <p className="text-sm text-muted-foreground">
-              Delarätt · v1.0
+              päronsplit · v1.0
             </p>
           </section>
         </div>
