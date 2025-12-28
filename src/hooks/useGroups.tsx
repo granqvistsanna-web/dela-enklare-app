@@ -16,6 +16,7 @@ export interface Group {
   is_temporary: boolean;
   created_by: string;
   created_at: string;
+  invite_code: string;
   members: GroupMember[];
 }
 
@@ -102,6 +103,7 @@ export function useGroups() {
           is_temporary: group.is_temporary,
           created_by: group.created_by,
           created_at: group.created_at,
+          invite_code: group.invite_code,
           members,
         };
       });
@@ -126,13 +128,13 @@ export function useGroups() {
     }
 
     try {
-      // Create the group - member is auto-added via database trigger
+      // Create the group - member and invite_code are auto-added via database triggers
       const { data: groupData, error: groupError } = await supabase
         .from("groups")
         .insert({
           name,
           is_temporary: isTemporary,
-        })
+        } as any)
         .select()
         .single();
 

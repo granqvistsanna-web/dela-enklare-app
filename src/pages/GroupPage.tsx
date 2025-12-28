@@ -142,11 +142,19 @@ const GroupPage = () => {
           <Link to="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← Tillbaka
           </Link>
-          <div className="flex items-baseline gap-3 mt-4">
-            <h1 className="text-2xl font-semibold text-foreground">{group.name}</h1>
-            {group.is_temporary && (
-              <span className="text-xs text-muted-foreground">tillfällig</span>
-            )}
+          <div className="flex items-baseline justify-between mt-4">
+            <div className="flex items-baseline gap-3">
+              <h1 className="text-2xl font-semibold text-foreground">{group.name}</h1>
+              {group.is_temporary && (
+                <span className="text-xs text-muted-foreground">tillfällig</span>
+              )}
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Kod:</span>
+              <code className="text-sm font-mono bg-secondary px-2 py-0.5 rounded">
+                {group.invite_code}
+              </code>
+            </div>
           </div>
         </div>
 

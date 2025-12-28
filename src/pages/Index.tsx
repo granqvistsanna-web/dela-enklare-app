@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses } from "@/hooks/useExpenses";
 import { CreateGroupModal } from "@/components/CreateGroupModal";
+import { JoinGroupModal } from "@/components/JoinGroupModal";
 
 const Index = () => {
-  const { groups, loading: groupsLoading, createGroup } = useGroups();
+  const { groups, loading: groupsLoading, createGroup, refetch } = useGroups();
   const { expenses, loading: expensesLoading } = useExpenses();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
   const loading = groupsLoading || expensesLoading;
 
@@ -76,9 +78,12 @@ const Index = () => {
               </p>
             )}
 
-            <div className="mt-8">
+            <div className="mt-8 flex gap-3">
               <Button variant="ghost" onClick={() => setIsCreateModalOpen(true)} className="text-muted-foreground">
                 + Ny grupp
+              </Button>
+              <Button variant="ghost" onClick={() => setIsJoinModalOpen(true)} className="text-muted-foreground">
+                Gå med i grupp
               </Button>
             </div>
           </>
@@ -89,6 +94,12 @@ const Index = () => {
         isOpen={isCreateModalOpen}
         onClose={() => setIsCreateModalOpen(false)}
         onSubmit={handleCreateGroup}
+      />
+      
+      <JoinGroupModal
+        isOpen={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
+        onSuccess={refetch}
       />
     </div>
   );

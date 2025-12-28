@@ -89,6 +89,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          invite_code: string
           is_temporary: boolean
           name: string
         }
@@ -96,6 +97,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invite_code: string
           is_temporary?: boolean
           name: string
         }
@@ -103,6 +105,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          invite_code?: string
           is_temporary?: boolean
           name?: string
         }
@@ -235,6 +238,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_invite_code: { Args: never; Returns: string }
       is_group_member: {
         Args: { _group_id: string; _user_id: string }
         Returns: boolean
