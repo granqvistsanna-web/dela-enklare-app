@@ -257,7 +257,7 @@ const Settings = () => {
           {/* About */}
           <section className="text-center py-4">
             <p className="text-sm text-muted-foreground">
-              Delarätt · v1.0
+              päronsplit · v1.0
             </p>
           </section>
         </div>
