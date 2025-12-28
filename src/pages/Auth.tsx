@@ -27,7 +27,7 @@ const Auth = () => {
 
   useEffect(() => {
     if (user && !loading) {
-      navigate("/");
+      navigate("/dashboard");
     }
   }, [user, loading, navigate]);
 
@@ -72,7 +72,7 @@ const Auth = () => {
             toast.error(error.message);
           }
         } else {
-          navigate("/");
+          navigate("/dashboard");
         }
       } else {
         const { error } = await signUp(email, password, name);
@@ -84,7 +84,7 @@ const Auth = () => {
           }
         } else {
           toast.success("Konto skapat");
-          navigate("/");
+          navigate("/dashboard");
         }
       }
     } finally {
