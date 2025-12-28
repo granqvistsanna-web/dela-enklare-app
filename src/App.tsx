@@ -1,10 +1,11 @@
+import { useEffect } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, useQueryClient } from "@tanstack/react-query";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
 import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persister";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
+import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "@/components/PublicRoute";
@@ -46,24 +47,44 @@ const persister = createSyncStoragePersister({
   storage: window.localStorage,
 });
 
+const AppContent = () => {
+  const { user } = useAuth();
+  const queryClientInstance = useQueryClient();
+
+  // Clear React Query cache when user logs out to prevent stale data
+  useEffect(() => {
+    if (!user) {
+      // User logged out - clear all cached queries
+      queryClientInstance.clear();
+      console.log("Cleared React Query cache after logout");
+    }
+  }, [user, queryClientInstance]);
+
+  return (
+    <>
+      <Toaster />
+      <OfflineIndicator />
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+          <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+          <Route path="/grupp/:id" element={<ProtectedRoute><GroupPage /></ProtectedRoute>} />
+          <Route path="/installningar" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
+          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
+};
+
 const App = () => (
   <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
     <ThemeProvider>
       <TooltipProvider>
         <AuthProvider>
-          <Toaster />
-          <OfflineIndicator />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
-              <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
-              <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-              <Route path="/grupp/:id" element={<ProtectedRoute><GroupPage /></ProtectedRoute>} />
-              <Route path="/installningar" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </BrowserRouter>
+          <AppContent />
         </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>

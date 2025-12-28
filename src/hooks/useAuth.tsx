@@ -82,38 +82,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Set up auth state listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        // Defer profile fetch to avoid deadlock
-        if (session?.user) {
-          setTimeout(() => {
-            fetchProfile(session.user);
-          }, 0);
-        } else {
-          setProfile(null);
-        }
-        
-        setLoading(false);
-      }
-    );
+    let mounted = true;
 
-    // THEN check for existing session
+    // Initialize session state
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
+
       setSession(session);
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         fetchProfile(session.user);
       }
-      
+
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    // Set up auth state listener for changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        console.log("Auth state changed:", event, session?.user?.id);
+
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        // Handle profile based on session
+        if (session?.user) {
+          // Defer profile fetch to avoid blocking
+          setTimeout(() => {
+            if (mounted) {
+              fetchProfile(session.user);
+            }
+          }, 0);
+        } else {
+          // Clear profile on sign out
+          setProfile(null);
+        }
+
+        // Only set loading to false on initial load
+        if (event === 'INITIAL_SESSION') {
+          setLoading(false);
+        }
+      }
+    );
+
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signUp = async (email: string, password: string, name: string) => {
@@ -141,10 +159,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSession(null);
-    setProfile(null);
+    try {
+      // Sign out from Supabase - this will trigger the auth state listener
+      // which will automatically clear user, session, and profile
+      const { error } = await supabase.auth.signOut();
+
+      if (error) {
+        console.error("Error signing out:", error);
+        throw error;
+      }
+
+      // Note: We don't manually clear state here because the
+      // onAuthStateChange listener will handle it automatically
+      // This prevents race conditions and ensures proper state synchronization
+    } catch (error) {
+      // If signOut fails, manually clear state as fallback
+      console.error("Sign out failed, clearing state manually:", error);
+      setUser(null);
+      setSession(null);
+      setProfile(null);
+      throw error;
+    }
   };
 
   const updatePassword = async (newPassword: string) => {
