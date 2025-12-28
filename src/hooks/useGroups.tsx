@@ -7,8 +7,8 @@ export interface GroupMember {
   id: string;
   user_id: string;
   name: string;
-  email: string;
 }
+
 
 export interface Group {
   id: string;
@@ -67,15 +67,15 @@ export function useGroups() {
       // Fetch profiles for all members
       const memberUserIds = [...new Set(allMembers?.map((m) => m.user_id) || [])];
       const { data: profiles, error: profilesError } = await supabase
-        .from("profiles")
-        .select("user_id, name, email, id")
+        .from("public_profiles")
+        .select("user_id, name, id")
         .in("user_id", memberUserIds);
 
       if (profilesError) throw profilesError;
 
       // Map profiles to a lookup
       const profileLookup = new Map(
-        profiles?.map((p) => [p.user_id, p]) || []
+        (profiles || []).map((p: any) => [p.user_id, p])
       );
 
       // Build groups with members
@@ -92,7 +92,6 @@ export function useGroups() {
               id: profile.id,
               user_id: profile.user_id,
               name: profile.name,
-              email: profile.email,
             };
           })
           .filter(Boolean) as GroupMember[];
