@@ -130,11 +130,12 @@ export function useGroups() {
       // Create the group
       const { data: groupData, error: groupError } = await supabase
         .from("groups")
-        .insert({
-          name,
-          is_temporary: isTemporary,
-          created_by: user.id,
-        })
+        .insert(
+          {
+            name,
+            is_temporary: isTemporary,
+          } as any
+        )
         .select()
         .single();
 
