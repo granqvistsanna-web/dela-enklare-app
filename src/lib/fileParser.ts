@@ -24,13 +24,19 @@ export function parseFile(content: string | ArrayBuffer, fileName: string): Pars
 }
 
 function parseExcel(buffer: ArrayBuffer): ParsedTransaction[] {
-  const workbook = XLSX.read(buffer, { type: 'array' });
-  const sheetName = workbook.SheetNames[0];
-  const sheet = workbook.Sheets[sheetName];
-  
-  // Convert to CSV format and parse
-  const csvContent = XLSX.utils.sheet_to_csv(sheet, { FS: ';' });
-  return parseCSV(csvContent);
+  try {
+    const workbook = XLSX.read(buffer, { type: 'array' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    
+    // Convert to CSV format and parse
+    const csvContent = XLSX.utils.sheet_to_csv(sheet, { FS: ';' });
+    console.log('Excel parsed to CSV, lines:', csvContent.split('\n').length);
+    return parseCSV(csvContent);
+  } catch (err) {
+    console.error('Excel parsing failed:', err);
+    throw new Error('Kunde inte läsa Excel-filen. Kontrollera att filen inte är skadad.');
+  }
 }
 
 export function parseCSV(content: string): ParsedTransaction[] {

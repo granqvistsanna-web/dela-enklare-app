@@ -102,11 +102,11 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
 
       setStep("review");
 
-    } catch (err) {
+    } catch (err: any) {
       console.error("File parsing error:", err);
       toast({
         title: "Fel vid import",
-        description: "Kunde inte läsa filen.",
+        description: err?.message || "Kunde inte läsa filen. Kontrollera formatet.",
         variant: "destructive",
       });
     }
