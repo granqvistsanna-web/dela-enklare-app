@@ -7,17 +7,17 @@ export function Header() {
   const { profile } = useAuth();
 
   return (
-    <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
-      <div className="container flex h-14 items-center justify-between">
-        <Link to="/" className="text-sm font-medium text-foreground hover:text-muted-foreground transition-colors">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
+      <div className="container flex h-16 items-center justify-between max-w-6xl mx-auto">
+        <Link to="/" className="text-base font-semibold text-foreground hover:text-muted-foreground transition-colors">
           Delarätt
         </Link>
 
-        <nav className="flex items-center gap-6">
+        <nav className="flex items-center gap-8">
           <Link
             to="/"
             className={cn(
-              "text-sm transition-colors",
+              "text-sm font-medium transition-colors",
               location.pathname === "/" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
@@ -26,14 +26,14 @@ export function Header() {
           <Link
             to="/installningar"
             className={cn(
-              "text-sm transition-colors",
+              "text-sm font-medium transition-colors",
               location.pathname === "/installningar" ? "text-foreground" : "text-muted-foreground hover:text-foreground"
             )}
           >
             Inställningar
           </Link>
           {profile && (
-            <span className="text-sm text-muted-foreground">
+            <span className="text-sm text-muted-foreground font-medium">
               {profile.name}
             </span>
           )}
