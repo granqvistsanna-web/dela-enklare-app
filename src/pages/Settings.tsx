@@ -111,15 +111,15 @@ const Settings = () => {
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="container py-12">
-        <div className="mb-10">
+      <main className="container py-8 sm:py-12 px-4 sm:px-6 max-w-3xl mx-auto">
+        <div className="mb-8 sm:mb-10">
           <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
             ← Tillbaka
           </Link>
-          <h1 className="text-2xl font-semibold text-foreground mt-4">Inställningar</h1>
+          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mt-4">Inställningar</h1>
         </div>
 
-        <div className="space-y-10">
+        <div className="space-y-8 sm:space-y-10">
           {/* Profile */}
           <section>
             <h2 className="text-sm font-medium text-muted-foreground mb-4">Profil</h2>
@@ -141,7 +141,7 @@ const Settings = () => {
           {/* Change Name */}
           <section>
             <h2 className="text-sm font-medium text-muted-foreground mb-4">Byt namn</h2>
-            <form onSubmit={handleNameChange} className="space-y-4 max-w-sm">
+            <form onSubmit={handleNameChange} className="space-y-4 max-w-full sm:max-w-sm">
               <div className="space-y-2">
                 <Label htmlFor="newName" className="text-sm text-muted-foreground">
                   Nytt namn
@@ -154,7 +154,7 @@ const Settings = () => {
                   onChange={(e) => setNewName(e.target.value)}
                 />
               </div>
-              <Button type="submit" variant="outline" disabled={isChangingName}>
+              <Button type="submit" variant="outline" disabled={isChangingName} className="w-full sm:w-auto">
                 {isChangingName ? "Sparar..." : "Uppdatera namn"}
               </Button>
             </form>
@@ -183,7 +183,7 @@ const Settings = () => {
           {/* Change Password */}
           <section>
             <h2 className="text-sm font-medium text-muted-foreground mb-4">Byt lösenord</h2>
-            <form onSubmit={handlePasswordChange} className="space-y-4 max-w-sm">
+            <form onSubmit={handlePasswordChange} className="space-y-4 max-w-full sm:max-w-sm">
               <div className="space-y-2">
                 <Label htmlFor="newPassword" className="text-sm text-muted-foreground">
                   Nytt lösenord
@@ -208,7 +208,7 @@ const Settings = () => {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
-              <Button type="submit" variant="outline" disabled={isChangingPassword}>
+              <Button type="submit" variant="outline" disabled={isChangingPassword} className="w-full sm:w-auto">
                 {isChangingPassword ? "Sparar..." : "Uppdatera"}
               </Button>
             </form>
@@ -218,14 +218,14 @@ const Settings = () => {
 
           {/* Sign Out & Delete */}
           <section className="space-y-4">
-            <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground">
+            <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground w-full sm:w-auto justify-start sm:justify-center">
               Logga ut
             </Button>
 
             <div className="pt-6">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                  <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto justify-start sm:justify-center">
                     Radera konto
                   </Button>
                 </AlertDialogTrigger>
