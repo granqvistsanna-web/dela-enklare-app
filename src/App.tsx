@@ -7,11 +7,13 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { PublicRoute } from "@/components/PublicRoute";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
 import Index from "./pages/Index";
 import GroupPage from "./pages/GroupPage";
 import Settings from "./pages/Settings";
 import Auth from "./pages/Auth";
+import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient({
@@ -53,8 +55,8 @@ const App = () => (
           <OfflineIndicator />
           <BrowserRouter>
             <Routes>
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+              <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
+              <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
               <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
               <Route path="/grupp/:id" element={<ProtectedRoute><GroupPage /></ProtectedRoute>} />
               <Route path="/installningar" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
