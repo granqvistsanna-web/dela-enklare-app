@@ -152,6 +152,7 @@ const Settings = () => {
                   placeholder={profile?.name || "Ditt namn"}
                   value={newName}
                   onChange={(e) => setNewName(e.target.value)}
+                  autoComplete="name"
                 />
               </div>
               <Button type="submit" variant="outline" disabled={isChangingName}>
