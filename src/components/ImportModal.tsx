@@ -218,6 +218,7 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
       {isOpen && (
         <>
           <motion.div
+            key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -225,6 +226,7 @@ export function ImportModal({ isOpen, onClose, onImport, groupId, currentUserId 
             onClick={handleClose}
           />
           <motion.div
+            key="modal"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
