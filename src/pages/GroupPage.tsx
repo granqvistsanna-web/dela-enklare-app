@@ -95,37 +95,7 @@ const GroupPage = () => {
     };
   }, [balances, group?.members, expenses]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container py-12">
-          <div className="h-6 w-32 rounded bg-secondary animate-pulse mb-4" />
-          <div className="h-8 w-48 rounded bg-secondary animate-pulse mb-8" />
-          <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 rounded bg-secondary animate-pulse" />
-            ))}
-          </div>
-        </main>
-      </div>
-    );
-  }
-
-  if (!group) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
-        <main className="container py-12">
-          <p className="text-muted-foreground mb-4">Gruppen hittades inte.</p>
-          <Link to="/dashboard" className="text-sm text-foreground hover:underline">
-            ← Tillbaka
-          </Link>
-        </main>
-      </div>
-    );
-  }
-
+  // All useCallback hooks must be called before any conditional returns
   const handleAddExpense = useCallback(async (newExpense: {
     group_id: string;
     amount: number;
@@ -233,6 +203,38 @@ const GroupPage = () => {
       toast.error("Kunde inte kopiera kod");
     }
   }, [group?.invite_code]);
+
+  // Conditional returns must come after ALL hooks
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container py-12">
+          <div className="h-6 w-32 rounded bg-secondary animate-pulse mb-4" />
+          <div className="h-8 w-48 rounded bg-secondary animate-pulse mb-8" />
+          <div className="space-y-2">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-12 rounded bg-secondary animate-pulse" />
+            ))}
+          </div>
+        </main>
+      </div>
+    );
+  }
+
+  if (!group) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="container py-12">
+          <p className="text-muted-foreground mb-4">Gruppen hittades inte.</p>
+          <Link to="/dashboard" className="text-sm text-foreground hover:underline">
+            ← Tillbaka
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
