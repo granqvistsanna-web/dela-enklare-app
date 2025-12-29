@@ -22,14 +22,13 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { ExpenseItem } from "@/components/ExpenseItem";
-import { AddExpenseModal } from "@/components/AddExpenseModal";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { SettlementModal } from "@/components/SettlementModal";
 import { SettlementHistory } from "@/components/SettlementHistory";
 import { ImportModal } from "@/components/ImportModal";
 import { AddMembersModal } from "@/components/AddMembersModal";
 import { IncomeItem } from "@/components/IncomeItem";
-import { AddIncomeModal } from "@/components/AddIncomeModal";
+import { AddTransactionModal } from "@/components/AddTransactionModal";
 import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
 import { useGroups } from "@/hooks/useGroups";
@@ -66,7 +65,7 @@ const GroupPage = () => {
   // Memoize group lookup to prevent recalculation and potential race conditions
   const group = useMemo(() => groups.find((g) => g.id === id), [groups, id]);
 
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSettleModalOpen, setIsSettleModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
@@ -79,7 +78,6 @@ const GroupPage = () => {
   const [isRegeneratingCode, setIsRegeneratingCode] = useState(false);
 
   // Income modal states
-  const [isAddIncomeModalOpen, setIsAddIncomeModalOpen] = useState(false);
   const [isEditIncomeModalOpen, setIsEditIncomeModalOpen] = useState(false);
   const [editingIncome, setEditingIncome] = useState<Income | null>(null);
 
@@ -575,13 +573,7 @@ const GroupPage = () => {
               {(activeTab === "expenses" || activeTab === "incomes") && (
                 <Button
                   size="sm"
-                  onClick={() => {
-                    if (activeTab === "expenses") {
-                      setIsAddModalOpen(true);
-                    } else if (activeTab === "incomes") {
-                      setIsAddIncomeModalOpen(true);
-                    }
-                  }}
+                  onClick={() => setIsAddTransactionModalOpen(true)}
                   className="gap-2 h-9 sm:h-8 flex-1 sm:flex-initial"
                 >
                   <Plus size={14} />
@@ -620,7 +612,7 @@ const GroupPage = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setIsAddModalOpen(true)}
+                    onClick={() => setIsAddTransactionModalOpen(true)}
                     className="gap-2"
                   >
                     <Plus size={14} />
@@ -734,7 +726,7 @@ const GroupPage = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setIsAddIncomeModalOpen(true)}
+                      onClick={() => setIsAddTransactionModalOpen(true)}
                       className="gap-2"
                     >
                       <Plus size={14} />
@@ -757,12 +749,14 @@ const GroupPage = () => {
       </main>
 
       {/* Modals */}
-      <AddExpenseModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddExpense}
+      <AddTransactionModal
+        isOpen={isAddTransactionModalOpen}
+        onClose={() => setIsAddTransactionModalOpen(false)}
+        onAddExpense={handleAddExpense}
+        onAddIncome={handleAddIncome}
         groupId={group.id}
         members={group.members}
+        defaultType={activeTab === "incomes" ? "income" : "expense"}
       />
 
       <ImportModal
@@ -843,14 +837,6 @@ const GroupPage = () => {
       </AlertDialog>
 
       {/* Income Modals */}
-      <AddIncomeModal
-        isOpen={isAddIncomeModalOpen}
-        onClose={() => setIsAddIncomeModalOpen(false)}
-        onAdd={handleAddIncome}
-        groupId={group.id}
-        members={group.members}
-      />
-
       <EditIncomeModal
         isOpen={isEditIncomeModalOpen}
         onClose={() => {
