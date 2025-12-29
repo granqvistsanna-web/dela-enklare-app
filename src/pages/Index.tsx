@@ -130,14 +130,8 @@ const Index = () => {
           <div className="text-center py-20">
             <h1 className="text-2xl font-semibold text-foreground mb-4">Välkommen!</h1>
             <p className="text-muted-foreground mb-8">
-              Du har inga hushåll ännu. Gå till Inställningar för att skapa ditt första hushåll.
+              Ditt hushåll skapas automatiskt. Vänta ett ögonblick...
             </p>
-            <button
-              onClick={() => navigate("/installningar")}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
-              Gå till Inställningar
-            </button>
           </div>
         </main>
       </div>
