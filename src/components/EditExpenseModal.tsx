@@ -150,6 +150,7 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
       {isOpen && expense && (
         <>
           <motion.div
+            key="backdrop"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -157,6 +158,7 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
             onClick={onClose}
           />
           <motion.div
+            key="modal"
             initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
