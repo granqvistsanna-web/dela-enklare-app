@@ -1,4 +1,4 @@
-import { useState, useEffect, createContext, useContext, ReactNode } from "react";
+import { useState, useEffect, createContext, useContext, ReactNode, useCallback, useMemo } from "react";
 import { User, Session } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -139,9 +139,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
-  const signUp = async (email: string, password: string, name: string) => {
+  const signUp = useCallback(async (email: string, password: string, name: string) => {
     const redirectUrl = `${window.location.origin}/`;
-    
+
     const { error } = await supabase.auth.signUp({
       email,
       password,
@@ -150,20 +150,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         data: { name }
       }
     });
-    
-    return { error: error as Error | null };
-  };
 
-  const signIn = async (email: string, password: string) => {
+    return { error: error as Error | null };
+  }, []);
+
+  const signIn = useCallback(async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password
     });
-    
-    return { error: error as Error | null };
-  };
 
-  const signOut = async () => {
+    return { error: error as Error | null };
+  }, []);
+
+  const signOut = useCallback(async () => {
     try {
       // Sign out from Supabase - this will trigger the auth state listener
       // which will automatically clear user, session, and profile
@@ -185,17 +185,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setProfile(null);
       throw error;
     }
-  };
+  }, []);
 
-  const updatePassword = async (newPassword: string) => {
+  const updatePassword = useCallback(async (newPassword: string) => {
     const { error } = await supabase.auth.updateUser({
       password: newPassword
     });
 
     return { error: error as Error | null };
-  };
+  }, []);
 
-  const updateProfile = async (name: string) => {
+  const updateProfile = useCallback(async (name: string) => {
     if (!user) {
       return { error: new Error("Ingen användare är inloggad") };
     }
@@ -210,35 +210,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return { error: error as Error | null };
-  };
+  }, [user]);
 
-  const deleteAccount = async () => {
+  const deleteAccount = useCallback(async () => {
     // First sign out, then the account deletion would need a backend function
     // For now, we'll just sign out - full deletion requires admin API
     await signOut();
     return { error: null };
-  };
+  }, [signOut]);
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (user) {
       await fetchProfile(user);
     }
-  };
+  }, [user]);
+
+  const value = useMemo(() => ({
+    user,
+    session,
+    profile,
+    loading,
+    signUp,
+    signIn,
+    signOut,
+    updatePassword,
+    updateProfile,
+    deleteAccount,
+    refreshProfile
+  }), [user, session, profile, loading, signUp, signIn, signOut, updatePassword, updateProfile, deleteAccount, refreshProfile]);
 
   return (
-    <AuthContext.Provider value={{
-      user,
-      session,
-      profile,
-      loading,
-      signUp,
-      signIn,
-      signOut,
-      updatePassword,
-      updateProfile,
-      deleteAccount,
-      refreshProfile
-    }}>
+    <AuthContext.Provider value={value}>
       {children}
     </AuthContext.Provider>
   );

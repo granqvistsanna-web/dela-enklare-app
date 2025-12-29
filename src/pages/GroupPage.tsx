@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,7 @@ const GroupPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { groups, loading: groupsLoading, deleteGroup, addMembers, removeMember, regenerateInviteCode, refetch } = useGroups();
-  const { expenses, loading: expensesLoading, addExpense, updateExpense, deleteExpense } = useExpenses(id);
+  const { expenses, loading: expensesLoading, addExpense, addExpenses, updateExpense, deleteExpense } = useExpenses(id);
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(id);
 
   const group = groups.find((g) => g.id === id);
@@ -77,15 +77,23 @@ const GroupPage = () => {
     [expenses, group]
   );
 
-  const positiveBalance = balances.find((b) => b.balance > 0);
-  const negativeBalance = balances.find((b) => b.balance < 0);
-  const positiveUser = positiveBalance
-    ? group?.members.find((u) => u.user_id === positiveBalance.userId)
-    : undefined;
-  const negativeUser = negativeBalance
-    ? group?.members.find((u) => u.user_id === negativeBalance.userId)
-    : undefined;
-  const oweAmount = negativeBalance ? Math.abs(negativeBalance.balance) : 0;
+  // Optimize repeated find() calls by combining them into a single useMemo
+  const { positiveBalance, negativeBalance, positiveUser, negativeUser, oweAmount, totalExpenses } = useMemo(() => {
+    const posBalance = balances.find((b) => b.balance > 0);
+    const negBalance = balances.find((b) => b.balance < 0);
+
+    return {
+      positiveBalance: posBalance,
+      negativeBalance: negBalance,
+      positiveUser: posBalance ? group?.members.find((u) => u.user_id === posBalance.userId) : undefined,
+      negativeUser: negBalance ? group?.members.find((u) => u.user_id === negBalance.userId) : undefined,
+      oweAmount: negBalance ? Math.abs(negBalance.balance) : 0,
+      totalExpenses: expenses.reduce((sum, e) => {
+        const amount = Number.isFinite(e.amount) ? e.amount : 0;
+        return sum + amount;
+      }, 0)
+    };
+  }, [balances, group?.members, expenses]);
 
   if (loading) {
     return (
@@ -118,7 +126,7 @@ const GroupPage = () => {
     );
   }
 
-  const handleAddExpense = async (newExpense: {
+  const handleAddExpense = useCallback(async (newExpense: {
     group_id: string;
     amount: number;
     paid_by: string;
@@ -127,9 +135,9 @@ const GroupPage = () => {
     date: string;
   }) => {
     await addExpense(newExpense);
-  };
+  }, [addExpense]);
 
-  const handleImportExpenses = async (newExpenses: {
+  const handleImportExpenses = useCallback(async (newExpenses: {
     group_id: string;
     amount: number;
     paid_by: string;
@@ -137,21 +145,21 @@ const GroupPage = () => {
     description: string;
     date: string;
   }[]) => {
-    // Process imports in parallel for better performance
+    // Batch insert all expenses in a single database query
     try {
-      await Promise.all(newExpenses.map(expense => addExpense(expense)));
+      await addExpenses(newExpenses);
     } catch (error) {
       console.error("Error importing expenses:", error);
       toast.error("Ett fel uppstod vid import av utgifter");
     }
-  };
+  }, [addExpenses]);
 
-  const handleEditExpense = (expense: Expense) => {
+  const handleEditExpense = useCallback((expense: Expense) => {
     setEditingExpense(expense);
     setIsEditModalOpen(true);
-  };
+  }, []);
 
-  const handleSaveExpense = async (updatedExpense: Expense) => {
+  const handleSaveExpense = useCallback(async (updatedExpense: Expense) => {
     await updateExpense(updatedExpense.id, {
       amount: updatedExpense.amount,
       category: updatedExpense.category,
@@ -160,13 +168,13 @@ const GroupPage = () => {
     });
     setIsEditModalOpen(false);
     setEditingExpense(null);
-  };
+  }, [updateExpense]);
 
-  const handleDeleteExpense = async (expenseId: string) => {
+  const handleDeleteExpense = useCallback(async (expenseId: string) => {
     await deleteExpense(expenseId);
-  };
+  }, [deleteExpense]);
 
-  const handleSettle = async () => {
+  const handleSettle = useCallback(async () => {
     if (!negativeUser || !positiveUser || !id) return;
 
     await addSettlement({
@@ -176,28 +184,28 @@ const GroupPage = () => {
       amount: Math.round(oweAmount),
     });
     setIsSettleModalOpen(false);
-  };
+  }, [negativeUser, positiveUser, id, addSettlement, oweAmount]);
 
-  const handleDeleteGroup = async () => {
+  const handleDeleteGroup = useCallback(async () => {
     if (!id) return;
     await deleteGroup(id);
     navigate("/dashboard");
-  };
+  }, [id, deleteGroup, navigate]);
 
-  const handleAddMembers = async (userIds: string[]) => {
+  const handleAddMembers = useCallback(async (userIds: string[]) => {
     if (!id) return;
     await addMembers(id, userIds);
     await refetch();
-  };
+  }, [id, addMembers, refetch]);
 
-  const handleRemoveMember = async () => {
+  const handleRemoveMember = useCallback(async () => {
     if (!id || !memberToRemove) return;
     await removeMember(id, memberToRemove.id);
     setIsRemoveMemberDialogOpen(false);
     setMemberToRemove(null);
-  };
+  }, [id, memberToRemove, removeMember]);
 
-  const handleRegenerateCode = async () => {
+  const handleRegenerateCode = useCallback(async () => {
     if (!id) return;
     setIsRegeneratingCode(true);
     try {
@@ -205,9 +213,9 @@ const GroupPage = () => {
     } finally {
       setIsRegeneratingCode(false);
     }
-  };
+  }, [id, regenerateInviteCode]);
 
-  const handleCopyCode = async () => {
+  const handleCopyCode = useCallback(async () => {
     if (!group?.invite_code) return;
 
     try {
@@ -224,12 +232,7 @@ const GroupPage = () => {
       console.error("Failed to copy invite code:", error);
       toast.error("Kunde inte kopiera kod");
     }
-  };
-
-  const totalExpenses = expenses.reduce((sum, e) => {
-    const amount = Number.isFinite(e.amount) ? e.amount : 0;
-    return sum + amount;
-  }, 0);
+  }, [group?.invite_code]);
 
   return (
     <div className="min-h-screen bg-background">

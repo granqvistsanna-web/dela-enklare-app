@@ -59,72 +59,66 @@ export function useGroups() {
 
       const groupIds = memberData.map((m) => m.group_id);
 
-      // Fetch groups
-      const { data: groupsData, error: groupsError } = await supabase
-        .from("groups")
-        .select("*")
-        .in("id", groupIds);
+      // Fetch groups, members, and profiles in parallel (4 queries -> 2 parallel queries)
+      const [groupsResult, membersResult] = await Promise.all([
+        supabase
+          .from("groups")
+          .select("*")
+          .in("id", groupIds),
+        supabase
+          .from("group_members")
+          .select(`
+            group_id,
+            user_id,
+            public_profiles!inner (
+              id,
+              user_id,
+              name
+            )
+          `)
+          .in("group_id", groupIds)
+      ]);
 
-      if (groupsError) throw groupsError;
+      if (groupsResult.error) throw groupsResult.error;
+      if (membersResult.error) throw membersResult.error;
 
-      // Fetch all members for these groups
-      const { data: allMembers, error: membersError } = await supabase
-        .from("group_members")
-        .select("group_id, user_id")
-        .in("group_id", groupIds);
+      const groupsData = groupsResult.data;
+      const membersWithProfiles = membersResult.data;
 
-      if (membersError) throw membersError;
+      // Build a map of group_id -> members with profiles
+      const groupMembersMap = new Map<string, GroupMember[]>();
 
-      // Fetch profiles for all members
-      const memberUserIds = [...new Set(allMembers?.map((m) => m.user_id) || [])];
-      const { data: profiles, error: profilesError } = await supabase
-        .from("public_profiles")
-        .select("user_id, name, id")
-        .in("user_id", memberUserIds);
+      membersWithProfiles?.forEach((member: any) => {
+        const profile = member.public_profiles;
 
-      if (profilesError) throw profilesError;
+        // Validate profile data
+        if (!profile || !profile.id || !profile.user_id || !profile.name) {
+          console.warn(`Invalid profile data for member`, member);
+          return;
+        }
 
-      // Map profiles to a lookup
-      const profileLookup = new Map<string, PublicProfile>(
-        (profiles || []).map((p) => [p.user_id, p as PublicProfile])
-      );
+        const groupMember: GroupMember = {
+          id: profile.id,
+          user_id: profile.user_id,
+          name: profile.name,
+        };
+
+        if (!groupMembersMap.has(member.group_id)) {
+          groupMembersMap.set(member.group_id, []);
+        }
+        groupMembersMap.get(member.group_id)!.push(groupMember);
+      });
 
       // Build groups with members
-      const groupsWithMembers: Group[] = (groupsData || []).map((group) => {
-        const groupMemberUserIds = allMembers
-          ?.filter((m) => m.group_id === group.id)
-          .map((m) => m.user_id) || [];
-
-        const members: GroupMember[] = groupMemberUserIds
-          .map((userId) => {
-            const profile = profileLookup.get(userId);
-            if (!profile) {
-              console.warn(`Profile not found for user ${userId} in group ${group.id}`);
-              return null;
-            }
-            // Validate profile data
-            if (!profile.id || !profile.user_id || !profile.name) {
-              console.warn(`Invalid profile data for user ${userId}`, profile);
-              return null;
-            }
-            return {
-              id: profile.id,
-              user_id: profile.user_id,
-              name: profile.name,
-            };
-          })
-          .filter((member): member is GroupMember => member !== null);
-
-        return {
-          id: group.id,
-          name: group.name,
-          is_temporary: group.is_temporary,
-          created_by: group.created_by,
-          created_at: group.created_at,
-          invite_code: group.invite_code,
-          members,
-        };
-      });
+      const groupsWithMembers: Group[] = (groupsData || []).map((group) => ({
+        id: group.id,
+        name: group.name,
+        is_temporary: group.is_temporary,
+        created_by: group.created_by,
+        created_at: group.created_at,
+        invite_code: group.invite_code,
+        members: groupMembersMap.get(group.id) || [],
+      }));
 
       setGroups(groupsWithMembers);
     } catch (error) {

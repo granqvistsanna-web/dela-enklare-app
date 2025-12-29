@@ -1,3 +1,4 @@
+import { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, Users } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -11,8 +12,11 @@ interface GroupCardProps {
   expenses: Expense[];
 }
 
-export function GroupCard({ group, expenses }: GroupCardProps) {
-  const balances = calculateBalance(expenses, group.members);
+export const GroupCard = memo(function GroupCard({ group, expenses }: GroupCardProps) {
+  const balances = useMemo(
+    () => calculateBalance(expenses, group.members),
+    [expenses, group.members]
+  );
   
   const positiveBalance = balances.find((b) => b.balance > 0);
   const positiveUser = group.members.find((u) => u.user_id === positiveBalance?.userId);
@@ -89,4 +93,4 @@ export function GroupCard({ group, expenses }: GroupCardProps) {
       </Link>
     </motion.div>
   );
-}
+});

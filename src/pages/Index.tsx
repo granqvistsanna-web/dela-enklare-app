@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Header } from "@/components/Header";
 import { GroupCard } from "@/components/GroupCard";
 import { Button } from "@/components/ui/button";
 import { useGroups } from "@/hooks/useGroups";
-import { useExpenses } from "@/hooks/useExpenses";
+import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { CreateGroupModal } from "@/components/CreateGroupModal";
 import { JoinGroupModal } from "@/components/JoinGroupModal";
 const Index = () => {
@@ -24,7 +24,19 @@ const Index = () => {
     await createGroup(name, isTemporary, selectedUserIds);
     setIsCreateModalOpen(false);
   };
-  const totalExpenses = expenses.reduce((sum, e) => sum + e.amount, 0);
+
+  // Memoize total and grouped expenses to avoid recalculation on every render
+  const { totalExpenses, expensesByGroup } = useMemo(() => {
+    const total = expenses.reduce((sum, e) => sum + e.amount, 0);
+    const byGroup = expenses.reduce((acc, expense) => {
+      if (!acc[expense.group_id]) {
+        acc[expense.group_id] = [];
+      }
+      acc[expense.group_id].push(expense);
+      return acc;
+    }, {} as Record<string, Expense[]>);
+    return { totalExpenses: total, expensesByGroup: byGroup };
+  }, [expenses]);
   return <div className="min-h-screen bg-background">
       <Header />
 
@@ -68,7 +80,7 @@ const Index = () => {
             {[1, 2, 3].map(i => <div key={i} className="h-32 rounded-lg bg-secondary/50 animate-pulse" />)}
           </div> : <>
             {groups.length > 0 ? <div className="space-y-3">
-                {groups.map(group => <GroupCard key={group.id} group={group} expenses={expenses.filter(e => e.group_id === group.id)} />)}
+                {groups.map(group => <GroupCard key={group.id} group={group} expenses={expensesByGroup[group.id] || []} />)}
               </div> : <div className="text-center py-20 px-6">
                 <div className="max-w-md mx-auto">
                   <h3 className="text-xl font-semibold text-foreground mb-3">

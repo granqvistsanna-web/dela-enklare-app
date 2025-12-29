@@ -91,6 +91,48 @@ export function useExpenses(groupId?: string) {
     }
   };
 
+  const addExpenses = async (expenses: {
+    group_id: string;
+    amount: number;
+    paid_by: string;
+    category: string;
+    description: string;
+    date: string;
+    splits?: ExpenseSplit | null;
+  }[]) => {
+    if (!user) {
+      toast.error("Du måste vara inloggad");
+      return [];
+    }
+
+    if (expenses.length === 0) {
+      return [];
+    }
+
+    try {
+      // Batch insert all expenses in a single query
+      const { data, error } = await supabase
+        .from("expenses")
+        .insert(
+          expenses.map(expense => ({
+            ...expense,
+            paid_by: user.id, // Always use current user
+          }))
+        )
+        .select();
+
+      if (error) throw error;
+
+      await fetchExpenses();
+      toast.success(`${expenses.length} utgifter tillagda!`);
+      return data || [];
+    } catch (error) {
+      console.error("Error adding expenses:", error);
+      toast.error("Kunde inte lägga till utgifter");
+      return [];
+    }
+  };
+
   const updateExpense = async (
     expenseId: string,
     updates: Partial<Omit<Expense, "id" | "created_at">>
@@ -175,6 +217,7 @@ export function useExpenses(groupId?: string) {
     expenses,
     loading,
     addExpense,
+    addExpenses,
     updateExpense,
     deleteExpense,
     refetch: fetchExpenses,
