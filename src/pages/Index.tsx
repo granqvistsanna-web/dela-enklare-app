@@ -10,8 +10,10 @@ import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { SettlementModal } from "@/components/SettlementModal";
 import { SettlementHistory } from "@/components/SettlementHistory";
 import { ImportModal } from "@/components/ImportModal";
+import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
+import { useIncomes } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateBalance } from "@/lib/balanceUtils";
@@ -21,7 +23,6 @@ import {
   TrendingUp,
   ArrowRight,
   Calendar,
-  Wallet,
   PiggyBank,
 } from "lucide-react";
 
@@ -45,6 +46,8 @@ const Index = () => {
     deleteExpense,
   } = useExpenses(primaryGroup?.id);
 
+  const { incomes, loading: incomesLoading } = useIncomes(primaryGroup?.id);
+
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(primaryGroup?.id);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -53,7 +56,7 @@ const Index = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
-  const loading = groupsLoading || expensesLoading || settlementsLoading;
+  const loading = groupsLoading || expensesLoading || incomesLoading || settlementsLoading;
 
   // Calculate balances
   const balances = useMemo(
@@ -268,19 +271,14 @@ const Index = () => {
             ) : null}
           </div>
 
-          {/* Placeholder cards for Income and Savings */}
+          {/* Income and Savings Overview */}
           <div className="grid gap-4 md:grid-cols-2">
-            <Card className="border-border/50 border-dashed opacity-60">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-muted">
-                    <Wallet size={18} className="text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground">Gemensamma inkomster</p>
-                </div>
-                <p className="text-lg text-muted-foreground">Kommer snart</p>
-              </CardContent>
-            </Card>
+            <IncomeOverviewCard
+              incomes={incomes}
+              members={primaryGroup.members}
+              selectedYear={new Date().getFullYear()}
+              selectedMonth={new Date().getMonth() + 1}
+            />
 
             <Card className="border-border/50 border-dashed opacity-60">
               <CardContent className="p-6">
