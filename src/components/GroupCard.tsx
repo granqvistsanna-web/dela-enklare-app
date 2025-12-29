@@ -1,6 +1,5 @@
 import { memo, useMemo } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, Users } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Group } from "@/hooks/useGroups";
@@ -47,8 +46,7 @@ export const GroupCard = memo(function GroupCard({ group, expenses }: GroupCardP
                     </span>
                   )}
                 </div>
-                <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
-                  <Users size={14} className="shrink-0" />
+                <div className="text-xs sm:text-sm text-muted-foreground">
                   <span className="line-clamp-1">
                     {group.members.length > 0
                       ? group.members.map((u) => u.name).join(", ")
@@ -56,10 +54,6 @@ export const GroupCard = memo(function GroupCard({ group, expenses }: GroupCardP
                   </span>
                 </div>
               </div>
-              <ArrowRight
-                size={18}
-                className="text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all mt-1 shrink-0 ml-2"
-              />
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pt-3 sm:pt-4 border-t border-border/50">

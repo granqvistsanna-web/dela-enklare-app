@@ -80,9 +80,6 @@ export const IncomeItem = memo(function IncomeItem({
         className="group flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background"
       >
       <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-        <div className="flex items-center justify-center w-10 h-10 sm:w-10 sm:h-10 rounded-lg bg-green-500/10 shrink-0">
-          <span className="text-lg">{getIncomeTypeIcon(income.type)}</span>
-        </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-foreground truncate">
