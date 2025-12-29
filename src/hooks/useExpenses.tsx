@@ -70,6 +70,12 @@ export function useExpenses(groupId?: string) {
     }
 
     try {
+      console.log("Adding expense:", {
+        ...expense,
+        paid_by: user.id,
+        user_id: user.id,
+      });
+
       const { data, error } = await supabase
         .from("expenses")
         .insert({
@@ -79,7 +85,15 @@ export function useExpenses(groupId?: string) {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Supabase error details:", {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          hint: error.hint,
+        });
+        throw error;
+      }
 
       await fetchExpenses();
       toast.success("Utgift tillagd!");

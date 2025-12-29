@@ -63,7 +63,24 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || !category || !description) return;
+    console.log("AddExpenseModal handleSubmit called", { amount, category, description, groupId, members });
+
+    // Validate required fields
+    if (!amount || !category || !description) {
+      if (!amount) {
+        toast.error("Ange ett belopp");
+        return;
+      }
+      if (!description) {
+        toast.error("Ange en beskrivning");
+        return;
+      }
+      if (!category) {
+        toast.error("Välj en kategori");
+        return;
+      }
+      return;
+    }
 
     const totalAmount = parseFloat(amount);
 
