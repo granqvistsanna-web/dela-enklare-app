@@ -32,24 +32,20 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
   const [useCustomSplit, setUseCustomSplit] = useState(false);
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
 
-  // Initialize custom splits when toggled on or when members change
-  // Note: intentionally NOT reacting to amount/customSplits changes to avoid resetting user's custom values
+  // Initialize custom splits when toggled on, when members change, or when amount changes
   useEffect(() => {
     if (useCustomSplit && amount && members.length > 0) {
       const totalAmount = parseFloat(amount) || 0;
       const perPerson = totalAmount / members.length;
       const splits: Record<string, string> = {};
       members.forEach((member) => {
-        if (!customSplits[member.user_id]) {
-          splits[member.user_id] = perPerson.toFixed(2);
-        } else {
-          splits[member.user_id] = customSplits[member.user_id];
-        }
+        // Only preserve existing values if they exist and we're just changing members
+        // Always recalculate when amount changes to keep sum in sync
+        splits[member.user_id] = perPerson.toFixed(2);
       });
       setCustomSplits(splits);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [useCustomSplit, members]);
+  }, [useCustomSplit, members, amount]);
 
   const handleSplitChange = (userId: string, value: string) => {
     setCustomSplits((prev) => ({
