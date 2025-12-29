@@ -66,16 +66,18 @@ export function calculateIncomeSettlement(
   if (totalIncome % 2 === 1) {
     // Odd total - one person gets floor, the other gets ceiling
     const floorShare = Math.floor(totalIncome / 2);
-    shareA = floorShare;
-    shareB = totalIncome - shareA;
+    const ceilingShare = floorShare + 1;
 
     // Assign extra cent to higher earner (tie → person A)
     if (personBIncome > personAIncome) {
       // Person B earned more, so B gets the extra cent
-      shareA = totalIncome - floorShare - 1;
-      shareB = floorShare + 1;
+      shareA = floorShare;
+      shareB = ceilingShare;
+    } else {
+      // Person A earned more or equal, so A gets the extra cent
+      shareA = ceilingShare;
+      shareB = floorShare;
     }
-    // If personAIncome >= personBIncome (including ties), A already has floor
   } else {
     // Even total - split exactly in half
     shareA = totalIncome / 2;
