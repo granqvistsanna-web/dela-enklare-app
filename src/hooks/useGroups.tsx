@@ -35,7 +35,7 @@ export function useGroups() {
   const [household, setHousehold] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const ensureHouseholdExists = async (): Promise<string | null> => {
+  const ensureHouseholdExists = useCallback(async (): Promise<string | null> => {
     if (!user) return null;
 
     try {
@@ -78,7 +78,7 @@ export function useGroups() {
       console.error("Error ensuring household exists:", error);
       return null;
     }
-  };
+  }, [user]);
 
   const fetchGroups = useCallback(async () => {
     if (!user) {
@@ -173,7 +173,7 @@ export function useGroups() {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, [user, ensureHouseholdExists]);
 
   useEffect(() => {
     fetchGroups();

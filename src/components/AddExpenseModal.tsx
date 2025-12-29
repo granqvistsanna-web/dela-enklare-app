@@ -7,6 +7,7 @@ import { GroupMember } from "@/hooks/useGroups";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { ExpenseSplit } from "@/hooks/useExpenses";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AddExpenseModalProps {
   isOpen: boolean;
@@ -25,6 +26,7 @@ interface AddExpenseModalProps {
 }
 
 export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: AddExpenseModalProps) {
+  const { user } = useAuth();
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(DEFAULT_CATEGORIES[0].id);
   const [description, setDescription] = useState("");
@@ -63,7 +65,6 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("AddExpenseModal handleSubmit called", { amount, category, description, groupId, members });
 
     // Validate required fields
     if (!amount || !category || !description) {
@@ -123,7 +124,7 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
     onAdd({
       group_id: groupId,
       amount: totalAmount,
-      paid_by: "",
+      paid_by: user?.id || "",
       category,
       description,
       date,
