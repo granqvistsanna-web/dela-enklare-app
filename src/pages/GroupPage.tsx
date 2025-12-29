@@ -28,10 +28,16 @@ import { SettlementModal } from "@/components/SettlementModal";
 import { SettlementHistory } from "@/components/SettlementHistory";
 import { ImportModal } from "@/components/ImportModal";
 import { AddMembersModal } from "@/components/AddMembersModal";
+import { IncomeItem } from "@/components/IncomeItem";
+import { AddIncomeModal } from "@/components/AddIncomeModal";
+import { EditIncomeModal } from "@/components/EditIncomeModal";
+import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
+import { useIncomes, Income, IncomeType } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
+import { getIncomesForMonth } from "@/lib/incomeUtils";
 import { calculateBalance } from "@/lib/balanceUtils";
 import {
   Trash2,
@@ -54,6 +60,7 @@ const GroupPage = () => {
   const { user } = useAuth();
   const { groups, loading: groupsLoading, deleteGroup, addMembers, removeMember, regenerateInviteCode, refetch } = useGroups();
   const { expenses, loading: expensesLoading, addExpense, addExpenses, updateExpense, deleteExpense } = useExpenses(id);
+  const { incomes, loading: incomesLoading, addIncome, updateIncome, deleteIncome } = useIncomes(id);
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(id);
 
   // Memoize group lookup to prevent recalculation and potential race conditions
@@ -71,7 +78,23 @@ const GroupPage = () => {
   const [copiedCode, setCopiedCode] = useState(false);
   const [isRegeneratingCode, setIsRegeneratingCode] = useState(false);
 
-  const loading = groupsLoading || expensesLoading || settlementsLoading;
+  // Income modal states
+  const [isAddIncomeModalOpen, setIsAddIncomeModalOpen] = useState(false);
+  const [isEditIncomeModalOpen, setIsEditIncomeModalOpen] = useState(false);
+  const [editingIncome, setEditingIncome] = useState<Income | null>(null);
+
+  // Income filter states
+  const currentDate = new Date();
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1); // 1-12
+  const [filterRecipient, setFilterRecipient] = useState<string | "all">("all");
+  const [filterType, setFilterType] = useState<IncomeType | "all">("all");
+  const [filterIncluded, setFilterIncluded] = useState<"all" | "included" | "excluded">("all");
+
+  // Track active tab
+  const [activeTab, setActiveTab] = useState("expenses");
+
+  const loading = groupsLoading || expensesLoading || incomesLoading || settlementsLoading;
 
   const balances = useMemo(
     () => (group ? calculateBalance(expenses, group.members) : []),
@@ -144,6 +167,55 @@ const GroupPage = () => {
   const handleDeleteExpense = useCallback(async (expenseId: string) => {
     await deleteExpense(expenseId);
   }, [deleteExpense]);
+
+  // Income handlers
+  const handleAddIncome = useCallback(async (newIncome: any) => {
+    return await addIncome(newIncome);
+  }, [addIncome]);
+
+  const handleEditIncome = useCallback((income: Income) => {
+    setEditingIncome(income);
+    setIsEditIncomeModalOpen(true);
+  }, []);
+
+  const handleSaveIncome = useCallback(async (updatedIncome: Income) => {
+    await updateIncome(updatedIncome.id, {
+      amount: updatedIncome.amount,
+      recipient: updatedIncome.recipient,
+      type: updatedIncome.type,
+      note: updatedIncome.note,
+      date: updatedIncome.date,
+      repeat: updatedIncome.repeat,
+      included_in_split: updatedIncome.included_in_split,
+    });
+    setIsEditIncomeModalOpen(false);
+    setEditingIncome(null);
+  }, [updateIncome]);
+
+  const handleDeleteIncome = useCallback(async (incomeId: string) => {
+    await deleteIncome(incomeId);
+  }, [deleteIncome]);
+
+  // Filtered incomes based on selected month and filters
+  const filteredIncomes = useMemo(() => {
+    let filtered = getIncomesForMonth(incomes, selectedYear, selectedMonth);
+
+    if (filterRecipient !== "all") {
+      filtered = filtered.filter((i) => i.recipient === filterRecipient);
+    }
+
+    if (filterType !== "all") {
+      filtered = filtered.filter((i) => i.type === filterType);
+    }
+
+    if (filterIncluded === "included") {
+      filtered = filtered.filter((i) => i.included_in_split);
+    } else if (filterIncluded === "excluded") {
+      filtered = filtered.filter((i) => !i.included_in_split);
+    }
+
+    return filtered;
+  }, [incomes, selectedYear, selectedMonth, filterRecipient, filterType, filterIncluded]);
 
   const handleSettle = useCallback(async () => {
     if (!negativeUser || !positiveUser || !id) return;
@@ -456,7 +528,7 @@ const GroupPage = () => {
         </div>
 
         {/* Tabs */}
-        <Tabs defaultValue="expenses" className="w-full">
+        <Tabs defaultValue="expenses" value={activeTab} onValueChange={setActiveTab} className="w-full">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
             <TabsList className="h-10 w-full sm:w-auto">
               <TabsTrigger value="expenses" className="gap-2 flex-1 sm:flex-initial">
@@ -464,6 +536,14 @@ const GroupPage = () => {
                 {expenses.length > 0 && (
                   <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
                     {expenses.length}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="incomes" className="gap-2 flex-1 sm:flex-initial">
+                Inkomster
+                {incomes.length > 0 && (
+                  <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                    {incomes.length}
                   </span>
                 )}
               </TabsTrigger>
@@ -478,24 +558,34 @@ const GroupPage = () => {
             </TabsList>
 
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsImportModalOpen(true)}
-                className="gap-2 h-9 sm:h-8 flex-1 sm:flex-initial"
-              >
-                <Upload size={14} />
-                <span className="hidden sm:inline">Importera</span>
-                <span className="sm:hidden">Importera</span>
-              </Button>
-              <Button
-                size="sm"
-                onClick={() => setIsAddModalOpen(true)}
-                className="gap-2 h-9 sm:h-8 flex-1 sm:flex-initial"
-              >
-                <Plus size={14} />
-                Lägg till
-              </Button>
+              {activeTab === "expenses" && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsImportModalOpen(true)}
+                  className="gap-2 h-9 sm:h-8 flex-1 sm:flex-initial"
+                >
+                  <Upload size={14} />
+                  <span className="hidden sm:inline">Importera</span>
+                  <span className="sm:hidden">Importera</span>
+                </Button>
+              )}
+              {(activeTab === "expenses" || activeTab === "incomes") && (
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    if (activeTab === "expenses") {
+                      setIsAddModalOpen(true);
+                    } else if (activeTab === "incomes") {
+                      setIsAddIncomeModalOpen(true);
+                    }
+                  }}
+                  className="gap-2 h-9 sm:h-8 flex-1 sm:flex-initial"
+                >
+                  <Plus size={14} />
+                  Lägg till
+                </Button>
+              )}
             </div>
           </div>
 
@@ -537,6 +627,121 @@ const GroupPage = () => {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          <TabsContent value="incomes" className="mt-0">
+            <div className="space-y-6">
+              {/* Month selector and filters */}
+              <Card className="border-border/50">
+                <CardContent className="p-4">
+                  <div className="grid gap-4 sm:grid-cols-2 md:grid-cols-4">
+                    <div className="space-y-2">
+                      <label className="text-xs text-muted-foreground">Månad</label>
+                      <select
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                      >
+                        {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                          <option key={month} value={month}>
+                            {new Date(2000, month - 1, 1).toLocaleDateString("sv-SE", { month: "long" })}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs text-muted-foreground">År</label>
+                      <select
+                        value={selectedYear}
+                        onChange={(e) => setSelectedYear(Number(e.target.value))}
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                      >
+                        {Array.from({ length: 3 }, (_, i) => currentDate.getFullYear() - i).map((year) => (
+                          <option key={year} value={year}>
+                            {year}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs text-muted-foreground">Person</label>
+                      <select
+                        value={filterRecipient}
+                        onChange={(e) => setFilterRecipient(e.target.value)}
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                      >
+                        <option value="all">Alla</option>
+                        {group.members.map((member) => (
+                          <option key={member.user_id} value={member.user_id}>
+                            {member.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs text-muted-foreground">Status</label>
+                      <select
+                        value={filterIncluded}
+                        onChange={(e) => setFilterIncluded(e.target.value as any)}
+                        className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
+                      >
+                        <option value="all">Alla</option>
+                        <option value="included">Inkluderade</option>
+                        <option value="excluded">Exkluderade</option>
+                      </select>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Income overview card */}
+              <IncomeOverviewCard
+                incomes={incomes}
+                members={group.members}
+                selectedYear={selectedYear}
+                selectedMonth={selectedMonth}
+              />
+
+              {/* Income list */}
+              {filteredIncomes.length > 0 ? (
+                <Card className="border-border/50">
+                  <CardContent className="p-0">
+                    <div className="divide-y divide-border/50">
+                      {filteredIncomes.map((income) => (
+                        <IncomeItem
+                          key={income.id}
+                          income={income}
+                          members={group.members}
+                          onEdit={handleEditIncome}
+                          onDelete={handleDeleteIncome}
+                          currentUserId={user?.id}
+                        />
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border-border/50 border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <div className="rounded-full bg-muted p-3 mb-4">
+                      <TrendingUp size={24} className="text-muted-foreground" />
+                    </div>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Inga inkomster för denna period
+                    </p>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setIsAddIncomeModalOpen(true)}
+                      className="gap-2"
+                    >
+                      <Plus size={14} />
+                      Lägg till inkomst
+                    </Button>
+                  </CardContent>
+                </Card>
+              )}
+            </div>
           </TabsContent>
 
           <TabsContent value="history" className="mt-0">
@@ -634,6 +839,26 @@ const GroupPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Income Modals */}
+      <AddIncomeModal
+        isOpen={isAddIncomeModalOpen}
+        onClose={() => setIsAddIncomeModalOpen(false)}
+        onAdd={handleAddIncome}
+        groupId={group.id}
+        members={group.members}
+      />
+
+      <EditIncomeModal
+        isOpen={isEditIncomeModalOpen}
+        onClose={() => {
+          setIsEditIncomeModalOpen(false);
+          setEditingIncome(null);
+        }}
+        onSave={handleSaveIncome}
+        income={editingIncome}
+        members={group.members}
+      />
     </div>
   );
 };
