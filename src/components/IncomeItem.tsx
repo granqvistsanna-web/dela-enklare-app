@@ -118,7 +118,7 @@ export const IncomeItem = memo(function IncomeItem({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-9 w-9 sm:h-8 sm:w-8 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+                className="h-11 w-11 sm:h-9 sm:w-9 text-foreground hover:bg-secondary text-xl sm:text-base"
               >
                 ⋮
               </Button>
