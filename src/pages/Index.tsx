@@ -25,7 +25,6 @@ import {
   TrendingDown,
   ArrowRight,
   Calendar,
-  PiggyBank,
   Receipt,
   DollarSign,
 } from "lucide-react";
@@ -356,25 +355,13 @@ const Index = () => {
             )}
           </div>
 
-          {/* Income and Savings Overview */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <IncomeOverviewCard
-              incomes={incomes}
-              members={primaryGroup.members}
-              selectedYear={new Date().getFullYear()}
-              selectedMonth={new Date().getMonth() + 1}
-            />
-
-            <Card className="border-border/50 border-dashed opacity-60">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-muted">
-                    <PiggyBank size={18} className="text-muted-foreground" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Income Overview */}
+          <IncomeOverviewCard
+            incomes={incomes}
+            members={primaryGroup.members}
+            selectedYear={new Date().getFullYear()}
+            selectedMonth={new Date().getMonth() + 1}
+          />
         </div>
 
         {/* Primary Actions - Moved up below summary */}
@@ -400,7 +387,7 @@ const Index = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="denna-manad" className="w-full">
-          <TabsList className="h-11 w-full sm:w-auto mb-6 grid grid-cols-4">
+          <TabsList className="h-11 w-full sm:w-auto mb-6 grid grid-cols-3">
             <TabsTrigger value="denna-manad" className="gap-2 text-sm">
               Denna månad
             </TabsTrigger>
@@ -419,9 +406,6 @@ const Index = () => {
                   {incomes.length}
                 </span>
               )}
-            </TabsTrigger>
-            <TabsTrigger value="sparande" className="gap-2 text-sm">
-              Sparande
             </TabsTrigger>
           </TabsList>
 
@@ -592,18 +576,6 @@ const Index = () => {
             )}
           </TabsContent>
 
-          {/* Sparande tab */}
-          <TabsContent value="sparande" className="mt-0">
-            <Card className="border-border/50 border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <div className="rounded-full bg-muted p-3 mb-4">
-                  <PiggyBank size={24} className="text-muted-foreground" />
-                </div>
-                <p className="text-sm text-muted-foreground mb-2">Sparande kommer snart</p>
-                <p className="text-xs text-muted-foreground">Här kommer du kunna följa era gemensamma sparkonton</p>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </main>
 
