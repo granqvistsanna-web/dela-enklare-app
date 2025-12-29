@@ -15,6 +15,12 @@ interface PublicProfile {
   name: string;
 }
 
+interface GroupMemberWithProfile {
+  group_id: string;
+  user_id: string;
+  public_profiles: PublicProfile | null;
+}
+
 interface GroupInsert {
   name: string;
   is_temporary: boolean;
@@ -88,7 +94,7 @@ export function useGroups() {
       // Build a map of group_id -> members with profiles
       const groupMembersMap = new Map<string, GroupMember[]>();
 
-      membersWithProfiles?.forEach((member: any) => {
+      membersWithProfiles?.forEach((member: GroupMemberWithProfile) => {
         const profile = member.public_profiles;
 
         // If no profile exists, create a fallback using the user_id from group_members
