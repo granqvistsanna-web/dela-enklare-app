@@ -40,24 +40,40 @@ export function useGroups() {
 
     try {
       // Check if user already has a household
-      const { data: memberData } = await supabase
+      const { data: memberData, error: memberError } = await supabase
         .from("group_members")
         .select("group_id")
         .eq("user_id", user.id)
         .limit(1)
-        .single();
+        .maybeSingle();
+
+      if (memberError) {
+        console.error("Error checking existing membership:", memberError);
+        throw memberError;
+      }
 
       if (memberData?.group_id) {
         return memberData.group_id;
       }
 
       // Create household if it doesn't exist (fallback for existing users)
+      // Generate a fresh invite code to satisfy NOT NULL constraint
+      const { data: inviteCode, error: inviteCodeError } = await supabase
+        .rpc("generate_invite_code");
+
+      if (inviteCodeError || !inviteCode) {
+        console.error("Error generating invite code:", inviteCodeError);
+        throw inviteCodeError ?? new Error("Kunde inte generera inbjudningskod");
+      }
+
       const { data: groupData, error: groupError } = await supabase
         .from("groups")
         .insert({
           name: "Mitt hushåll",
           is_temporary: false,
-        } as { name: string; is_temporary: boolean; invite_code: string })
+          created_by: user.id,
+          invite_code: inviteCode,
+        })
         .select()
         .single();
 
