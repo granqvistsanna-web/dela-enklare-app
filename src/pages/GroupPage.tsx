@@ -165,8 +165,8 @@ const GroupPage = () => {
   const handleAddMembers = useCallback(async (userIds: string[]) => {
     if (!id) return;
     await addMembers(id, userIds);
-    await refetch();
-  }, [id, addMembers, refetch]);
+    // addMembers already calls fetchGroups internally, no need to refetch
+  }, [id, addMembers]);
 
   const handleRemoveMember = useCallback(async () => {
     if (!id || !memberToRemove) return;
