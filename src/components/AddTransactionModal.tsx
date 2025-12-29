@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,12 +57,6 @@ export function AddTransactionModal({
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
 
   // Income-specific fields
-  const getInitialRecipient = useCallback(() => {
-    if (members.length > 0) return members[0].user_id;
-    if (user?.id) return user.id;
-    return "";
-  }, [members, user]);
-
   const [recipient, setRecipient] = useState(() => {
     if (members.length > 0) return members[0].user_id;
     if (user?.id) return user.id;
@@ -86,14 +80,6 @@ export function AddTransactionModal({
     }
   }, [useCustomSplit, members, amount, transactionType]);
 
-  // Update recipient when members or user changes
-  useEffect(() => {
-    const newRecipient = getInitialRecipient();
-    if (newRecipient && newRecipient !== recipient) {
-      setRecipient(newRecipient);
-    }
-  }, [getInitialRecipient, recipient]);
-
   const handleSplitChange = (userId: string, value: string) => {
     setCustomSplits((prev) => ({
       ...prev,
@@ -115,7 +101,12 @@ export function AddTransactionModal({
     setDescription("");
     setUseCustomSplit(false);
     setCustomSplits({});
-    setRecipient(getInitialRecipient());
+    // Reset recipient to first member or current user
+    if (members.length > 0) {
+      setRecipient(members[0].user_id);
+    } else if (user?.id) {
+      setRecipient(user.id);
+    }
     setIncomeType("salary");
     setNote("");
     setRepeat("none");
