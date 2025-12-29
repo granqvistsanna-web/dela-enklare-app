@@ -22,13 +22,13 @@ import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { SettlementModal } from "@/components/SettlementModal";
 import { SettlementHistory } from "@/components/SettlementHistory";
 import { ImportModal } from "@/components/ImportModal";
+import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateBalance } from "@/lib/balanceUtils";
-import { calculateIncomeSettlement } from "@/lib/incomeUtils";
 import { toast } from "sonner";
 import {
   Plus,
@@ -136,21 +136,6 @@ const Index = () => {
       }, 0),
     };
   }, [expenseBalances, primaryGroup?.members, expenses]);
-
-  // Calculate income settlement
-  const incomeSettlement = useMemo(() => {
-    if (!primaryGroup || primaryGroup.members.length < 2) {
-      return null;
-    }
-    const [personA, personB] = primaryGroup.members;
-    return calculateIncomeSettlement(
-      incomes,
-      personA.user_id,
-      personB.user_id,
-      currentYear,
-      currentMonthNum
-    );
-  }, [incomes, primaryGroup, currentYear, currentMonthNum]);
 
   const handleAddExpense = useCallback(async (newExpense: {
     group_id: string;
@@ -427,73 +412,13 @@ const Index = () => {
                 </CardContent>
               </Card>
 
-              {/* Income Summary Card */}
-              {incomeSettlement && (
-                <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
-                  <CardContent className="p-6">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2.5 rounded-lg bg-green-500/10">
-                        <DollarSign size={20} className="text-green-600 dark:text-green-400" />
-                      </div>
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Inkomster</p>
-                        <p className="text-2xl font-bold text-foreground tabular-nums mt-0.5">
-                          {(incomeSettlement.totalIncome / 100).toLocaleString("sv-SE")} kr
-                        </p>
-                      </div>
-                    </div>
-
-                    {primaryGroup.members.length > 1 && (
-                      <>
-                        <div className="space-y-2 mb-4">
-                          {primaryGroup.members.map((member, idx) => {
-                            const income = idx === 0 ? incomeSettlement.personAIncome : incomeSettlement.personBIncome;
-                            return (
-                              <div key={member.user_id} className="flex items-center justify-between text-sm">
-                                <span className="text-muted-foreground">{member.name} tjänat</span>
-                                <span className="font-semibold text-foreground tabular-nums">
-                                  {(income / 100).toLocaleString("sv-SE")} kr
-                                </span>
-                              </div>
-                            );
-                          })}
-                        </div>
-
-                        {/* Income Settlement Result */}
-                        <div className="pt-4 border-t border-border/50">
-                          <div className="flex items-center gap-2 mb-2">
-                            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Utjämning</p>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Info size={14} className="text-muted-foreground cursor-help" />
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p className="max-w-xs">50/50 delning av gemensamma inkomster</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </div>
-                          {incomeSettlement.transferAmount > 0 && incomeSettlement.transferFrom && incomeSettlement.transferTo ? (
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm font-medium text-foreground">
-                                {primaryGroup.members.find(m => m.user_id === incomeSettlement.transferFrom)?.name}
-                              </span>
-                              <ArrowRight size={16} className="text-blue-600 dark:text-blue-400" aria-label="betalar till" />
-                              <span className="text-sm font-medium text-foreground">
-                                {primaryGroup.members.find(m => m.user_id === incomeSettlement.transferTo)?.name}
-                              </span>
-                              <span className="ml-auto text-lg font-bold text-blue-600 dark:text-blue-400 tabular-nums">
-                                {(incomeSettlement.transferAmount / 100).toLocaleString("sv-SE")} kr
-                              </span>
-                            </div>
-                          ) : (
-                            <p className="text-lg font-semibold text-green-600 dark:text-green-400">Kvitt ✓</p>
-                          )}
-                        </div>
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+              {/* Income Overview Component */}
+              <IncomeOverviewCard
+                incomes={incomes}
+                members={primaryGroup.members}
+                selectedYear={currentYear}
+                selectedMonth={currentMonthNum}
+              />
 
               {/* Savings Placeholder */}
               <Card className="border-border/50 border-dashed opacity-60">
