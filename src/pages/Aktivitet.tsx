@@ -227,28 +227,28 @@ export default function Aktivitet() {
 
   return (
     <div className="lg:pl-64">
-      <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
-        <h1 className="text-3xl font-bold text-foreground mb-8">Aktivitet</h1>
+      <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+        <h1 className="text-heading text-2xl mb-6">Aktivitet</h1>
 
         {/* Search and filters */}
-        <Card className="mb-8">
-          <CardContent className="p-6">
-            <div className="grid gap-4 md:grid-cols-3">
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="grid gap-3 md:grid-cols-3">
               {/* Search */}
               <div className="md:col-span-2 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
                 <Input
                   placeholder="Sök aktivitet..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10"
+                  className="pl-9"
                 />
               </div>
 
               {/* Sort options */}
               <div className="flex gap-2">
                 <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="h-9">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -257,14 +257,14 @@ export default function Aktivitet() {
                     <SelectItem value="category">Kategori</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="icon" onClick={toggleSortDirection}>
-                  <ArrowUpDown size={18} />
+                <Button variant="outline" size="icon" onClick={toggleSortDirection} className="h-9 w-9">
+                  <ArrowUpDown size={16} />
                 </Button>
               </div>
             </div>
 
             {/* Results count */}
-            <div className="mt-4 text-sm text-muted-foreground">
+            <div className="mt-3 text-caption">
               {filteredItems.length} {filteredItems.length === 1 ? 'aktivitet' : 'aktiviteter'}
               {searchQuery && ` hittades för "${searchQuery}"`}
             </div>
@@ -273,7 +273,7 @@ export default function Aktivitet() {
 
         {/* Activity list grouped by month */}
         {groupedByMonth.length > 0 ? (
-          <div className="space-y-8">
+          <div className="space-y-6">
             {groupedByMonth.map(({ monthKey, items }) => {
               const [year, month] = monthKey.split('-');
               const monthName = MONTHS[parseInt(month) - 1];
@@ -283,27 +283,27 @@ export default function Aktivitet() {
               return (
                 <div key={monthKey}>
                   {/* Month header */}
-                  <div className="mb-4">
+                  <div className="mb-3">
                     <div className="flex items-center justify-between mb-2">
-                      <h2 className="text-xl font-semibold text-foreground">
+                      <h2 className="text-heading text-base">
                         {monthName} {year}
                       </h2>
-                      <div className="flex gap-4 text-sm">
-                        <span className="text-green-600 dark:text-green-400">
+                      <div className="flex gap-3 text-sm font-medium">
+                        <span className="text-green-600 dark:text-green-400 tabular-nums">
                           +{totalIncomes.toLocaleString("sv-SE")} kr
                         </span>
-                        <span className="text-red-600 dark:text-red-400">
+                        <span className="text-red-600 dark:text-red-400 tabular-nums">
                           -{totalExpenses.toLocaleString("sv-SE")} kr
                         </span>
                       </div>
                     </div>
-                    <div className="h-px bg-border" />
+                    <div className="h-px bg-border/60" />
                   </div>
 
                   {/* Items for this month */}
                   <Card>
                     <CardContent className="p-0">
-                      <div className="divide-y divide-border/50">
+                      <div className="divide-y divide-border/40">
                         {items.map((item, index) => {
                           if (item.type === 'expense') {
                             const expense = item.data as Expense;
@@ -323,15 +323,15 @@ export default function Aktivitet() {
                             return (
                               <div
                                 key={`income-${income.id}`}
-                                className="p-4 sm:p-6 hover:bg-muted/20 transition-colors"
+                                className="p-3.5 notion-hover cursor-pointer"
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
-                                    <DollarSign size={18} className="text-green-600 dark:text-green-400" />
+                                  <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
+                                    <DollarSign size={16} className="text-green-600 dark:text-green-400" />
                                   </div>
                                   <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-foreground">{income.note || 'Inkomst'}</p>
-                                    <p className="text-sm text-muted-foreground">
+                                    <p className="font-medium text-foreground text-sm">{income.note || 'Inkomst'}</p>
+                                    <p className="text-caption">
                                       {household.members.find(m => m.user_id === income.recipient)?.name} •{' '}
                                       {new Date(income.date).toLocaleDateString('sv-SE', {
                                         day: 'numeric',
@@ -341,7 +341,7 @@ export default function Aktivitet() {
                                     </p>
                                   </div>
                                   <div className="text-right">
-                                    <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums">
+                                    <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums text-sm">
                                       +{(income.amount / 100).toLocaleString('sv-SE')} kr
                                     </p>
                                   </div>
@@ -359,10 +359,12 @@ export default function Aktivitet() {
           </div>
         ) : (
           <Card className="border-dashed">
-            <CardContent className="flex flex-col items-center justify-center py-16">
-              <Calendar size={48} className="text-muted-foreground mb-4" />
-              <p className="text-lg font-medium text-foreground mb-2">Inga aktiviteter</p>
-              <p className="text-sm text-muted-foreground">
+            <CardContent className="flex flex-col items-center justify-center py-12">
+              <div className="rounded-full bg-muted p-3 mb-3">
+                <Calendar size={24} className="text-muted-foreground" />
+              </div>
+              <p className="text-base font-medium text-foreground mb-1">Inga aktiviteter</p>
+              <p className="text-caption">
                 {searchQuery ? 'Inga resultat matchade din sökning' : 'Börja genom att lägga till en utgift eller inkomst'}
               </p>
             </CardContent>
