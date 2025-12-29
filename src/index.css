@@ -41,7 +41,7 @@
     --warning-foreground: 0 0% 98%;
 
     /* Borders and inputs */
-    --border: 0 0% 90%;
+    --border: 0 0% 92%;
     --input: 0 0% 90%;
     --ring: 0 0% 9%;
 
@@ -212,17 +212,19 @@
     background-color: hsl(var(--secondary));
   }
 
-  /* Subtle shadow for cards */
+  /* Subtle shadow for cards - Notion style */
   .shadow-notion {
     box-shadow:
-      0 1px 2px 0 rgba(0, 0, 0, 0.03),
-      0 1px 3px 0 rgba(0, 0, 0, 0.04);
+      0 0 0 1px rgba(0, 0, 0, 0.024),
+      0 1px 2px 0 rgba(0, 0, 0, 0.02),
+      0 2px 4px 0 rgba(0, 0, 0, 0.024);
   }
 
   .shadow-notion-lg {
     box-shadow:
-      0 2px 4px 0 rgba(0, 0, 0, 0.05),
-      0 4px 12px 0 rgba(0, 0, 0, 0.08);
+      0 0 0 1px rgba(0, 0, 0, 0.032),
+      0 2px 4px 0 rgba(0, 0, 0, 0.04),
+      0 8px 16px 0 rgba(0, 0, 0, 0.06);
   }
 
   /* Text styles */
