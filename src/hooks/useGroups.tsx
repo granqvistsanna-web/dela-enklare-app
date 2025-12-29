@@ -39,7 +39,7 @@ export function useGroups() {
     if (!user) return null;
 
     try {
-      // Check if user already has a household
+      // Check if user already has a household membership
       const { data: memberData } = await supabase
         .from("group_members")
         .select("group_id")
@@ -51,13 +51,37 @@ export function useGroups() {
         return memberData.group_id;
       }
 
+      // Check if user created a household but isn't a member
+      const { data: createdGroup } = await supabase
+        .from("groups")
+        .select("id")
+        .eq("created_by", user.id)
+        .limit(1)
+        .single();
+
+      if (createdGroup) {
+        // Add user as member of their created household
+        const { error: memberError } = await supabase
+          .from("group_members")
+          .insert({
+            group_id: createdGroup.id,
+            user_id: user.id,
+          });
+
+        if (memberError && memberError.code !== '23505') { // Ignore duplicate key errors
+          console.error("Error adding user to created household:", memberError);
+        }
+
+        return createdGroup.id;
+      }
+
       // Create household if it doesn't exist (fallback for existing users)
       const { data: groupData, error: groupError } = await supabase
         .from("groups")
         .insert({
           name: "Mitt hushåll",
           is_temporary: false,
-        } as { name: string; is_temporary: boolean; invite_code: string })
+        })
         .select()
         .single();
 

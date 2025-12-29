@@ -116,6 +116,8 @@ export function AddTransactionModal({
   };
 
   const handleSubmitExpense = () => {
+    console.log("handleSubmitExpense called", { amount, category, description, groupId, members });
+
     // Validate required fields
     if (!amount || !category || !description) {
       if (!amount) {
@@ -171,7 +173,7 @@ export function AddTransactionModal({
       });
     }
 
-    onAddExpense({
+    const expenseData = {
       group_id: groupId,
       amount: totalAmount,
       paid_by: "",
@@ -179,12 +181,17 @@ export function AddTransactionModal({
       description,
       date,
       splits,
-    });
+    };
+
+    console.log("Submitting expense:", expenseData);
+    onAddExpense(expenseData);
 
     return true;
   };
 
   const handleSubmitIncome = async () => {
+    console.log("handleSubmitIncome called", { amount, recipient, groupId, members, user });
+
     // Validate required fields
     if (!amount || !recipient) {
       if (!amount) {
@@ -213,7 +220,7 @@ export function AddTransactionModal({
     // Convert to cents
     const amountCents = Math.round(amountKr * 100);
 
-    const result = await onAddIncome({
+    const incomeData = {
       group_id: groupId,
       amount: amountCents,
       recipient,
@@ -222,7 +229,10 @@ export function AddTransactionModal({
       date,
       repeat,
       included_in_split: includedInSplit,
-    });
+    };
+
+    console.log("Submitting income:", incomeData);
+    const result = await onAddIncome(incomeData);
 
     return !!result;
   };
