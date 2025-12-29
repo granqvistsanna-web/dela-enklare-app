@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExpenseItem } from "@/components/ExpenseItem";
-import { AddExpenseModal } from "@/components/AddExpenseModal";
+import { AddTransactionModal } from "@/components/AddTransactionModal";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { SettlementModal } from "@/components/SettlementModal";
 import { SettlementHistory } from "@/components/SettlementHistory";
@@ -47,7 +47,7 @@ const Index = () => {
     deleteExpense,
   } = useExpenses(primaryGroup?.id);
 
-  const { incomes, loading: incomesLoading } = useIncomes(primaryGroup?.id);
+  const { incomes, loading: incomesLoading, addIncome } = useIncomes(primaryGroup?.id);
 
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(primaryGroup?.id);
 
@@ -114,6 +114,10 @@ const Index = () => {
   }) => {
     await addExpense(newExpense);
   }, [addExpense]);
+
+  const handleAddIncome = useCallback(async (newIncome: any) => {
+    return await addIncome(newIncome);
+  }, [addIncome]);
 
   const handleImportExpenses = useCallback(async (newExpenses: {
     group_id: string;
@@ -604,12 +608,14 @@ const Index = () => {
       </main>
 
       {/* Modals */}
-      <AddExpenseModal
+      <AddTransactionModal
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
-        onAdd={handleAddExpense}
+        onAddExpense={handleAddExpense}
+        onAddIncome={handleAddIncome}
         groupId={primaryGroup.id}
         members={primaryGroup.members}
+        defaultType="expense"
       />
 
       <ImportModal
