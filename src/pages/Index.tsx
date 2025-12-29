@@ -226,8 +226,29 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Group name - cleaner hierarchy */}
-        <h1 className="text-3xl font-bold text-foreground mb-8">{primaryGroup.name}</h1>
+        {/* Group name with action buttons */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <h1 className="text-3xl font-bold text-foreground">{primaryGroup.name}</h1>
+          <div className="flex gap-3">
+            <Button
+              size="default"
+              onClick={() => setIsAddModalOpen(true)}
+              className="gap-2 flex-1 sm:flex-initial hover:scale-105 active:scale-95 transition-transform shadow-sm"
+            >
+              <Plus size={16} />
+              Lägg till
+            </Button>
+            <Button
+              variant="outline"
+              size="default"
+              onClick={() => setIsImportModalOpen(true)}
+              className="gap-2 flex-1 sm:flex-initial hover:scale-105 active:scale-95 transition-transform"
+            >
+              <Upload size={16} />
+              Importera
+            </Button>
+          </div>
+        </div>
 
         {/* Summary Section - Comprehensive household overview */}
         <div className="mb-8">
@@ -362,27 +383,6 @@ const Index = () => {
             selectedYear={new Date().getFullYear()}
             selectedMonth={new Date().getMonth() + 1}
           />
-        </div>
-
-        {/* Primary Actions - Moved up below summary */}
-        <div className="flex gap-3 mb-8">
-          <Button
-            size="default"
-            onClick={() => setIsAddModalOpen(true)}
-            className="gap-2 flex-1 sm:flex-initial hover:scale-105 active:scale-95 transition-transform shadow-sm"
-          >
-            <Plus size={16} />
-            Lägg till
-          </Button>
-          <Button
-            variant="outline"
-            size="default"
-            onClick={() => setIsImportModalOpen(true)}
-            className="gap-2 flex-1 sm:flex-initial hover:scale-105 active:scale-95 transition-transform"
-          >
-            <Upload size={16} />
-            Importera
-          </Button>
         </div>
 
         {/* Main Content Tabs */}
