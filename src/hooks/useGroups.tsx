@@ -70,7 +70,7 @@ export function useGroups() {
           .select(`
             group_id,
             user_id,
-            public_profiles!inner (
+            public_profiles (
               id,
               user_id,
               name
