@@ -49,10 +49,10 @@ export function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGroupModal
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-background border border-border rounded-md w-full max-w-md p-6">
+            <div className="bg-background border border-border rounded-md w-full max-w-md p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium text-foreground">Ny grupp</h2>
-                <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+                <button onClick={onClose} className="text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center -mr-1">
                   ✕
                 </button>
               </div>
@@ -69,13 +69,14 @@ export function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGroupModal
                     onChange={(e) => setName(e.target.value)}
                     required
                     autoFocus
+                    className="h-11 sm:h-10"
                   />
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div>
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
                     <Label htmlFor="temporary" className="text-sm text-foreground">Tillfällig</Label>
-                    <p className="text-xs text-muted-foreground">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       För resor eller engångsprojekt
                     </p>
                   </div>
@@ -83,12 +84,13 @@ export function CreateGroupModal({ isOpen, onClose, onSubmit }: CreateGroupModal
                     id="temporary"
                     checked={isTemporary}
                     onCheckedChange={setIsTemporary}
+                    className="shrink-0"
                   />
                 </div>
 
                 <Button
                   type="submit"
-                  className="w-full"
+                  className="w-full h-11 sm:h-10"
                   disabled={isSubmitting || !name.trim()}
                 >
                   {isSubmitting ? "Skapar..." : "Skapa"}

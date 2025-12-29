@@ -97,10 +97,10 @@ export function JoinGroupModal({ isOpen, onClose, onSuccess }: JoinGroupModalPro
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-background border border-border rounded-md w-full max-w-sm p-6">
+            <div className="bg-background border border-border rounded-md w-full max-w-sm p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium text-foreground">Gå med i grupp</h2>
-                <button onClick={handleClose} className="text-muted-foreground hover:text-foreground">
+                <button onClick={handleClose} className="text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center -mr-1">
                   ✕
                 </button>
               </div>
@@ -114,13 +114,13 @@ export function JoinGroupModal({ isOpen, onClose, onSuccess }: JoinGroupModalPro
                     value={code}
                     onChange={(e) => setCode(e.target.value.toUpperCase())}
                     placeholder="ABC123"
-                    className="text-center text-lg tracking-widest font-mono"
+                    className="text-center text-lg tracking-widest font-mono h-12 sm:h-10"
                     maxLength={6}
                   />
                 </div>
-                <Button 
-                  onClick={handleJoin} 
-                  className="w-full"
+                <Button
+                  onClick={handleJoin}
+                  className="w-full h-11 sm:h-10"
                   disabled={loading || code.length < 6}
                 >
                   {loading ? "Går med..." : "Gå med"}
