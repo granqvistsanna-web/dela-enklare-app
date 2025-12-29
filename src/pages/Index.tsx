@@ -23,7 +23,6 @@ import {
   TrendingUp,
   ArrowRight,
   Calendar,
-  PiggyBank,
 } from "lucide-react";
 
 const Index = () => {
@@ -271,27 +270,13 @@ const Index = () => {
             ) : null}
           </div>
 
-          {/* Income and Savings Overview */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <IncomeOverviewCard
-              incomes={incomes}
-              members={primaryGroup.members}
-              selectedYear={new Date().getFullYear()}
-              selectedMonth={new Date().getMonth() + 1}
-            />
-
-            <Card className="border-border/50 border-dashed opacity-60">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-muted">
-                    <PiggyBank size={18} className="text-muted-foreground" />
-                  </div>
-                  <p className="text-sm font-medium text-muted-foreground">Gemensamt sparande</p>
-                </div>
-                <p className="text-lg text-muted-foreground">Kommer snart</p>
-              </CardContent>
-            </Card>
-          </div>
+          {/* Income Overview */}
+          <IncomeOverviewCard
+            incomes={incomes}
+            members={primaryGroup.members}
+            selectedYear={new Date().getFullYear()}
+            selectedMonth={new Date().getMonth() + 1}
+          />
         </div>
 
         {/* Tabs */}
