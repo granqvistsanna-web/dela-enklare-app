@@ -45,7 +45,7 @@ const Landing = () => {
       <nav className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
         <div className="container max-w-6xl mx-auto px-4 sm:px-6 py-3 sm:py-4 flex justify-between items-center">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Päronsplit" className="h-10 sm:h-12" />
+            <img src={logo} alt="Päronsplit" className="h-14 sm:h-16" />
           </div>
           <Button
             variant="ghost"

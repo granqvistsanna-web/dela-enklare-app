@@ -15,7 +15,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm shadow-sm">
       <div className="container flex h-16 items-center justify-between max-w-4xl mx-auto px-4">
         <Link to="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img src={logo} alt="Päronsplit" className="h-14 sm:h-20 w-auto" />
+          <img src={logo} alt="Päronsplit" className="h-16 sm:h-24 w-auto" />
         </Link>
 
         {/* Desktop Navigation */}
