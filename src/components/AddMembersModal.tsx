@@ -104,9 +104,9 @@ export function AddMembersModal({ isOpen, onClose, onSubmit, currentMembers }: A
                               />
                               <div className="flex items-center gap-2 flex-1">
                                 <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
-                                  {u.name.charAt(0).toUpperCase()}
+                                  {(u.name || '?').charAt(0).toUpperCase()}
                                 </div>
-                                <span className="text-sm text-foreground">{u.name}</span>
+                                <span className="text-sm text-foreground">{u.name || 'Okänd'}</span>
                               </div>
                             </div>
                           ))}
