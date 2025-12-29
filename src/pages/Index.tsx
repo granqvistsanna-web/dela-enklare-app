@@ -254,7 +254,7 @@ const Index = () => {
         <div className="mb-8">
           <div className="grid gap-6 mb-6">
             {/* Expenses Summary Card */}
-            <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <Card className="border-border/50 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2.5 rounded-lg bg-red-500/10">
@@ -319,7 +319,7 @@ const Index = () => {
 
             {/* Income Summary Card */}
             {incomeSettlement && (
-              <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <Card className="border-border/50 shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2.5 rounded-lg bg-green-500/10">
@@ -443,7 +443,7 @@ const Index = () => {
                             currentUserId={user?.id}
                           />
                         ) : (
-                          <div key={`income-${item.data.id}`} className="p-4 hover:bg-muted/30 transition-colors">
+                          <div key={`income-${item.data.id}`} className="p-4">
                             <div className="flex items-center gap-3">
                               <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
                                 <DollarSign size={18} className="text-green-600 dark:text-green-400" />
@@ -539,7 +539,7 @@ const Index = () => {
                 <CardContent className="p-4">
                   <div className="space-y-3">
                     {incomes.map((income) => (
-                      <div key={income.id} className="p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                      <div key={income.id} className="p-3 rounded-lg">
                         <div className="flex items-center gap-3">
                           <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
                             <DollarSign size={18} className="text-green-600 dark:text-green-400" />
