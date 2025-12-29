@@ -204,7 +204,7 @@ const GroupPage = () => {
     }
   }, [group?.invite_code]);
 
-  // Conditional returns must come after ALL hooks
+  // Render loading state
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -222,6 +222,7 @@ const GroupPage = () => {
     );
   }
 
+  // Render not found state
   if (!group) {
     return (
       <div className="min-h-screen bg-background">
@@ -236,6 +237,7 @@ const GroupPage = () => {
     );
   }
 
+  // Main render
   return (
     <div className="min-h-screen bg-background">
       <Header />
