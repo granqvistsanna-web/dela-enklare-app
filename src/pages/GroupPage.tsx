@@ -204,11 +204,12 @@ const GroupPage = () => {
     }
   }, [group?.invite_code]);
 
-  // Render loading state
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
+  // Single return with conditional rendering
+  return (
+    <div className="min-h-screen bg-background">
+      <Header />
+
+      {loading ? (
         <main className="container py-12">
           <div className="h-6 w-32 rounded bg-secondary animate-pulse mb-4" />
           <div className="h-8 w-48 rounded bg-secondary animate-pulse mb-8" />
@@ -218,30 +219,14 @@ const GroupPage = () => {
             ))}
           </div>
         </main>
-      </div>
-    );
-  }
-
-  // Render not found state
-  if (!group) {
-    return (
-      <div className="min-h-screen bg-background">
-        <Header />
+      ) : !group ? (
         <main className="container py-12">
           <p className="text-muted-foreground mb-4">Gruppen hittades inte.</p>
           <Link to="/dashboard" className="text-sm text-foreground hover:underline">
             ← Tillbaka
           </Link>
         </main>
-      </div>
-    );
-  }
-
-  // Main render
-  return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
+      ) : (
       <main className="container max-w-4xl py-8 px-4 sm:px-6">
         {/* Back & Title */}
         <div className="mb-10">
@@ -628,6 +613,8 @@ const GroupPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </main>
+      )}
     </div>
   );
 };
