@@ -11,7 +11,7 @@ import { useGroups } from "@/hooks/useGroups";
 import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink, Palette, Sun, Moon, Monitor } from "lucide-react";
+import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink, Palette, Sun, Moon, Monitor, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -156,17 +156,16 @@ const Settings = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Groups Card */}
+          {/* Household Invitations Card */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Grupper</CardTitle>
+                <CardTitle>Hushållsinbjudningar</CardTitle>
               </div>
-              <CardDescription>Hantera dina grupper och gruppmedlemskap</CardDescription>
+              <CardDescription>Bjud in andra användare till ditt hushåll</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Group List */}
+            <CardContent className="space-y-6">
               {groupsLoading ? (
                 <div className="space-y-2">
                   {[1, 2].map((i) => (
@@ -174,60 +173,92 @@ const Settings = () => {
                   ))}
                 </div>
               ) : groups.length > 0 ? (
-                <div className="space-y-2">
-                  {groups.map((group) => (
-                    <div
-                      key={group.id}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-secondary/30 transition-colors"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-foreground truncate">{group.name}</p>
-                          {group.is_temporary && (
-                            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground shrink-0">
-                              Tillfällig
-                            </span>
-                          )}
+                <>
+                  {/* Invite Code Section */}
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Inbjudningskod</p>
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 px-4 py-3 bg-muted/50 rounded-lg border border-border/50">
+                          <p className="text-2xl font-mono font-semibold text-foreground tracking-widest text-center">
+                            {groups[0]?.invite_code || '------'}
+                          </p>
                         </div>
-                        <p className="text-sm text-muted-foreground">
-                          {group.members.length} {group.members.length === 1 ? "medlem" : "medlemmar"}
-                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            if (groups[0]?.invite_code) {
+                              await navigator.clipboard.writeText(groups[0].invite_code);
+                              toast.success("Kod kopierad!");
+                            }
+                          }}
+                          className="gap-2 h-11"
+                        >
+                          <Copy size={14} />
+                          <span className="hidden sm:inline">Kopiera</span>
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/grupp/${group.id}`)}
-                        className="gap-2 shrink-0"
-                      >
-                        <span className="hidden sm:inline">Öppna</span>
-                        <ExternalLink size={14} />
-                      </Button>
+                      <p className="text-xs text-muted-foreground mt-2">
+                        Dela denna kod med andra för att bjuda in dem till ditt hushåll
+                      </p>
                     </div>
-                  ))}
-                </div>
+                  </div>
+
+                  {/* Members List */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Medlemmar ({groups[0]?.members.length || 0})</p>
+                    <div className="space-y-2">
+                      {groups[0]?.members.map((member) => (
+                        <div
+                          key={member.user_id}
+                          className="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-background hover:bg-muted/20 transition-colors"
+                        >
+                          <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
+                            {member.name?.charAt(0).toUpperCase() || "?"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-foreground truncate">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {member.user_id === profile?.user_id ? "Du" : "Medlem"}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Join Another Household */}
+                  <div className="pt-2 border-t border-border/50">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsJoinModalOpen(true)}
+                      className="w-full sm:w-auto"
+                    >
+                      Gå med i ett hushåll
+                    </Button>
+                  </div>
+                </>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-sm text-muted-foreground mb-4">Inga grupper ännu</p>
+                  <p className="text-sm text-muted-foreground mb-4">Du har inget hushåll ännu</p>
+                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                    <Button
+                      onClick={() => setIsCreateModalOpen(true)}
+                      className="gap-2"
+                    >
+                      <Plus size={14} />
+                      Skapa hushåll
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsJoinModalOpen(true)}
+                    >
+                      Gå med i hushåll
+                    </Button>
+                  </div>
                 </div>
               )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                <Button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="w-full sm:w-auto gap-2"
-                >
-                  <Plus size={14} />
-                  Skapa ny grupp
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsJoinModalOpen(true)}
-                  className="w-full sm:w-auto"
-                >
-                  Gå med i grupp
-                </Button>
-              </div>
             </CardContent>
           </Card>
 
