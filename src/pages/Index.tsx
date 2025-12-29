@@ -354,6 +354,7 @@ const Index = () => {
                 </CardContent>
               </Card>
             )}
+          </div>
 
           {/* Income and Savings Overview */}
           <div className="grid gap-4 md:grid-cols-2">
