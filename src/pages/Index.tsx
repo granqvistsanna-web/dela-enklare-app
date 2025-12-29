@@ -41,7 +41,7 @@ const Index = () => {
     deleteExpense,
   } = useExpenses(household?.id);
 
-  const { incomes, loading: incomesLoading, addIncome } = useIncomes(primaryGroup?.id);
+  const { incomes, loading: incomesLoading, addIncome } = useIncomes(household?.id);
 
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(household?.id);
 
@@ -607,8 +607,8 @@ const Index = () => {
         onClose={() => setIsAddModalOpen(false)}
         onAddExpense={handleAddExpense}
         onAddIncome={handleAddIncome}
-        groupId={primaryGroup.id}
-        members={primaryGroup.members}
+        groupId={household.id}
+        members={household.members}
         defaultType="expense"
       />
 
