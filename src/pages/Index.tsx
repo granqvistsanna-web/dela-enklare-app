@@ -13,7 +13,7 @@ import { ImportModal } from "@/components/ImportModal";
 import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
-import { useIncomes } from "@/hooks/useIncomes";
+import { useIncomes, Income } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateBalance } from "@/lib/balanceUtils";
@@ -21,6 +21,10 @@ import { calculateIncomeSettlement } from "@/lib/incomeUtils";
 import {
   Plus,
   Upload,
+  TrendingDown,
+  DollarSign,
+  Calendar,
+  TrendingUp,
 } from "lucide-react";
 
 const Index = () => {
@@ -156,7 +160,7 @@ const Index = () => {
 
   // Combine expenses and incomes for "Denna månad" view
   const combinedItems = useMemo(() => {
-    const items: Array<{ type: 'expense' | 'income'; data: Expense | any; date: string }> = [];
+    const items: Array<{ type: 'expense' | 'income'; data: Expense | Income; date: string }> = [];
 
     expenses.forEach(expense => {
       items.push({ type: 'expense', data: expense, date: expense.date });
@@ -541,82 +545,46 @@ const Index = () => {
             )}
           </TabsContent>
 
-          {/* Utgifter tab */}
-          <TabsContent value="utgifter" className="mt-0">
-            {expenses.length > 0 ? (
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-0">
-                  <div className="divide-y divide-border/50">
-                    {expenses.map((expense, index) => (
-                      <ExpenseItem
-                        key={expense.id}
-                        expense={expense}
-                        members={primaryGroup.members}
-                        index={index}
-                        onEdit={handleEditExpense}
-                        onDelete={handleDeleteExpense}
-                        currentUserId={user?.id}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="border-border/50 border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <p className="text-sm text-muted-foreground mb-4">Inga utgifter ännu</p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setIsAddModalOpen(true)}
-                    className="gap-2"
-                  >
-                    <Plus size={14} />
-                    Lägg till första utgiften
-                  </Button>
-                </CardContent>
-              </Card>
-            )}
-          </TabsContent>
-
-          {/* Inkomster tab */}
-          <TabsContent value="inkomster" className="mt-0">
-            {incomes.length > 0 ? (
-              <Card className="border-border/50 shadow-sm">
-                <CardContent className="p-4">
-                  <div className="space-y-3">
-                    {incomes.map((income) => (
-                      <div key={income.id} className="p-3 rounded-lg">
-                        <div className="flex items-center justify-between gap-4">
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground">
-                              {income.note || 'Inkomst'}
-                            </p>
-                            <p className="text-sm text-muted-foreground mt-0.5">
-                              {primaryGroup.members.find(m => m.user_id === income.recipient)?.name} •
-                              {new Date(income.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums">
-                              +{(income.amount / 100).toLocaleString('sv-SE')} kr
-                            </p>
+          {/* Analytics tab */}
+          <TabsContent value="analytics" className="mt-0">
+            <div className="space-y-6">
+              {incomes.length > 0 ? (
+                <Card className="border-border/50 shadow-sm">
+                  <CardContent className="p-4">
+                    <div className="space-y-3">
+                      {incomes.map((income) => (
+                        <div key={income.id} className="p-3 rounded-lg">
+                          <div className="flex items-center justify-between gap-4">
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground">
+                                {income.note || 'Inkomst'}
+                              </p>
+                              <p className="text-sm text-muted-foreground mt-0.5">
+                                {primaryGroup.members.find(m => m.user_id === income.recipient)?.name} •
+                                {new Date(income.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums">
+                                +{(income.amount / 100).toLocaleString('sv-SE')} kr
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ) : (
-                  <Card className="border-border/50 border-dashed">
-                    <CardContent className="flex flex-col items-center justify-center py-12">
-                      <div className="rounded-full bg-muted p-3 mb-4">
-                        <TrendingUp size={24} className="text-muted-foreground" />
-                      </div>
-                      <p className="text-sm text-muted-foreground">Ingen data att visa ännu</p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border-border/50 border-dashed">
+                  <CardContent className="flex flex-col items-center justify-center py-12">
+                    <div className="rounded-full bg-muted p-3 mb-4">
+                      <TrendingUp size={24} className="text-muted-foreground" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">Ingen data att visa ännu</p>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Utveckling över tid - placeholder */}
               <div>

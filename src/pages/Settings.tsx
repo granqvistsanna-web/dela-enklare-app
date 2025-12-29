@@ -197,6 +197,7 @@ const Settings = () => {
                   ))}
                 </div>
               ) : groups.length > 0 ? (
+                <>
                 <div className="space-y-2">
                   {groups.map((group) => (
                     <div
