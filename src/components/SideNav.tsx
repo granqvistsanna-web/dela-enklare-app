@@ -21,7 +21,7 @@ export function SideNav() {
           {/* Logo */}
           <div className="flex items-center h-14 px-4 border-b border-sidebar-border/50">
             <Link to="/dashboard" className="flex items-center hover:opacity-70 transition-opacity">
-              <img src={logo} alt="Päronsplit" className="h-12 w-auto" />
+              <img src={logo} alt="Päronsplit" className="h-16 w-auto" />
             </Link>
           </div>
 
