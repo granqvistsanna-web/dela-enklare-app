@@ -246,11 +246,11 @@ const GroupPage = () => {
           </Link>
 
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <h1 className="text-3xl font-semibold text-foreground">{group.name}</h1>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 sm:gap-3 mb-3 flex-wrap">
+                <h1 className="text-2xl sm:text-3xl font-semibold text-foreground break-words">{group.name}</h1>
                 {group.is_temporary && (
-                  <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground">
+                  <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground shrink-0">
                     Tillfällig
                   </span>
                 )}
@@ -261,12 +261,12 @@ const GroupPage = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleCopyCode}
-                className="gap-2"
+                className="gap-2 h-9 sm:h-8"
               >
                 {copiedCode ? (
                   <>
@@ -328,7 +328,7 @@ const GroupPage = () => {
                     )}
                     <DropdownMenuItem
                       onClick={() => setIsDeleteDialogOpen(true)}
-                      className="text-destructive focus:text-destructive"
+                      className="text-destructive focus:text-destructive py-3 sm:py-2"
                     >
                       <Trash2 size={14} className="mr-2" />
                       Radera grupp
@@ -401,17 +401,17 @@ const GroupPage = () => {
 
           {/* Per-person breakdown */}
           {group.members.length > 1 && (
-            <div className="grid gap-3 sm:grid-cols-2 md:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {balances.map((b) => {
                 const member = group.members.find((u) => u.user_id === b.userId);
                 const isPositive = b.balance >= 0;
                 const isZero = b.balance === 0;
                 return (
                   <Card key={b.userId} className="border-border/50">
-                    <CardContent className="p-4">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className={`h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold ${
+                    <CardContent className="p-3 sm:p-4">
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="flex items-center gap-2 min-w-0 flex-1">
+                          <div className={`h-8 w-8 shrink-0 rounded-full flex items-center justify-center text-xs font-semibold ${
                             isPositive && !isZero
                               ? 'bg-green-500/10 text-green-600 dark:text-green-400'
                               : isZero
@@ -420,11 +420,11 @@ const GroupPage = () => {
                           }`}>
                             {member?.name?.charAt(0).toUpperCase() || "?"}
                           </div>
-                          <span className="text-sm font-medium text-foreground">
+                          <span className="text-sm font-medium text-foreground truncate">
                             {member?.name || "Okänd"}
                           </span>
                         </div>
-                        <span className={`text-sm font-semibold tabular-nums ${
+                        <span className={`text-sm font-semibold tabular-nums shrink-0 ${
                           isPositive && !isZero
                             ? 'text-green-600 dark:text-green-400'
                             : isZero
@@ -444,9 +444,9 @@ const GroupPage = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="expenses" className="w-full">
-          <div className="flex items-center justify-between mb-6">
-            <TabsList className="h-10">
-              <TabsTrigger value="expenses" className="gap-2">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+            <TabsList className="h-10 w-full sm:w-auto">
+              <TabsTrigger value="expenses" className="gap-2 flex-1 sm:flex-initial">
                 Utgifter
                 {expenses.length > 0 && (
                   <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
@@ -454,7 +454,7 @@ const GroupPage = () => {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="history" className="gap-2">
+              <TabsTrigger value="history" className="gap-2 flex-1 sm:flex-initial">
                 Historik
                 {settlements.length > 0 && (
                   <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
@@ -469,15 +469,16 @@ const GroupPage = () => {
                 variant="outline"
                 size="sm"
                 onClick={() => setIsImportModalOpen(true)}
-                className="gap-2"
+                className="gap-2 h-9 sm:h-8 flex-1 sm:flex-initial"
               >
                 <Upload size={14} />
                 <span className="hidden sm:inline">Importera</span>
+                <span className="sm:hidden">Importera</span>
               </Button>
               <Button
                 size="sm"
                 onClick={() => setIsAddModalOpen(true)}
-                className="gap-2"
+                className="gap-2 h-9 sm:h-8 flex-1 sm:flex-initial"
               >
                 <Plus size={14} />
                 Lägg till

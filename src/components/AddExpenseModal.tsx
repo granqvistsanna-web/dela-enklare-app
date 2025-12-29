@@ -143,10 +143,10 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-background border border-border rounded-md w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto p-6">
+            <div className="bg-background border border-border rounded-md w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium text-foreground">Ny utgift</h2>
-                <button onClick={onClose} className="text-muted-foreground hover:text-foreground">
+                <button onClick={onClose} className="text-muted-foreground hover:text-foreground h-8 w-8 flex items-center justify-center -mr-1">
                   ✕
                 </button>
               </div>
@@ -175,7 +175,7 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
                         key={cat.id}
                         type="button"
                         onClick={() => setCategory(cat.id)}
-                        className={`flex items-center gap-2 rounded-md border px-3 py-1.5 text-sm transition-colors ${
+                        className={`flex items-center gap-2 rounded-md border px-3 py-2 sm:py-1.5 text-sm transition-colors active:scale-95 ${
                           category === cat.id
                             ? "border-foreground bg-secondary"
                             : "border-border hover:border-muted-foreground"
@@ -227,7 +227,7 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
                   </div>
 
                   {useCustomSplit && amount && (
-                    <div className="space-y-2 p-3 border border-border rounded-md bg-secondary/20">
+                    <div className="space-y-3 p-3 sm:p-3 border border-border rounded-md bg-secondary/20">
                       <p className="text-xs text-muted-foreground mb-2">
                         Fördela {parseFloat(amount).toFixed(2)} kr mellan gruppmedlemmar:
                       </p>
@@ -243,9 +243,9 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
                             placeholder="0.00"
                             value={customSplits[member.user_id] || ""}
                             onChange={(e) => handleSplitChange(member.user_id, e.target.value)}
-                            className="w-24"
+                            className="w-28 sm:w-24 h-10 sm:h-9"
                           />
-                          <span className="text-sm text-muted-foreground">kr</span>
+                          <span className="text-sm text-muted-foreground shrink-0">kr</span>
                         </div>
                       ))}
                       <div className="pt-2 border-t border-border mt-2">

@@ -145,13 +145,13 @@ const Settings = () => {
           <section>
             <h2 className="text-sm font-medium text-muted-foreground mb-4">Profil</h2>
             {profile && (
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-lg font-semibold text-primary">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <div className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-lg sm:text-xl font-semibold text-primary">
                   {profile.name?.[0]?.toUpperCase() || "?"}
                 </div>
-                <div>
-                  <p className="text-base font-medium text-foreground">{profile.name}</p>
-                  <p className="text-sm text-muted-foreground">{profile.email}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="text-base font-medium text-foreground truncate">{profile.name}</p>
+                  <p className="text-sm text-muted-foreground truncate">{profile.email}</p>
                 </div>
               </div>
             )}
@@ -239,29 +239,29 @@ const Settings = () => {
 
           {/* Sign Out & Delete */}
           <section className="space-y-4">
-            <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground w-full sm:w-auto justify-start sm:justify-center">
+            <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground w-full sm:w-auto justify-start sm:justify-center h-10">
               Logga ut
             </Button>
 
             <div className="pt-6">
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto justify-start sm:justify-center">
+                  <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto justify-start sm:justify-center h-10">
                     Radera konto
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="border border-border">
+                <AlertDialogContent className="border border-border mx-4 max-w-md">
                   <AlertDialogHeader>
                     <AlertDialogTitle>Radera konto?</AlertDialogTitle>
                     <AlertDialogDescription>
                       Detta raderar permanent ditt konto och all data.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className="border-border">Avbryt</AlertDialogCancel>
+                  <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                    <AlertDialogCancel className="border-border m-0 w-full sm:w-auto">Avbryt</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAccount}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0 w-full sm:w-auto"
                       disabled={isDeletingAccount}
                     >
                       {isDeletingAccount ? "Raderar..." : "Radera"}
