@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { AddMembersModal } from "@/components/AddMembersModal";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useGroups } from "@/hooks/useGroups";
@@ -27,7 +28,7 @@ import {
 const Settings = () => {
   const navigate = useNavigate();
   const { profile, signOut, updatePassword, updateProfile } = useAuth();
-  const { household, loading: householdLoading, updateHouseholdName } = useGroups();
+  const { household, loading: householdLoading, updateHouseholdName, addMembers } = useGroups();
   const { theme, setTheme } = useTheme();
   const { selectedYear, selectedMonth, goToCurrentMonth, isCurrentMonth } = useMonthSelection();
 
@@ -41,6 +42,7 @@ const Settings = () => {
 
   const [isEditingHouseholdName, setIsEditingHouseholdName] = useState(false);
   const [editingHouseholdName, setEditingHouseholdName] = useState("");
+  const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false);
 
   const handleNameChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -155,6 +157,11 @@ const Settings = () => {
     setEditingHouseholdName("");
   };
 
+  const handleAddMembers = async (userIds: string[]) => {
+    await addMembers(userIds);
+    setIsAddMembersModalOpen(false);
+  };
+
   return (
     <div className="lg:pl-64">
       <main className="container max-w-3xl py-8 sm:py-12 px-4 sm:px-6 pb-24 lg:pb-8 mx-auto">
@@ -236,6 +243,15 @@ const Settings = () => {
                           >
                             <Edit2 size={14} />
                             <span className="hidden sm:inline">Ändra namn</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setIsAddMembersModalOpen(true)}
+                            className="gap-2"
+                          >
+                            <Plus size={14} />
+                            <span className="hidden sm:inline">Bjud in</span>
                           </Button>
                           <Button
                             variant="ghost"
@@ -571,6 +587,14 @@ const Settings = () => {
           </div>
         </div>
       </main>
+
+      {/* Add Members Modal */}
+      <AddMembersModal
+        isOpen={isAddMembersModalOpen}
+        onClose={() => setIsAddMembersModalOpen(false)}
+        onSubmit={handleAddMembers}
+        currentMembers={household?.members || []}
+      />
     </div>
   );
 };

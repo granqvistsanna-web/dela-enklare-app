@@ -3,8 +3,10 @@ import { useNavigate } from "react-router-dom";
 import { MonthSelector } from "@/components/MonthSelector";
 import { AddFab } from "@/components/AddFab";
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { AddTransactionModal } from "@/components/AddTransactionModal";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
+import { ImportModal } from "@/components/ImportModal";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes, Income, IncomeInput } from "@/hooks/useIncomes";
@@ -16,6 +18,7 @@ import {
   Calendar,
   TrendingUp,
   ArrowRight,
+  Upload,
 } from "lucide-react";
 
 const Index = () => {
@@ -28,11 +31,13 @@ const Index = () => {
     expenses,
     loading: expensesLoading,
     addExpense,
+    addExpenses,
   } = useExpenses(household?.id);
 
   const { incomes, loading: incomesLoading, addIncome } = useIncomes(household?.id);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const loading = householdLoading || expensesLoading || incomesLoading;
 
@@ -94,6 +99,17 @@ const Index = () => {
     return await addIncome(newIncome);
   }, [addIncome]);
 
+  const handleImportExpenses = useCallback(async (newExpenses: {
+    group_id: string;
+    amount: number;
+    paid_by: string;
+    category: string;
+    description: string;
+    date: string;
+  }[]) => {
+    await addExpenses(newExpenses);
+  }, [addExpenses]);
+
   // Calculate percentages for visual bar
   const visualPercentages = useMemo(() => {
     const total = totals.totalIncomes + totals.totalExpenses;
@@ -143,8 +159,21 @@ const Index = () => {
       <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Hem</h1>
-          <p className="text-muted-foreground">{household.name}</p>
+          <div className="flex items-start justify-between gap-4 mb-2">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground mb-2">Hem</h1>
+              <p className="text-muted-foreground">{household.name}</p>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsImportModalOpen(true)}
+              className="gap-2 shrink-0"
+            >
+              <Upload size={14} />
+              <span className="hidden sm:inline">Importera</span>
+            </Button>
+          </div>
         </div>
 
         {/* Month selector */}
@@ -360,6 +389,15 @@ const Index = () => {
         groupId={household.id}
         members={household.members}
         defaultType="expense"
+      />
+
+      {/* Import modal */}
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImport={handleImportExpenses}
+        groupId={household.id}
+        currentUserId={user?.id || ""}
       />
     </div>
   );
