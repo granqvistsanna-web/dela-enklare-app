@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,8 +57,17 @@ export function AddTransactionModal({
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
 
   // Income-specific fields
-  // Use current user as fallback if members list is empty
-  const [recipient, setRecipient] = useState(members[0]?.user_id || user?.id || "");
+  const getInitialRecipient = useCallback(() => {
+    if (members.length > 0) return members[0].user_id;
+    if (user?.id) return user.id;
+    return "";
+  }, [members, user]);
+
+  const [recipient, setRecipient] = useState(() => {
+    if (members.length > 0) return members[0].user_id;
+    if (user?.id) return user.id;
+    return "";
+  });
   const [incomeType, setIncomeType] = useState<IncomeType>("salary");
   const [note, setNote] = useState("");
   const [repeat, setRepeat] = useState<IncomeRepeat>("none");
@@ -77,15 +86,13 @@ export function AddTransactionModal({
     }
   }, [useCustomSplit, members, amount, transactionType]);
 
-  // Reset recipient when members change
+  // Update recipient when members or user changes
   useEffect(() => {
-    if (members.length > 0 && !recipient) {
-      setRecipient(members[0].user_id);
-    } else if (members.length === 0 && !recipient && user?.id) {
-      // Fallback to current user if no members
-      setRecipient(user.id);
+    const newRecipient = getInitialRecipient();
+    if (newRecipient && newRecipient !== recipient) {
+      setRecipient(newRecipient);
     }
-  }, [members, recipient, user]);
+  }, [getInitialRecipient, recipient]);
 
   const handleSplitChange = (userId: string, value: string) => {
     setCustomSplits((prev) => ({
@@ -108,7 +115,7 @@ export function AddTransactionModal({
     setDescription("");
     setUseCustomSplit(false);
     setCustomSplits({});
-    setRecipient(members[0]?.user_id || user?.id || "");
+    setRecipient(getInitialRecipient());
     setIncomeType("salary");
     setNote("");
     setRepeat("none");
@@ -116,6 +123,18 @@ export function AddTransactionModal({
   };
 
   const handleSubmitExpense = () => {
+    // Validate user is logged in
+    if (!user?.id) {
+      toast.error("Du måste vara inloggad för att lägga till utgifter");
+      return false;
+    }
+
+    // Validate group exists
+    if (!groupId) {
+      toast.error("Ingen grupp vald");
+      return false;
+    }
+
     // Validate required fields
     if (!amount || !category || !description) {
       if (!amount) {
@@ -171,20 +190,38 @@ export function AddTransactionModal({
       });
     }
 
-    onAddExpense({
-      group_id: groupId,
-      amount: totalAmount,
-      paid_by: user?.id || "",
-      category,
-      description,
-      date,
-      splits,
-    });
+    try {
+      onAddExpense({
+        group_id: groupId,
+        amount: totalAmount,
+        paid_by: user.id,
+        category,
+        description,
+        date,
+        splits,
+      });
 
-    return true;
+      return true;
+    } catch (error) {
+      console.error("Error in handleSubmitExpense:", error);
+      toast.error("Ett fel uppstod när utgiften skulle läggas till");
+      return false;
+    }
   };
 
   const handleSubmitIncome = async () => {
+    // Validate user is logged in
+    if (!user?.id) {
+      toast.error("Du måste vara inloggad för att lägga till inkomster");
+      return false;
+    }
+
+    // Validate group exists
+    if (!groupId) {
+      toast.error("Ingen grupp vald");
+      return false;
+    }
+
     // Validate required fields
     if (!amount || !recipient) {
       if (!amount) {
@@ -213,18 +250,24 @@ export function AddTransactionModal({
     // Convert to cents
     const amountCents = Math.round(amountKr * 100);
 
-    const result = await onAddIncome({
-      group_id: groupId,
-      amount: amountCents,
-      recipient,
-      type: incomeType,
-      note: note.trim() || undefined,
-      date,
-      repeat,
-      included_in_split: includedInSplit,
-    });
+    try {
+      const result = await onAddIncome({
+        group_id: groupId,
+        amount: amountCents,
+        recipient,
+        type: incomeType,
+        note: note.trim() || undefined,
+        date,
+        repeat,
+        included_in_split: includedInSplit,
+      });
 
-    return !!result;
+      return !!result;
+    } catch (error) {
+      console.error("Error in handleSubmitIncome:", error);
+      toast.error("Ett fel uppstod när inkomsten skulle läggas till");
+      return false;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -243,27 +286,26 @@ export function AddTransactionModal({
     }
   };
 
+  // Don't render if not open
+  if (!isOpen) return null;
+
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <>
-          <motion.div
-            key="backdrop"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 bg-foreground/10 backdrop-blur-sm"
-            onClick={onClose}
-          />
-          <motion.div
-            key="modal"
-            initial={{ opacity: 0, scale: 0.98 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          >
-            <div className="bg-background border border-border rounded-md w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6">
+    <AnimatePresence mode="wait">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-50 bg-foreground/10 backdrop-blur-sm"
+        onClick={onClose}
+      />
+      <motion.div
+        initial={{ opacity: 0, scale: 0.98 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.98 }}
+        transition={{ duration: 0.15 }}
+        className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      >
+        <div className="bg-background border border-border rounded-md w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium text-foreground">
                   Lägg till transaktion
@@ -543,8 +585,6 @@ export function AddTransactionModal({
               </form>
             </div>
           </motion.div>
-        </>
-      )}
     </AnimatePresence>
   );
 }
