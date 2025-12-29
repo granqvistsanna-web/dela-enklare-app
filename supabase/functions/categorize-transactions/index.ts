@@ -1,7 +1,10 @@
 /**
  * Edge function for categorizing transactions using OpenAI ChatGPT
  *
- * SECURITY NOTE: This function uses origin-based CORS to prevent unauthorized access.
+ * SECURITY NOTE: This function requires user authentication via JWT token.
+ * The Authorization header must contain a valid Supabase session token.
+ *
+ * Additionally, origin-based CORS prevents unauthorized cross-origin requests.
  * Configure the ALLOWED_ORIGINS environment variable with your application's URL(s).
  * Set via: supabase secrets set ALLOWED_ORIGINS=https://yourdomain.com
  *
@@ -12,6 +15,7 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 
 // Restrict CORS to allowed origins only - prevents unauthorized cross-origin requests
 const ALLOWED_ORIGINS = Deno.env.get("ALLOWED_ORIGINS")?.split(",") || [];
@@ -39,6 +43,35 @@ serve(async (req) => {
   }
 
   try {
+    // Verify user authentication before processing
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing authorization header" }),
+        { status: 401, headers: { ...corsHeaders(origin), "Content-Type": "application/json" } }
+      );
+    }
+
+    // Create Supabase client with the user's auth token
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Verify the token is valid and get the authenticated user
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser();
+
+    if (authError || !user) {
+      console.error("Authentication failed:", authError?.message);
+      return new Response(
+        JSON.stringify({ error: "Invalid or expired authentication token" }),
+        { status: 401, headers: { ...corsHeaders(origin), "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`Authenticated request from user: ${user.id}`);
+
     const { transactions, existingRules } = await req.json();
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
