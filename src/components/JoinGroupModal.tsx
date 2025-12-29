@@ -22,9 +22,20 @@ export function JoinGroupModal({ isOpen, onClose, onSuccess }: JoinGroupModalPro
 
     setLoading(true);
     try {
+      // Validate code format (6 alphanumeric characters)
+      const trimmedCode = code.trim().toUpperCase();
+      if (!/^[A-Z0-9]{6}$/.test(trimmedCode)) {
+        toast.error("Ogiltig kod", { description: "Koden måste vara 6 tecken lång." });
+        setLoading(false);
+        return;
+      }
+
       // Find group by invite code using RPC function to bypass RLS
       const { data, error: groupError } = await supabase
-        .rpc("lookup_group_by_invite_code", { code: code.trim() });
+        .rpc("lookup_group_by_invite_code", { code: trimmedCode }) as {
+          data: Array<{ id: string; name: string; created_by: string }> | null;
+          error: Error | null;
+        };
 
       if (groupError) {
         console.error("Error looking up group:", groupError);
