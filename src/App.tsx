@@ -7,6 +7,7 @@ import { createSyncStoragePersister } from "@tanstack/query-sync-storage-persist
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { ThemeProvider } from "@/hooks/useTheme";
+import { MonthSelectionProvider } from "@/hooks/useMonthSelection";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { PublicRoute } from "@/components/PublicRoute";
 import { OfflineIndicator } from "@/components/OfflineIndicator";
@@ -84,7 +85,9 @@ const App = () => (
     <ThemeProvider>
       <TooltipProvider>
         <AuthProvider>
-          <AppContent />
+          <MonthSelectionProvider>
+            <AppContent />
+          </MonthSelectionProvider>
         </AuthProvider>
       </TooltipProvider>
     </ThemeProvider>

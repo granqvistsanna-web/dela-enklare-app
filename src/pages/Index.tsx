@@ -1,6 +1,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header";
+import { MonthSelector } from "@/components/MonthSelector";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -16,6 +17,7 @@ import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes, Income, IncomeInput } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
+import { useMonthSelection } from "@/hooks/useMonthSelection";
 import { calculateBalance } from "@/lib/balanceUtils";
 import { calculateIncomeSettlement } from "@/lib/incomeUtils";
 import {
@@ -31,6 +33,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { household, loading: householdLoading } = useGroups();
+  const { selectedYear, selectedMonth } = useMonthSelection();
 
   const {
     expenses,
@@ -53,19 +56,34 @@ const Index = () => {
 
   const loading = householdLoading || expensesLoading || incomesLoading || settlementsLoading;
 
-  // Get current month and year
-  const now = new Date();
-  const currentYear = now.getFullYear();
-  const currentMonthNum = now.getMonth() + 1; // 1-12
-  const currentMonth = now.toLocaleDateString("sv-SE", { month: "long", year: "numeric" });
+  // Use selected month/year instead of current
+  const currentYear = selectedYear;
+  const currentMonthNum = selectedMonth;
 
-  // Calculate expense balances
+  // Filter expenses and incomes by selected month
+  const filteredExpenses = useMemo(() => {
+    return expenses.filter(expense => {
+      const expenseDate = new Date(expense.date);
+      return expenseDate.getFullYear() === selectedYear &&
+             expenseDate.getMonth() + 1 === selectedMonth;
+    });
+  }, [expenses, selectedYear, selectedMonth]);
+
+  const filteredIncomes = useMemo(() => {
+    return incomes.filter(income => {
+      const incomeDate = new Date(income.date);
+      return incomeDate.getFullYear() === selectedYear &&
+             incomeDate.getMonth() + 1 === selectedMonth;
+    });
+  }, [incomes, selectedYear, selectedMonth]);
+
+  // Calculate expense balances (using filtered expenses for selected month)
   const expenseBalances = useMemo(
-    () => (household ? calculateBalance(expenses, household.members) : []),
-    [expenses, household]
+    () => (household ? calculateBalance(filteredExpenses, household.members) : []),
+    [filteredExpenses, household]
   );
 
-  // Calculate expense summary
+  // Calculate expense summary (using filtered expenses for selected month)
   const expenseSummary = useMemo(() => {
     const posBalance = expenseBalances.find((b) => b.balance > 0);
     const negBalance = expenseBalances.find((b) => b.balance < 0);
@@ -76,27 +94,27 @@ const Index = () => {
       positiveUser: posBalance ? household?.members.find((u) => u.user_id === posBalance.userId) : undefined,
       negativeUser: negBalance ? household?.members.find((u) => u.user_id === negBalance.userId) : undefined,
       oweAmount: negBalance ? Math.abs(negBalance.balance) : 0,
-      totalExpenses: expenses.reduce((sum, e) => {
+      totalExpenses: filteredExpenses.reduce((sum, e) => {
         const amount = Number.isFinite(e.amount) ? e.amount : 0;
         return sum + amount;
       }, 0),
     };
-  }, [expenseBalances, household?.members, expenses]);
+  }, [expenseBalances, household?.members, filteredExpenses]);
 
-  // Calculate income settlement
+  // Calculate income settlement (using filtered incomes for selected month)
   const incomeSettlement = useMemo(() => {
     if (!household || household.members.length < 2) {
       return null;
     }
     const [personA, personB] = household.members;
     return calculateIncomeSettlement(
-      incomes,
+      filteredIncomes,
       personA.user_id,
       personB.user_id,
       currentYear,
       currentMonthNum
     );
-  }, [incomes, household, currentYear, currentMonthNum]);
+  }, [filteredIncomes, household, currentYear, currentMonthNum]);
 
   const handleAddExpense = useCallback(async (newExpense: {
     group_id: string;
@@ -156,20 +174,20 @@ const Index = () => {
     setIsSettleModalOpen(false);
   }, [expenseSummary.negativeUser, expenseSummary.positiveUser, household?.id, addSettlement, expenseSummary.oweAmount]);
 
-  // Combine expenses and incomes for "Denna månad" view
+  // Combine filtered expenses and incomes for selected month view
   const combinedItems = useMemo(() => {
     const items: Array<{ type: 'expense' | 'income'; data: Expense | Income; date: string }> = [];
 
-    expenses.forEach(expense => {
+    filteredExpenses.forEach(expense => {
       items.push({ type: 'expense', data: expense, date: expense.date });
     });
 
-    incomes.forEach(income => {
+    filteredIncomes.forEach(income => {
       items.push({ type: 'income', data: income, date: income.date });
     });
 
     return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [expenses, incomes]);
+  }, [filteredExpenses, filteredIncomes]);
 
   // Loading state
   if (loading) {
@@ -214,11 +232,9 @@ const Index = () => {
       <Header />
 
       <main className="container max-w-4xl py-8 px-4 sm:px-6">
-        {/* Month selector - non-intrusive at top */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="text-sm text-muted-foreground">
-            <span className="capitalize font-medium">{currentMonth}</span>
-          </div>
+        {/* Month selector - prominent at top */}
+        <div className="mb-6">
+          <MonthSelector />
         </div>
 
         {/* Group name with action buttons */}
@@ -363,10 +379,10 @@ const Index = () => {
 
           {/* Income Overview */}
           <IncomeOverviewCard
-            incomes={incomes}
+            incomes={filteredIncomes}
             members={household.members}
-            selectedYear={new Date().getFullYear()}
-            selectedMonth={new Date().getMonth() + 1}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
           />
         </div>
 
@@ -546,11 +562,11 @@ const Index = () => {
           {/* Analytics tab */}
           <TabsContent value="analytics" className="mt-0">
             <div className="space-y-6">
-              {incomes.length > 0 ? (
+              {filteredIncomes.length > 0 ? (
                 <Card className="border-border/50 shadow-sm">
                   <CardContent className="p-4">
                     <div className="space-y-3">
-                      {incomes.map((income) => (
+                      {filteredIncomes.map((income) => (
                         <div key={income.id} className="p-3 rounded-lg">
                           <div className="flex items-center justify-between gap-4">
                             <div className="flex-1 min-w-0">
