@@ -81,7 +81,7 @@ export function useGroups() {
       const userIds = [...new Set(membersData?.map(m => m.user_id) || [])];
       
       // Fetch profiles for all members
-      let profilesMap = new Map<string, { id: string; user_id: string; name: string }>();
+      const profilesMap = new Map<string, { id: string; user_id: string; name: string }>();
 
       if (userIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
