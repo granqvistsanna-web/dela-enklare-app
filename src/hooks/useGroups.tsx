@@ -43,82 +43,58 @@ export function useGroups() {
     }
 
     try {
-      // Fetch groups the user is a member of
-      const { data: memberData, error: memberError } = await supabase
-        .from("group_members")
-        .select("group_id")
-        .eq("user_id", user.id);
+      // Use RPC function to fetch groups with members (bypasses RLS issues)
+      const { data, error } = await supabase.rpc("get_user_groups");
 
-      if (memberError) throw memberError;
+      if (error) throw error;
 
-      if (!memberData || memberData.length === 0) {
+      if (!data || data.length === 0) {
         setGroups([]);
         setLoading(false);
         return;
       }
 
-      const groupIds = memberData.map((m) => m.group_id);
-
-      // Fetch groups, members, and profiles in parallel (4 queries -> 2 parallel queries)
-      const [groupsResult, membersResult] = await Promise.all([
-        supabase
-          .from("groups")
-          .select("*")
-          .in("id", groupIds),
-        supabase
-          .from("group_members")
-          .select(`
-            group_id,
-            user_id,
-            public_profiles (
-              id,
-              user_id,
-              name
-            )
-          `)
-          .in("group_id", groupIds)
-      ]);
-
-      if (groupsResult.error) throw groupsResult.error;
-      if (membersResult.error) throw membersResult.error;
-
-      const groupsData = groupsResult.data;
-      const membersWithProfiles = membersResult.data;
-
-      // Build a map of group_id -> members with profiles
+      // Build a map of group_id -> members
       const groupMembersMap = new Map<string, GroupMember[]>();
+      const groupsMap = new Map<string, Group>();
 
-      membersWithProfiles?.forEach((member: any) => {
-        const profile = member.public_profiles;
-
-        // Validate profile data
-        if (!profile || !profile.id || !profile.user_id || !profile.name) {
-          console.warn(`Invalid profile data for member`, member);
-          return;
+      data.forEach((row: any) => {
+        // Create or update group entry
+        if (!groupsMap.has(row.group_id)) {
+          groupsMap.set(row.group_id, {
+            id: row.group_id,
+            name: row.group_name,
+            is_temporary: row.group_is_temporary,
+            created_by: row.group_created_by,
+            created_at: row.group_created_at,
+            invite_code: row.group_invite_code,
+            members: [],
+          });
+          groupMembersMap.set(row.group_id, []);
         }
 
-        const groupMember: GroupMember = {
-          id: profile.id,
-          user_id: profile.user_id,
-          name: profile.name,
-        };
+        // Add member if profile data is valid
+        if (row.member_id && row.member_user_id && row.member_name) {
+          const members = groupMembersMap.get(row.group_id)!;
 
-        if (!groupMembersMap.has(member.group_id)) {
-          groupMembersMap.set(member.group_id, []);
+          // Avoid duplicates (same member might appear multiple times)
+          if (!members.some(m => m.user_id === row.member_user_id)) {
+            members.push({
+              id: row.member_id,
+              user_id: row.member_user_id,
+              name: row.member_name,
+            });
+          }
         }
-        groupMembersMap.get(member.group_id)!.push(groupMember);
       });
 
-      // Build groups with members
-      const groupsWithMembers: Group[] = (groupsData || []).map((group) => ({
-        id: group.id,
-        name: group.name,
-        is_temporary: group.is_temporary,
-        created_by: group.created_by,
-        created_at: group.created_at,
-        invite_code: group.invite_code,
-        members: groupMembersMap.get(group.id) || [],
-      }));
+      // Assign members to groups
+      const groupsWithMembers: Group[] = Array.from(groupsMap.values()).map(
+        (group) => ({
+          ...group,
+          members: groupMembersMap.get(group.id) || [],
+        })
+      );
 
       setGroups(groupsWithMembers);
     } catch (error) {
