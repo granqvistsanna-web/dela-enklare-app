@@ -286,26 +286,27 @@ export function AddTransactionModal({
     }
   };
 
-  // Don't render if not open
-  if (!isOpen) return null;
-
   return (
-    <AnimatePresence mode="wait">
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 z-50 bg-foreground/10 backdrop-blur-sm"
-        onClick={onClose}
-      />
-      <motion.div
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.98 }}
-        transition={{ duration: 0.15 }}
-        className="fixed inset-0 z-50 flex items-center justify-center p-4"
-      >
-        <div className="bg-background border border-border rounded-md w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6">
+    <AnimatePresence>
+      {isOpen && (
+        <>
+          <motion.div
+            key="backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-foreground/10 backdrop-blur-sm"
+            onClick={onClose}
+          />
+          <motion.div
+            key="modal"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          >
+            <div className="bg-background border border-border rounded-md w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium text-foreground">
                   Lägg till transaktion
@@ -585,6 +586,8 @@ export function AddTransactionModal({
               </form>
             </div>
           </motion.div>
+        </>
+      )}
     </AnimatePresence>
   );
 }
