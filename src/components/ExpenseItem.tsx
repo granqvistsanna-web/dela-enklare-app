@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Expense } from "@/hooks/useExpenses";
 import { GroupMember } from "@/hooks/useGroups";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
@@ -18,7 +19,7 @@ interface ExpenseItemProps {
   currentUserId?: string;
 }
 
-export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId }: ExpenseItemProps) {
+export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId }: ExpenseItemProps) {
   const payer = members.find((u) => u.user_id === expense.paid_by);
   const category = DEFAULT_CATEGORIES.find((c) => c.id === expense.category);
   const canModify = currentUserId === expense.paid_by;
@@ -108,4 +109,4 @@ export function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId 
       </div>
     </div>
   );
-}
+});
