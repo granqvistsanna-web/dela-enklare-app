@@ -396,6 +396,7 @@ const Index = () => {
             Importera
           </Button>
         </div>
+      </div>
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="denna-manad" className="w-full">

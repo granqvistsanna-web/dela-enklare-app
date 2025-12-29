@@ -33,7 +33,7 @@ import { AddIncomeModal } from "@/components/AddIncomeModal";
 import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
 import { useGroups } from "@/hooks/useGroups";
-import { useExpenses, Expense } from "@/hooks/useExpenses";
+import { useExpenses, Expense, ExpenseSplit } from "@/hooks/useExpenses";
 import { useIncomes, Income, IncomeType } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
@@ -127,6 +127,7 @@ const GroupPage = () => {
     category: string;
     description: string;
     date: string;
+    splits?: ExpenseSplit | null;
   }) => {
     await addExpense(newExpense);
   }, [addExpense]);
@@ -138,6 +139,7 @@ const GroupPage = () => {
     category: string;
     description: string;
     date: string;
+    splits?: ExpenseSplit | null;
   }[]) => {
     // Batch insert all expenses in a single database query
     try {
