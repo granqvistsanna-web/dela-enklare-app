@@ -39,7 +39,7 @@ export function AddFab({ onClick, onImportClick }: AddFabProps) {
       {/* Menu options */}
       <AnimatePresence>
         {isOpen && (
-          <div className="fixed bottom-20 right-5 lg:bottom-6 lg:right-6 z-40 flex flex-col-reverse gap-3 items-end">
+          <div className="fixed bottom-[140px] right-5 lg:bottom-[84px] lg:right-6 z-50 flex flex-col-reverse gap-3 items-end">
             {onImportClick && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
