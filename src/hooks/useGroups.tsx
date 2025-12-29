@@ -59,7 +59,7 @@ export function useGroups() {
 
       const groupIds = memberData.map((m) => m.group_id);
 
-      // Fetch groups, members, and profiles in parallel (4 queries -> 2 parallel queries)
+      // Fetch groups and members in parallel
       const [groupsResult, membersResult] = await Promise.all([
         supabase
           .from("groups")
@@ -67,15 +67,7 @@ export function useGroups() {
           .in("id", groupIds),
         supabase
           .from("group_members")
-          .select(`
-            group_id,
-            user_id,
-            public_profiles!left (
-              id,
-              user_id,
-              name
-            )
-          `)
+          .select("group_id, user_id")
           .in("group_id", groupIds)
       ]);
 
@@ -83,25 +75,41 @@ export function useGroups() {
       if (membersResult.error) throw membersResult.error;
 
       const groupsData = groupsResult.data;
-      const membersWithProfiles = membersResult.data;
+      const membersData = membersResult.data;
+
+      // Get unique user IDs to fetch profiles
+      const userIds = [...new Set(membersData?.map(m => m.user_id) || [])];
+      
+      // Fetch profiles for all members
+      let profilesMap = new Map<string, { id: string; user_id: string; name: string }>();
+      
+      if (userIds.length > 0) {
+        const { data: profilesData } = await supabase
+          .from("public_profiles")
+          .select("id, user_id, name")
+          .in("user_id", userIds);
+        
+        profilesData?.forEach(profile => {
+          profilesMap.set(profile.user_id, profile);
+        });
+      }
 
       // Build a map of group_id -> members with profiles
       const groupMembersMap = new Map<string, GroupMember[]>();
 
-      membersWithProfiles?.forEach((member: any) => {
-        const profile = member.public_profiles;
+      membersData?.forEach((member) => {
+        const profile = profilesMap.get(member.user_id);
 
-        // If no profile exists, create a fallback using the user_id from group_members
-        const groupMember: GroupMember = profile && profile.id && profile.user_id && profile.name
+        const groupMember: GroupMember = profile
           ? {
               id: profile.id,
               user_id: profile.user_id,
               name: profile.name,
             }
           : {
-              id: member.user_id, // Use user_id as fallback id
+              id: member.user_id,
               user_id: member.user_id,
-              name: "Okänd användare", // Fallback name
+              name: "Okänd användare",
             };
 
         if (!groupMembersMap.has(member.group_id)) {
