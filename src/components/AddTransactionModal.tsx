@@ -7,7 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { GroupMember } from "@/hooks/useGroups";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { ExpenseSplit } from "@/hooks/useExpenses";
-import { IncomeType, IncomeRepeat, IncomeInput } from "@/hooks/useIncomes";
+import { IncomeType, IncomeRepeat, IncomeInput, Income } from "@/hooks/useIncomes";
 import { getIncomeTypeIcon, getIncomeTypeLabel } from "@/lib/incomeUtils";
 import { toast } from "sonner";
 
@@ -23,7 +23,7 @@ interface AddTransactionModalProps {
     date: string;
     splits?: ExpenseSplit | null;
   }) => void;
-  onAddIncome: (income: IncomeInput) => Promise<any>;
+  onAddIncome: (income: IncomeInput) => Promise<Income | null>;
   groupId: string;
   members: GroupMember[];
   defaultType?: "expense" | "income";

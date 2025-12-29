@@ -1,18 +1,18 @@
-import { useState } from "react";
+import { type FormEvent, type MouseEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GroupMember } from "@/hooks/useGroups";
-import { IncomeType, IncomeRepeat, IncomeInput } from "@/hooks/useIncomes";
+import { IncomeType, IncomeRepeat, IncomeInput, Income } from "@/hooks/useIncomes";
 import { getIncomeTypeIcon, getIncomeTypeLabel } from "@/lib/incomeUtils";
 import { toast } from "sonner";
 
 interface AddIncomeModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (income: IncomeInput) => Promise<any>;
+  onAdd: (income: IncomeInput) => Promise<Income | null>;
   groupId: string;
   members: GroupMember[];
 }
@@ -44,7 +44,10 @@ export function AddIncomeModal({
     setIncludedInSplit(true);
   };
 
-  const handleSubmit = async (e: React.FormEvent, saveAndAddAnother: boolean = false) => {
+  const handleSubmit = async (
+    e: FormEvent<HTMLFormElement> | MouseEvent<HTMLButtonElement>,
+    saveAndAddAnother: boolean = false
+  ) => {
     e.preventDefault();
 
     // Validate required fields
@@ -254,7 +257,7 @@ export function AddIncomeModal({
                   <Button
                     type="button"
                     variant="outline"
-                    onClick={(e: any) => handleSubmit(e, true)}
+                    onClick={(e) => handleSubmit(e, true)}
                     className="flex-1"
                   >
                     Spara och lägg till ny
