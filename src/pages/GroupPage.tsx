@@ -207,59 +207,48 @@ const GroupPage = () => {
 
       <main className="container max-w-4xl py-8 px-4 sm:px-6">
         {/* Back & Title */}
-        <div className="mb-10">
+        <div className="mb-6 sm:mb-10">
           <Link
             to="/dashboard"
-            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-6"
+            className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4 sm:mb-6"
           >
             ← Tillbaka
           </Link>
 
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex items-start justify-between gap-3">
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 sm:gap-3 mb-3 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-semibold text-foreground break-words">{group.name}</h1>
+              <div className="flex items-center gap-2 mb-1 sm:mb-2 flex-wrap">
+                <h1 className="text-xl sm:text-3xl font-semibold text-foreground break-words">{group.name}</h1>
                 {group.is_temporary && (
-                  <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground shrink-0">
+                  <span className="inline-flex items-center rounded-full bg-muted px-2 sm:px-3 py-0.5 sm:py-1 text-xs font-medium text-muted-foreground shrink-0">
                     Tillfällig
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Users size={16} />
+              <div className="flex items-center gap-2 text-xs sm:text-sm text-muted-foreground">
+                <Users size={14} className="sm:hidden" />
+                <Users size={16} className="hidden sm:block" />
                 <span>{group.members.length} {group.members.length === 1 ? 'medlem' : 'medlemmar'}</span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyCode}
-                className="gap-2 h-9 sm:h-8"
-              >
-                {copiedCode ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 sm:h-9 sm:w-9 p-0 shrink-0">
+                  <MoreHorizontal size={18} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="min-w-[160px]">
+                <DropdownMenuItem
+                  onClick={handleCopyCode}
+                  className="py-3 sm:py-2"
+                >
+                  <Copy size={14} className="mr-2" />
+                  Kopiera kod: {group.invite_code}
+                </DropdownMenuItem>
+                {user?.id === group.created_by && (
                   <>
-                    <Check size={14} />
-                    <span className="hidden sm:inline">Kopierad</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy size={14} />
-                    <span className="hidden sm:inline">Kod: {group.invite_code}</span>
-                    <span className="sm:hidden">{group.invite_code}</span>
-                  </>
-                )}
-              </Button>
-
-              {user?.id === group.created_by && (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
-                      <MoreHorizontal size={18} />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
+                    <DropdownMenuSeparator />
                     <DropdownMenuItem
                       onClick={() => setIsDeleteDialogOpen(true)}
                       className="text-destructive focus:text-destructive py-3 sm:py-2"
@@ -267,26 +256,26 @@ const GroupPage = () => {
                       <Trash2 size={14} className="mr-2" />
                       Radera grupp
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              )}
-            </div>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
 
         {/* Balance Summary */}
-        <div className="mb-10">
-          <div className="grid gap-4 md:grid-cols-2 mb-6">
+        <div className="mb-6 sm:mb-10">
+          <div className="grid gap-3 sm:gap-4 md:grid-cols-2 mb-4 sm:mb-6">
             {/* Total Expenses Card */}
             <Card className="border-border/50">
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <div className="p-2 rounded-lg bg-primary/10">
-                    <TrendingUp size={18} className="text-primary" />
+              <CardContent className="p-4 sm:p-6">
+                <div className="flex items-center gap-2 sm:gap-3 mb-1 sm:mb-2">
+                  <div className="p-1.5 sm:p-2 rounded-lg bg-primary/10">
+                    <TrendingUp size={16} className="text-primary sm:w-[18px] sm:h-[18px]" />
                   </div>
-                  <p className="text-sm font-medium text-muted-foreground">Totala utgifter</p>
+                  <p className="text-xs sm:text-sm font-medium text-muted-foreground">Totala utgifter</p>
                 </div>
-                <p className="text-3xl font-semibold text-foreground tabular-nums">
+                <p className="text-xl sm:text-3xl font-semibold text-foreground tabular-nums">
                   {totalExpenses.toLocaleString("sv-SE")} kr
                 </p>
               </CardContent>
@@ -295,20 +284,20 @@ const GroupPage = () => {
             {/* Balance Card */}
             {group.members.length > 1 ? (
               <Card className="border-border/50">
-                <CardContent className="p-6">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${oweAmount > 0 ? 'bg-orange-500/10' : 'bg-green-500/10'}`}>
-                        <ArrowRight size={18} className={oweAmount > 0 ? 'text-orange-600' : 'text-green-600'} />
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex items-center justify-between mb-1 sm:mb-2">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                      <div className={`p-1.5 sm:p-2 rounded-lg ${oweAmount > 0 ? 'bg-orange-500/10' : 'bg-green-500/10'}`}>
+                        <ArrowRight size={16} className={`${oweAmount > 0 ? 'text-orange-600' : 'text-green-600'} sm:w-[18px] sm:h-[18px]`} />
                       </div>
-                      <p className="text-sm font-medium text-muted-foreground">Balans</p>
+                      <p className="text-xs sm:text-sm font-medium text-muted-foreground">Balans</p>
                     </div>
                     {oweAmount > 0 && (
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => setIsSettleModalOpen(true)}
-                        className="text-xs h-7"
+                        className="text-xs h-7 hidden sm:flex"
                       >
                         Avräkna
                       </Button>
@@ -316,26 +305,26 @@ const GroupPage = () => {
                   </div>
                   {oweAmount > 0 && negativeUser && positiveUser ? (
                     <div>
-                      <p className="text-base text-muted-foreground mb-1">
+                      <p className="text-xs sm:text-base text-muted-foreground mb-0.5 sm:mb-1">
                         <span className="font-medium text-foreground">{negativeUser.name}</span>
-                        <span className="mx-2">→</span>
+                        <span className="mx-1 sm:mx-2">→</span>
                         <span className="font-medium text-foreground">{positiveUser.name}</span>
                       </p>
-                      <p className="text-2xl font-semibold text-foreground tabular-nums">
+                      <p className="text-xl sm:text-2xl font-semibold text-foreground tabular-nums">
                         {Math.round(oweAmount).toLocaleString("sv-SE")} kr
                       </p>
                     </div>
                   ) : (
-                    <p className="text-2xl font-semibold text-green-600 dark:text-green-400">Kvitt ✓</p>
+                    <p className="text-xl sm:text-2xl font-semibold text-green-600 dark:text-green-400">Kvitt ✓</p>
                   )}
                 </CardContent>
               </Card>
             ) : null}
           </div>
 
-          {/* Per-person breakdown */}
+          {/* Per-person breakdown - hidden on mobile */}
           {group.members.length > 1 && (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="hidden sm:grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {balances.map((b) => {
                 const member = group.members.find((u) => u.user_id === b.userId);
                 const isPositive = b.balance >= 0;
@@ -378,67 +367,92 @@ const GroupPage = () => {
 
         {/* Tabs */}
         <Tabs defaultValue="expenses" className="w-full">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-            <TabsList className="h-10 w-full sm:w-auto">
-              <TabsTrigger value="expenses" className="gap-2 flex-1 sm:flex-initial">
+          <div className="flex items-center justify-between gap-3 mb-4 sm:mb-6">
+            <TabsList className="h-9 sm:h-10">
+              <TabsTrigger value="expenses" className="gap-1.5 sm:gap-2 text-xs sm:text-sm">
                 Utgifter
                 {expenses.length > 0 && (
-                  <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                  <span className="ml-0.5 sm:ml-1 rounded-full bg-muted px-1.5 sm:px-2 py-0.5 text-xs font-medium">
                     {expenses.length}
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="history" className="gap-2 flex-1 sm:flex-initial">
+              <TabsTrigger value="history" className="gap-1.5 sm:gap-2 text-xs sm:text-sm">
                 Historik
                 {settlements.length > 0 && (
-                  <span className="ml-1 rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
+                  <span className="ml-0.5 sm:ml-1 rounded-full bg-muted px-1.5 sm:px-2 py-0.5 text-xs font-medium">
                     {settlements.length}
                   </span>
                 )}
               </TabsTrigger>
             </TabsList>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 shrink-0">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-9 w-9 p-0 sm:hidden"
+                  >
+                    <MoreHorizontal size={16} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="min-w-[140px]">
+                  <DropdownMenuItem
+                    onClick={() => setIsImportModalOpen(true)}
+                    className="py-3"
+                  >
+                    <Upload size={14} className="mr-2" />
+                    Importera
+                  </DropdownMenuItem>
+                  {oweAmount > 0 && negativeUser && positiveUser && (
+                    <DropdownMenuItem
+                      onClick={() => setIsSettleModalOpen(true)}
+                      className="py-3"
+                    >
+                      <ArrowRight size={14} className="mr-2" />
+                      Avräkna
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => setIsImportModalOpen(true)}
-                className="gap-2 h-9 sm:h-8 flex-1 sm:flex-initial"
+                className="gap-2 h-8 hidden sm:flex"
               >
                 <Upload size={14} />
-                <span className="hidden sm:inline">Importera</span>
-                <span className="sm:hidden">Importera</span>
+                <span>Importera</span>
               </Button>
               <Button
                 size="sm"
                 onClick={() => setIsAddModalOpen(true)}
-                className="gap-2 h-9 sm:h-8 flex-1 sm:flex-initial"
+                className="gap-1.5 sm:gap-2 h-9 sm:h-8"
               >
                 <Plus size={14} />
-                Lägg till
+                <span className="text-sm">Lägg till</span>
               </Button>
             </div>
           </div>
 
           <TabsContent value="expenses" className="mt-0">
             {expenses.length > 0 ? (
-              <Card className="border-border/50">
-                <CardContent className="p-0">
-                  <div className="divide-y divide-border/50">
-                    {expenses.map((expense, index) => (
-                      <ExpenseItem
-                        key={expense.id}
-                        expense={expense}
-                        members={group.members}
-                        index={index}
-                        onEdit={handleEditExpense}
-                        onDelete={handleDeleteExpense}
-                        currentUserId={user?.id}
-                      />
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="border border-border/50 rounded-lg overflow-hidden bg-card">
+                {expenses.map((expense, index) => (
+                  <ExpenseItem
+                    key={expense.id}
+                    expense={expense}
+                    members={group.members}
+                    index={index}
+                    onEdit={handleEditExpense}
+                    onDelete={handleDeleteExpense}
+                    currentUserId={user?.id}
+                  />
+                ))}
+              </div>
             ) : (
               <Card className="border-border/50 border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-12">
