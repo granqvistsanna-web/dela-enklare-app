@@ -59,8 +59,8 @@ const GroupPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { groups, loading: groupsLoading, deleteGroup, addMembers, removeMember, regenerateInviteCode, refetch } = useGroups();
-  const { expenses, loading: expensesLoading, addExpense, addExpenses, updateExpense, deleteExpense } = useExpenses(id);
-  const { incomes, loading: incomesLoading, addIncome, updateIncome, deleteIncome } = useIncomes(id);
+  const { expenses, loading: expensesLoading, addExpense, addExpenses, updateExpense, deleteExpense, refetch: refetchExpenses } = useExpenses(id);
+  const { incomes, loading: incomesLoading, addIncome, updateIncome, deleteIncome, refetch: refetchIncomes } = useIncomes(id);
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(id);
 
   // Memoize group lookup to prevent recalculation and potential race conditions
