@@ -174,7 +174,12 @@ function parseTable(rawRows: string[][]): ParsedTransaction[] {
     if (!description) continue;
 
     // Keep both + and - amounts; user can deselect in review.
-    // Use crypto.randomUUID if available, otherwise fallback to timestamp + random
+    // SECURITY NOTE: Use crypto.randomUUID for generating unpredictable IDs.
+    // Fallback to timestamp + Math.random() is acceptable here since these IDs are:
+    // 1. Temporary (client-side only, not persisted)
+    // 2. Not used for security-sensitive operations
+    // 3. Only used for UI rendering and deduplication
+    // Modern browsers all support crypto.randomUUID, so the fallback is rarely used.
     const uniqueId = typeof crypto !== 'undefined' && crypto.randomUUID
       ? crypto.randomUUID()
       : `${headerRowIndex + 1 + i}-${Date.now()}-${Math.random()}`;
