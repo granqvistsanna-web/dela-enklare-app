@@ -365,7 +365,10 @@ const Index = () => {
       </main>
 
       {/* Add FAB */}
-      <AddFab onClick={() => setIsAddModalOpen(true)} />
+      <AddFab
+        onClick={() => setIsAddModalOpen(true)}
+        onImportClick={() => setIsImportModalOpen(true)}
+      />
 
       {/* Add transaction modal */}
       <AddTransactionModal
