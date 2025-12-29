@@ -180,17 +180,16 @@ const Settings = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Groups Card */}
+          {/* Household Invitations Card */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Grupper</CardTitle>
+                <CardTitle>Hushållsinbjudningar</CardTitle>
               </div>
-              <CardDescription>Hantera dina grupper och gruppmedlemskap</CardDescription>
+              <CardDescription>Bjud in andra användare till ditt hushåll</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {/* Group List */}
+            <CardContent className="space-y-6">
               {groupsLoading ? (
                 <div className="space-y-2">
                   {[1, 2].map((i) => (
@@ -277,30 +276,62 @@ const Settings = () => {
                       </div>
                     </div>
                   ))}
-                </div>
+                  </div>
+
+                  {/* Members List */}
+                  <div className="space-y-3">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Medlemmar ({groups[0]?.members.length || 0})</p>
+                    <div className="space-y-2">
+                      {groups[0]?.members.map((member) => (
+                        <div
+                          key={member.user_id}
+                          className="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-background hover:bg-muted/20 transition-colors"
+                        >
+                          <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
+                            {member.name?.charAt(0).toUpperCase() || "?"}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-foreground truncate">{member.name}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {member.user_id === profile?.user_id ? "Du" : "Medlem"}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Join Another Household */}
+                  <div className="pt-2 border-t border-border/50">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsJoinModalOpen(true)}
+                      className="w-full sm:w-auto"
+                    >
+                      Gå med i ett hushåll
+                    </Button>
+                  </div>
+                </>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-sm text-muted-foreground mb-4">Inga grupper ännu</p>
+                  <p className="text-sm text-muted-foreground mb-4">Du har inget hushåll ännu</p>
+                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                    <Button
+                      onClick={() => setIsCreateModalOpen(true)}
+                      className="gap-2"
+                    >
+                      <Plus size={14} />
+                      Skapa hushåll
+                    </Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsJoinModalOpen(true)}
+                    >
+                      Gå med i hushåll
+                    </Button>
+                  </div>
                 </div>
               )}
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row gap-2 pt-2">
-                <Button
-                  onClick={() => setIsCreateModalOpen(true)}
-                  className="w-full sm:w-auto gap-2"
-                >
-                  <Plus size={14} />
-                  Skapa ny grupp
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => setIsJoinModalOpen(true)}
-                  className="w-full sm:w-auto"
-                >
-                  Gå med i grupp
-                </Button>
-              </div>
             </CardContent>
           </Card>
 

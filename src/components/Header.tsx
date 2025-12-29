@@ -13,7 +13,7 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm shadow-sm">
-      <div className="container flex h-16 items-center justify-between max-w-6xl mx-auto px-4">
+      <div className="container flex h-16 items-center justify-between max-w-4xl mx-auto px-4">
         <Link to="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
           <img src={logo} alt="Päronsplit" className="h-12 sm:h-16 w-auto" />
         </Link>
@@ -83,7 +83,7 @@ export function Header() {
       {/* Mobile Navigation */}
       {isMobileMenuOpen && (
         <div className="md:hidden border-t border-border bg-background/95 backdrop-blur-sm">
-          <nav className="container max-w-6xl mx-auto px-4 py-6 flex flex-col gap-2">
+          <nav className="container max-w-4xl mx-auto px-4 py-6 flex flex-col gap-2">
             <Link
               to="/dashboard"
               onClick={() => setIsMobileMenuOpen(false)}
