@@ -8,9 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useGroups } from "@/hooks/useGroups";
+import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink } from "lucide-react";
+import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink, Palette, Sun, Moon, Monitor } from "lucide-react";
+import { cn } from "@/lib/utils";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +31,7 @@ const Settings = () => {
   const navigate = useNavigate();
   const { profile, signOut, updatePassword, updateProfile } = useAuth();
   const { groups, loading: groupsLoading, createGroup, refetch } = useGroups();
+  const { theme, setTheme } = useTheme();
 
   const [newName, setNewName] = useState("");
   const [isChangingName, setIsChangingName] = useState(false);
@@ -224,6 +227,60 @@ const Settings = () => {
                 >
                   Gå med i grupp
                 </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Theme Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Palette className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Utseende</CardTitle>
+              </div>
+              <CardDescription>Anpassa appens utseende och tema</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Välj tema</Label>
+                <div className="grid grid-cols-3 gap-3">
+                  <Button
+                    variant={theme === "light" ? "default" : "outline"}
+                    onClick={() => setTheme("light")}
+                    className={cn(
+                      "flex-col h-auto py-4 gap-2 transition-all",
+                      theme === "light" && "ring-2 ring-primary ring-offset-2"
+                    )}
+                  >
+                    <Sun className="h-5 w-5" />
+                    <span className="text-sm font-medium">Ljust</span>
+                  </Button>
+                  <Button
+                    variant={theme === "dark" ? "default" : "outline"}
+                    onClick={() => setTheme("dark")}
+                    className={cn(
+                      "flex-col h-auto py-4 gap-2 transition-all",
+                      theme === "dark" && "ring-2 ring-primary ring-offset-2"
+                    )}
+                  >
+                    <Moon className="h-5 w-5" />
+                    <span className="text-sm font-medium">Mörkt</span>
+                  </Button>
+                  <Button
+                    variant={theme === "system" ? "default" : "outline"}
+                    onClick={() => setTheme("system")}
+                    className={cn(
+                      "flex-col h-auto py-4 gap-2 transition-all",
+                      theme === "system" && "ring-2 ring-primary ring-offset-2"
+                    )}
+                  >
+                    <Monitor className="h-5 w-5" />
+                    <span className="text-sm font-medium">System</span>
+                  </Button>
+                </div>
+                <p className="text-xs text-muted-foreground mt-2">
+                  Systemläget matchar ditt operativsystems inställningar
+                </p>
               </div>
             </CardContent>
           </Card>

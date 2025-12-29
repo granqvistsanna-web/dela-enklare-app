@@ -1,22 +1,14 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Moon, Sun, Monitor, Menu, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import logo from "@/assets/logo.png";
 
 export function Header() {
   const location = useLocation();
   const { profile } = useAuth();
-  const { theme, setTheme } = useTheme();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
@@ -57,41 +49,18 @@ export function Header() {
             )}
           </Link>
 
-          <div className="w-px h-6 bg-border mx-2" />
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9 rounded-md hover:bg-secondary/50 transition-colors">
-                <Sun className="h-[1.1rem] w-[1.1rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                <Moon className="absolute h-[1.1rem] w-[1.1rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                <span className="sr-only">Växla tema</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
-              <DropdownMenuItem onClick={() => setTheme("light")}>
-                <Sun className="mr-2 h-4 w-4" />
-                <span>Ljust</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("dark")}>
-                <Moon className="mr-2 h-4 w-4" />
-                <span>Mörkt</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setTheme("system")}>
-                <Monitor className="mr-2 h-4 w-4" />
-                <span>System</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
           {profile && (
-            <div className="flex items-center gap-2 ml-2 pl-2 border-l border-border">
+            <Link
+              to="/installningar"
+              className="flex items-center gap-2 ml-2 pl-2 border-l border-border hover:opacity-80 transition-opacity"
+            >
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
                 {profile.name?.charAt(0).toUpperCase() || "?"}
               </div>
               <span className="text-sm text-foreground font-medium max-w-[120px] truncate">
                 {profile.name}
               </span>
-            </div>
+            </Link>
           )}
         </nav>
 
@@ -146,52 +115,13 @@ export function Header() {
               )}
             </Link>
 
-            {/* Theme Selector for Mobile */}
-            <div className="pt-4 pb-2 mt-2 border-t border-border">
-              <p className="text-xs font-medium text-muted-foreground mb-3 px-1">Tema</p>
-              <div className="grid grid-cols-3 gap-2">
-                <Button
-                  variant={theme === "light" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setTheme("light")}
-                  className={cn(
-                    "flex-col h-auto py-3 gap-1 transition-all",
-                    theme === "light" && "bg-secondary/70 border-primary/20 border"
-                  )}
-                >
-                  <Sun className="h-4 w-4" />
-                  <span className="text-xs">Ljust</span>
-                </Button>
-                <Button
-                  variant={theme === "dark" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setTheme("dark")}
-                  className={cn(
-                    "flex-col h-auto py-3 gap-1 transition-all",
-                    theme === "dark" && "bg-secondary/70 border-primary/20 border"
-                  )}
-                >
-                  <Moon className="h-4 w-4" />
-                  <span className="text-xs">Mörkt</span>
-                </Button>
-                <Button
-                  variant={theme === "system" ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setTheme("system")}
-                  className={cn(
-                    "flex-col h-auto py-3 gap-1 transition-all",
-                    theme === "system" && "bg-secondary/70 border-primary/20 border"
-                  )}
-                >
-                  <Monitor className="h-4 w-4" />
-                  <span className="text-xs">System</span>
-                </Button>
-              </div>
-            </div>
-
             {profile && (
-              <div className="pt-4 mt-2 border-t border-border">
-                <div className="flex items-center gap-3 px-4 py-3 bg-secondary/30 rounded-lg">
+              <Link
+                to="/installningar"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="pt-4 mt-2 border-t border-border"
+              >
+                <div className="flex items-center gap-3 px-4 py-3 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-base font-semibold text-primary shrink-0">
                     {profile.name?.charAt(0).toUpperCase() || "?"}
                   </div>
@@ -200,7 +130,7 @@ export function Header() {
                     <p className="text-sm font-medium text-foreground truncate">{profile.name}</p>
                   </div>
                 </div>
-              </div>
+              </Link>
             )}
           </nav>
         </div>
