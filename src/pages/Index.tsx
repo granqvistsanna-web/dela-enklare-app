@@ -10,6 +10,7 @@ import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { SettlementModal } from "@/components/SettlementModal";
 import { SettlementHistory } from "@/components/SettlementHistory";
 import { ImportModal } from "@/components/ImportModal";
+import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes } from "@/hooks/useIncomes";
@@ -24,7 +25,6 @@ import {
   TrendingDown,
   ArrowRight,
   Calendar,
-  Wallet,
   PiggyBank,
   Receipt,
   DollarSign,
@@ -51,6 +51,7 @@ const Index = () => {
   } = useExpenses(primaryGroup?.id);
 
   const { incomes, loading: incomesLoading } = useIncomes(primaryGroup?.id);
+
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(primaryGroup?.id);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -354,16 +355,20 @@ const Index = () => {
               </Card>
             )}
 
-            {/* Savings Placeholder */}
+          {/* Income and Savings Overview */}
+          <div className="grid gap-4 md:grid-cols-2">
+            <IncomeOverviewCard
+              incomes={incomes}
+              members={primaryGroup.members}
+              selectedYear={new Date().getFullYear()}
+              selectedMonth={new Date().getMonth() + 1}
+            />
+
             <Card className="border-border/50 border-dashed opacity-60">
               <CardContent className="p-6">
-                <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-lg bg-muted">
-                    <PiggyBank size={20} className="text-muted-foreground" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Gemensamt sparande</p>
-                    <p className="text-sm text-muted-foreground mt-1">Kommer snart</p>
+                <div className="flex items-center gap-3 mb-2">
+                  <div className="p-2 rounded-lg bg-muted">
+                    <PiggyBank size={18} className="text-muted-foreground" />
                   </div>
                 </div>
               </CardContent>

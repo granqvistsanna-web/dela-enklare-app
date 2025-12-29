@@ -1,4 +1,5 @@
-import { memo } from "react";
+import { memo, useState } from "react";
+import { motion, PanInfo } from "framer-motion";
 import { Expense } from "@/hooks/useExpenses";
 import { GroupMember } from "@/hooks/useGroups";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
@@ -23,6 +24,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
   const payer = members.find((u) => u.user_id === expense.paid_by);
   const category = DEFAULT_CATEGORIES.find((c) => c.id === expense.category);
   const canModify = currentUserId === expense.paid_by;
+  const [dragX, setDragX] = useState(0);
 
   // Safe date parsing with fallback
   let formattedDate = "Ogiltigt datum";
@@ -45,8 +47,36 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
     ? expense.amount
     : 0;
 
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    // Swipe left to delete threshold
+    if (info.offset.x < -100 && canModify && onDelete) {
+      onDelete(expense.id);
+    }
+  };
+
   return (
-    <div className="group flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors">
+    <div className="group relative overflow-hidden">
+      {/* Delete background - shown when swiping */}
+      {canModify && onDelete && (
+        <div
+          className="absolute inset-0 bg-destructive flex items-center justify-end px-6"
+          style={{
+            opacity: Math.min(Math.abs(dragX) / 100, 1),
+          }}
+        >
+          <span className="text-destructive-foreground font-medium">Ta bort</span>
+        </div>
+      )}
+
+      {/* Main content - draggable on mobile */}
+      <motion.div
+        drag={canModify && onDelete ? "x" : false}
+        dragConstraints={{ left: -120, right: 0 }}
+        dragElastic={0.1}
+        onDrag={(_, info) => setDragX(info.offset.x)}
+        onDragEnd={handleDragEnd}
+        className="group flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background"
+      >
       <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
         <div className="flex items-center justify-center w-10 h-10 sm:w-10 sm:h-10 rounded-lg bg-muted/50 shrink-0">
           <span className="text-lg">{category?.icon || "📦"}</span>
@@ -107,6 +137,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
           </DropdownMenu>
         )}
       </div>
+      </motion.div>
     </div>
   );
 });
