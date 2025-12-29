@@ -70,7 +70,7 @@ export function useGroups() {
           .select(`
             group_id,
             user_id,
-            public_profiles (
+            public_profiles!left (
               id,
               user_id,
               name
@@ -91,17 +91,18 @@ export function useGroups() {
       membersWithProfiles?.forEach((member: any) => {
         const profile = member.public_profiles;
 
-        // Validate profile data
-        if (!profile || !profile.id || !profile.user_id || !profile.name) {
-          console.warn(`Invalid profile data for member`, member);
-          return;
-        }
-
-        const groupMember: GroupMember = {
-          id: profile.id,
-          user_id: profile.user_id,
-          name: profile.name,
-        };
+        // If no profile exists, create a fallback using the user_id from group_members
+        const groupMember: GroupMember = profile && profile.id && profile.user_id && profile.name
+          ? {
+              id: profile.id,
+              user_id: profile.user_id,
+              name: profile.name,
+            }
+          : {
+              id: member.user_id, // Use user_id as fallback id
+              user_id: member.user_id,
+              name: "Okänd användare", // Fallback name
+            };
 
         if (!groupMembersMap.has(member.group_id)) {
           groupMembersMap.set(member.group_id, []);
