@@ -1,9 +1,22 @@
+/**
+ * Edge function for categorizing transactions using AI
+ *
+ * SECURITY NOTE: This function uses origin-based CORS to prevent unauthorized access.
+ * Configure the ALLOWED_ORIGINS environment variable with your application's URL(s).
+ * Set via: supabase secrets set ALLOWED_ORIGINS=https://yourdomain.com
+ *
+ * Multiple origins can be comma-separated:
+ * ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+ */
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
-const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+// Restrict CORS to allowed origins only - prevents unauthorized cross-origin requests
+const ALLOWED_ORIGINS = Deno.env.get("ALLOWED_ORIGINS")?.split(",") || [];
+const corsHeaders = (origin: string | null) => ({
+  "Access-Control-Allow-Origin": origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0] || "",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-};
+});
 
 interface Transaction {
   date: string;
@@ -17,8 +30,10 @@ interface TagRule {
 }
 
 serve(async (req) => {
+  const origin = req.headers.get("origin");
+
   if (req.method === "OPTIONS") {
-    return new Response(null, { headers: corsHeaders });
+    return new Response(null, { headers: corsHeaders(origin) });
   }
 
   try {
@@ -80,13 +95,13 @@ Return ONLY valid JSON array, no other text.`;
       if (response.status === 429) {
         return new Response(JSON.stringify({ error: "Rate limit exceeded. Please try again later." }), {
           status: 429,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
         });
       }
       if (response.status === 402) {
         return new Response(JSON.stringify({ error: "Payment required. Please add funds to your workspace." }), {
           status: 402,
-          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
         });
       }
       
@@ -119,14 +134,14 @@ Return ONLY valid JSON array, no other text.`;
     console.log(`Successfully categorized ${categorizations.length} transactions`);
 
     return new Response(JSON.stringify({ categorizations }), {
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
+      headers: { ...corsHeaders(origin), "Content-Type": "application/json" },
     });
 
   } catch (error) {
     console.error("Error in categorize-transactions:", error);
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      { status: 500, headers: { ...corsHeaders(origin), "Content-Type": "application/json" } }
     );
   }
 });
