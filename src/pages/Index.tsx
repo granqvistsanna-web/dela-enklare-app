@@ -386,31 +386,105 @@ const Index = () => {
         </div>
 
         {/* Main Content Tabs */}
-        <Tabs defaultValue="denna-manad" className="w-full">
+        <Tabs defaultValue="dashboard" className="w-full">
           <TabsList className="h-11 w-full sm:w-auto mb-6 grid grid-cols-3">
-            <TabsTrigger value="denna-manad" className="gap-2 text-sm">
-              Denna månad
+            <TabsTrigger value="dashboard" className="gap-2 text-sm">
+              Dashboard
             </TabsTrigger>
-            <TabsTrigger value="utgifter" className="gap-2 text-sm">
-              Utgifter
-              {expenses.length > 0 && (
+            <TabsTrigger value="transaktioner" className="gap-2 text-sm">
+              Transaktioner
+              {combinedItems.length > 0 && (
                 <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium">
-                  {expenses.length}
+                  {combinedItems.length}
                 </span>
               )}
             </TabsTrigger>
-            <TabsTrigger value="inkomster" className="gap-2 text-sm">
-              Inkomster
-              {incomes.length > 0 && (
-                <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-xs font-medium">
-                  {incomes.length}
-                </span>
-              )}
+            <TabsTrigger value="analytics" className="gap-2 text-sm">
+              Analytics
             </TabsTrigger>
           </TabsList>
 
-          {/* Denna månad tab - Chronological list of all items */}
-          <TabsContent value="denna-manad" className="mt-0">
+          {/* Dashboard tab - Summary overview */}
+          <TabsContent value="dashboard" className="mt-0">
+            <div className="space-y-6">
+              {/* Snabb översikt - senaste transaktioner */}
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">Senaste aktivitet</h3>
+                {combinedItems.length > 0 ? (
+                  <Card className="border-border/50 shadow-sm">
+                    <CardContent className="p-0">
+                      <div className="divide-y divide-border/50">
+                        {combinedItems.slice(0, 5).map((item) => (
+                          item.type === 'expense' ? (
+                            <div key={`expense-${item.data.id}`} className="p-4 hover:bg-muted/20 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-red-500/10 shrink-0">
+                                  <TrendingDown size={18} className="text-red-600 dark:text-red-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-foreground">{item.data.description || item.data.category}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {primaryGroup.members.find(m => m.user_id === item.data.paid_by)?.name} •
+                                    {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-semibold text-red-600 dark:text-red-400 tabular-nums">
+                                    -{item.data.amount.toLocaleString('sv-SE')} kr
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div key={`income-${item.data.id}`} className="p-4 hover:bg-muted/20 transition-colors">
+                              <div className="flex items-center gap-3">
+                                <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
+                                  <DollarSign size={18} className="text-green-600 dark:text-green-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="font-medium text-foreground">{item.data.note || 'Inkomst'}</p>
+                                  <p className="text-sm text-muted-foreground">
+                                    {primaryGroup.members.find(m => m.user_id === item.data.recipient)?.name} •
+                                    {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
+                                  </p>
+                                </div>
+                                <div className="text-right">
+                                  <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums">
+                                    +{(item.data.amount / 100).toLocaleString('sv-SE')} kr
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                          )
+                        ))}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="border-border/50 border-dashed">
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <div className="rounded-full bg-muted p-3 mb-4">
+                        <Calendar size={24} className="text-muted-foreground" />
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-4">Inga transaktioner ännu</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsAddModalOpen(true)}
+                        className="gap-2"
+                      >
+                        <Plus size={14} />
+                        Lägg till
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+            </div>
+          </TabsContent>
+
+          {/* Transaktioner tab - Full chronological list */}
+          <TabsContent value="transaktioner" className="mt-0">
             {combinedItems.length > 0 ? (
               <div className="space-y-4">
                 {/* Settle shortcut */}
@@ -560,20 +634,32 @@ const Index = () => {
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            ) : (
-              <Card className="border-border/50 border-dashed">
-                <CardContent className="flex flex-col items-center justify-center py-12">
-                  <div className="rounded-full bg-muted p-3 mb-4">
-                    <DollarSign size={24} className="text-muted-foreground" />
-                  </div>
-                  <p className="text-sm text-muted-foreground">Inga inkomster ännu</p>
-                </CardContent>
-              </Card>
-            )}
+                    </CardContent>
+                  </Card>
+                ) : (
+                  <Card className="border-border/50 border-dashed">
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <div className="rounded-full bg-muted p-3 mb-4">
+                        <TrendingUp size={24} className="text-muted-foreground" />
+                      </div>
+                      <p className="text-sm text-muted-foreground">Ingen data att visa ännu</p>
+                    </CardContent>
+                  </Card>
+                )}
+              </div>
+
+              {/* Utveckling över tid - placeholder */}
+              <div>
+                <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">Utveckling över tid</h3>
+                <Card className="border-border/50 shadow-sm">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-center py-12">
+                      <p className="text-sm text-muted-foreground">Diagram kommer snart</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
           </TabsContent>
 
         </Tabs>
