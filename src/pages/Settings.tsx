@@ -275,6 +275,7 @@ const Settings = () => {
                         )}
                       </div>
                     </div>
+                  ))}
                   </div>
 
                   {/* Members List */}
