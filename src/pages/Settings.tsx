@@ -7,9 +7,10 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
+import { useGroups } from "@/hooks/useGroups";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Lock, Tag, LogOut, Trash2, ChevronLeft } from "lucide-react";
+import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,10 +22,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { CreateGroupModal } from "@/components/CreateGroupModal";
+import { JoinGroupModal } from "@/components/JoinGroupModal";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { profile, signOut, updatePassword, updateProfile } = useAuth();
+  const { groups, loading: groupsLoading, createGroup, refetch } = useGroups();
 
   const [newName, setNewName] = useState("");
   const [isChangingName, setIsChangingName] = useState(false);
@@ -33,6 +37,9 @@ const Settings = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
 
   const handleNameChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -105,11 +112,9 @@ const Settings = () => {
 
       await signOut();
       toast.success("Konto raderat");
-      // Navigation will be handled automatically by the auth state listener
     } catch (error) {
       console.error("Error deleting account:", error);
       toast.error("Kunde inte radera kontot");
-      // Force navigation if there's an error
       navigate("/auth");
     } finally {
       setIsDeletingAccount(false);
@@ -119,14 +124,16 @@ const Settings = () => {
   const handleSignOut = async () => {
     try {
       await signOut();
-      // Navigation will be handled automatically by the auth state listener
-      // and the ProtectedRoute/PublicRoute components
     } catch (error) {
       console.error("Error during sign out:", error);
       toast.error("Kunde inte logga ut");
-      // Force navigation even if signOut fails
       navigate("/auth");
     }
+  };
+
+  const handleCreateGroup = async (name: string, isTemporary: boolean, selectedUserIds: string[]) => {
+    await createGroup(name, isTemporary, selectedUserIds);
+    setIsCreateModalOpen(false);
   };
 
   return (
@@ -146,6 +153,81 @@ const Settings = () => {
         </div>
 
         <div className="space-y-6">
+          {/* Groups Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Users className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Grupper</CardTitle>
+              </div>
+              <CardDescription>Hantera dina grupper och gruppmedlemskap</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {/* Group List */}
+              {groupsLoading ? (
+                <div className="space-y-2">
+                  {[1, 2].map((i) => (
+                    <div key={i} className="h-16 rounded-lg bg-secondary/50 animate-pulse" />
+                  ))}
+                </div>
+              ) : groups.length > 0 ? (
+                <div className="space-y-2">
+                  {groups.map((group) => (
+                    <div
+                      key={group.id}
+                      className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-secondary/30 transition-colors"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <p className="font-medium text-foreground truncate">{group.name}</p>
+                          {group.is_temporary && (
+                            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground shrink-0">
+                              Tillfällig
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {group.members.length} {group.members.length === 1 ? "medlem" : "medlemmar"}
+                        </p>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigate(`/grupp/${group.id}`)}
+                        className="gap-2 shrink-0"
+                      >
+                        <span className="hidden sm:inline">Öppna</span>
+                        <ExternalLink size={14} />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-sm text-muted-foreground mb-4">Inga grupper ännu</p>
+                </div>
+              )}
+
+              {/* Action Buttons */}
+              <div className="flex flex-col sm:flex-row gap-2 pt-2">
+                <Button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="w-full sm:w-auto gap-2"
+                >
+                  <Plus size={14} />
+                  Skapa ny grupp
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsJoinModalOpen(true)}
+                  className="w-full sm:w-auto"
+                >
+                  Gå med i grupp
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
           {/* Profile Card */}
           <Card>
             <CardHeader>
@@ -332,6 +414,19 @@ const Settings = () => {
           </div>
         </div>
       </main>
+
+      {/* Modals */}
+      <CreateGroupModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        onSubmit={handleCreateGroup}
+      />
+
+      <JoinGroupModal
+        isOpen={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
+        onSuccess={refetch}
+      />
     </div>
   );
 };
