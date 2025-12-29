@@ -287,11 +287,34 @@ export function useGroups() {
       return newCode;
     } catch (error) {
       console.error("Error regenerating invite code:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : "Kunde inte generera ny kod";
       toast.error(errorMessage);
       return null;
+    }
+  };
+
+  const updateGroup = async (groupId: string, name: string) => {
+    try {
+      const { error } = await supabase
+        .from("groups")
+        .update({ name })
+        .eq("id", groupId);
+
+      if (error) {
+        console.error("Error updating group:", error);
+        throw error;
+      }
+
+      await fetchGroups();
+      toast.success("Gruppnamn uppdaterat");
+    } catch (error) {
+      console.error("Error updating group:", error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : "Kunde inte uppdatera gruppnamn";
+      toast.error(errorMessage);
     }
   };
 
@@ -303,6 +326,7 @@ export function useGroups() {
     addMembers,
     removeMember,
     regenerateInviteCode,
+    updateGroup,
     refetch: fetchGroups,
   };
 }

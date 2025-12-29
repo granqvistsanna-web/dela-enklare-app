@@ -11,7 +11,7 @@ import { useGroups } from "@/hooks/useGroups";
 import { useTheme } from "@/hooks/useTheme";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink, Palette, Sun, Moon, Monitor } from "lucide-react";
+import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink, Palette, Sun, Moon, Monitor, Edit2, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -30,7 +30,7 @@ import { JoinGroupModal } from "@/components/JoinGroupModal";
 const Settings = () => {
   const navigate = useNavigate();
   const { profile, signOut, updatePassword, updateProfile } = useAuth();
-  const { groups, loading: groupsLoading, createGroup, refetch } = useGroups();
+  const { groups, loading: groupsLoading, createGroup, updateGroup, refetch } = useGroups();
   const { theme, setTheme } = useTheme();
 
   const [newName, setNewName] = useState("");
@@ -43,6 +43,9 @@ const Settings = () => {
 
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+
+  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
+  const [editingGroupName, setEditingGroupName] = useState("");
 
   const handleNameChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,6 +142,27 @@ const Settings = () => {
     setIsCreateModalOpen(false);
   };
 
+  const handleEditGroupName = (groupId: string, currentName: string) => {
+    setEditingGroupId(groupId);
+    setEditingGroupName(currentName);
+  };
+
+  const handleSaveGroupName = async (groupId: string) => {
+    if (editingGroupName.trim().length < 2) {
+      toast.error("Gruppnamn måste vara minst 2 tecken");
+      return;
+    }
+
+    await updateGroup(groupId, editingGroupName.trim());
+    setEditingGroupId(null);
+    setEditingGroupName("");
+  };
+
+  const handleCancelEditGroupName = () => {
+    setEditingGroupId(null);
+    setEditingGroupName("");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -181,27 +205,76 @@ const Settings = () => {
                       className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-secondary/30 transition-colors"
                     >
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p className="font-medium text-foreground truncate">{group.name}</p>
-                          {group.is_temporary && (
-                            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground shrink-0">
-                              Tillfällig
-                            </span>
-                          )}
-                        </div>
+                        {editingGroupId === group.id ? (
+                          <div className="flex items-center gap-2">
+                            <Input
+                              value={editingGroupName}
+                              onChange={(e) => setEditingGroupName(e.target.value)}
+                              className="max-w-xs"
+                              autoFocus
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  handleSaveGroupName(group.id);
+                                } else if (e.key === "Escape") {
+                                  handleCancelEditGroupName();
+                                }
+                              }}
+                            />
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleSaveGroupName(group.id)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Check size={14} className="text-green-600" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={handleCancelEditGroupName}
+                              className="h-8 w-8 p-0"
+                            >
+                              <X size={14} className="text-red-600" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <p className="font-medium text-foreground truncate">{group.name}</p>
+                            {group.is_temporary && (
+                              <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground shrink-0">
+                                Tillfällig
+                              </span>
+                            )}
+                          </div>
+                        )}
                         <p className="text-sm text-muted-foreground">
                           {group.members.length} {group.members.length === 1 ? "medlem" : "medlemmar"}
                         </p>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => navigate(`/grupp/${group.id}`)}
-                        className="gap-2 shrink-0"
-                      >
-                        <span className="hidden sm:inline">Öppna</span>
-                        <ExternalLink size={14} />
-                      </Button>
+                      <div className="flex items-center gap-2 shrink-0">
+                        {editingGroupId !== group.id && (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditGroupName(group.id, group.name)}
+                              className="gap-2"
+                            >
+                              <Edit2 size={14} />
+                              <span className="hidden sm:inline">Ändra namn</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => navigate(`/grupp/${group.id}`)}
+                              className="gap-2"
+                            >
+                              <span className="hidden sm:inline">Öppna</span>
+                              <ExternalLink size={14} />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
