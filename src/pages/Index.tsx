@@ -140,37 +140,37 @@ const Index = () => {
 
   return (
     <div className="lg:pl-64">
-      <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
+      <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Hem</h1>
-          <p className="text-muted-foreground">{household.name}</p>
+        <div className="mb-6">
+          <h1 className="text-heading text-2xl mb-1">Hem</h1>
+          <p className="text-caption">{household.name}</p>
         </div>
 
         {/* Month selector */}
-        <div className="mb-8">
+        <div className="mb-6">
           <MonthSelector />
         </div>
 
         {/* Summary grid - 2 columns */}
-        <div className="grid gap-6 lg:grid-cols-2 mb-8">
+        <div className="grid gap-4 lg:grid-cols-2 mb-6">
           {/* Left column: Summering */}
-          <div className="space-y-4">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+          <div className="space-y-3">
+            <h2 className="text-subheading">
               Översikt
             </h2>
 
             <Card>
-              <CardContent className="p-6 space-y-4">
+              <CardContent className="p-5 space-y-3">
                 {/* Total in */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-green-500/10">
-                      <TrendingUp size={20} className="text-green-600 dark:text-green-400" />
+                    <div className="p-1.5 rounded-md bg-green-500/10">
+                      <TrendingUp size={18} className="text-green-600 dark:text-green-400" />
                     </div>
-                    <span className="text-sm text-muted-foreground">Total in</span>
+                    <span className="text-caption font-medium">Total in</span>
                   </div>
-                  <span className="text-xl font-bold text-foreground tabular-nums">
+                  <span className="text-lg font-semibold text-foreground tabular-nums">
                     {totals.totalIncomes.toLocaleString("sv-SE")} kr
                   </span>
                 </div>
@@ -178,26 +178,26 @@ const Index = () => {
                 {/* Total ut */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-red-500/10">
-                      <TrendingDown size={20} className="text-red-600 dark:text-red-400" />
+                    <div className="p-1.5 rounded-md bg-red-500/10">
+                      <TrendingDown size={18} className="text-red-600 dark:text-red-400" />
                     </div>
-                    <span className="text-sm text-muted-foreground">Total ut</span>
+                    <span className="text-caption font-medium">Total ut</span>
                   </div>
-                  <span className="text-xl font-bold text-foreground tabular-nums">
+                  <span className="text-lg font-semibold text-foreground tabular-nums">
                     {totals.totalExpenses.toLocaleString("sv-SE")} kr
                   </span>
                 </div>
 
-                <div className="pt-4 border-t border-border">
+                <div className="pt-3 border-t border-border/60">
                   {/* Netto */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-2 rounded-lg ${totals.netto >= 0 ? 'bg-green-500/10' : 'bg-orange-500/10'}`}>
-                        <DollarSign size={20} className={totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'} />
+                      <div className={`p-1.5 rounded-md ${totals.netto >= 0 ? 'bg-green-500/10' : 'bg-orange-500/10'}`}>
+                        <DollarSign size={18} className={totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'} />
                       </div>
-                      <span className="text-sm text-muted-foreground">Netto</span>
+                      <span className="text-caption font-medium">Netto</span>
                     </div>
-                    <span className={`text-2xl font-bold tabular-nums ${totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                    <span className={`text-xl font-bold tabular-nums ${totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
                       {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
                     </span>
                   </div>
@@ -207,25 +207,25 @@ const Index = () => {
           </div>
 
           {/* Right column: Visual diagram */}
-          <div className="space-y-4">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+          <div className="space-y-3">
+            <h2 className="text-subheading">
               Fördelning
             </h2>
 
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="p-5">
                 {/* Circular/bar visualization */}
-                <div className="space-y-6">
+                <div className="space-y-5">
                   {/* Bar chart */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-green-600 dark:text-green-400 font-medium">Inkomster</span>
-                        <span className="text-muted-foreground">
+                        <span className="text-caption">
                           {visualPercentages.incomeWidth.toFixed(0)}%
                         </span>
                       </div>
-                      <div className="h-8 bg-secondary rounded-lg overflow-hidden">
+                      <div className="h-7 bg-muted rounded-md overflow-hidden">
                         <div
                           className="h-full bg-green-500 transition-all duration-500"
                           style={{ width: `${visualPercentages.incomeWidth}%` }}
@@ -236,11 +236,11 @@ const Index = () => {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-red-600 dark:text-red-400 font-medium">Utgifter</span>
-                        <span className="text-muted-foreground">
+                        <span className="text-caption">
                           {visualPercentages.expenseWidth.toFixed(0)}%
                         </span>
                       </div>
-                      <div className="h-8 bg-secondary rounded-lg overflow-hidden">
+                      <div className="h-7 bg-muted rounded-md overflow-hidden">
                         <div
                           className="h-full bg-red-500 transition-all duration-500"
                           style={{ width: `${visualPercentages.expenseWidth}%` }}
@@ -250,18 +250,18 @@ const Index = () => {
                   </div>
 
                   {/* Stats */}
-                  <div className="pt-4 border-t border-border grid grid-cols-2 gap-4 text-center">
+                  <div className="pt-3 border-t border-border/60 grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <p className="text-2xl font-bold text-foreground tabular-nums">
+                      <p className="text-xl font-bold text-foreground tabular-nums">
                         {filteredExpenses.length}
                       </p>
-                      <p className="text-xs text-muted-foreground">Utgifter</p>
+                      <p className="text-caption">Utgifter</p>
                     </div>
                     <div>
-                      <p className="text-2xl font-bold text-foreground tabular-nums">
+                      <p className="text-xl font-bold text-foreground tabular-nums">
                         {filteredIncomes.length}
                       </p>
-                      <p className="text-xs text-muted-foreground">Inkomster</p>
+                      <p className="text-caption">Inkomster</p>
                     </div>
                   </div>
                 </div>
@@ -271,14 +271,14 @@ const Index = () => {
         </div>
 
         {/* Latest activities */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="text-subheading">
               Senaste aktiviteter
             </h2>
             <button
               onClick={() => navigate("/aktivitet")}
-              className="text-sm text-primary hover:underline flex items-center gap-1"
+              className="text-sm text-foreground hover:opacity-70 flex items-center gap-1 transition-opacity"
             >
               Se alla
               <ArrowRight size={14} />
@@ -288,43 +288,43 @@ const Index = () => {
           {latestActivities.length > 0 ? (
             <Card>
               <CardContent className="p-0">
-                <div className="divide-y divide-border/50">
+                <div className="divide-y divide-border/40">
                   {latestActivities.map((item) => (
                     item.type === 'expense' ? (
-                      <div key={`expense-${item.data.id}`} className="p-4 hover:bg-muted/20 transition-colors">
+                      <div key={`expense-${item.data.id}`} className="p-3.5 notion-hover cursor-pointer">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-red-500/10 shrink-0">
-                            <TrendingDown size={18} className="text-red-600 dark:text-red-400" />
+                          <div className="p-1.5 rounded-md bg-red-500/10 shrink-0">
+                            <TrendingDown size={16} className="text-red-600 dark:text-red-400" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground">{item.data.description || item.data.category}</p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="font-medium text-foreground text-sm">{item.data.description || item.data.category}</p>
+                            <p className="text-caption">
                               {household.members.find(m => m.user_id === item.data.paid_by)?.name} •{' '}
                               {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-red-600 dark:text-red-400 tabular-nums">
+                            <p className="font-semibold text-red-600 dark:text-red-400 tabular-nums text-sm">
                               -{item.data.amount.toLocaleString('sv-SE')} kr
                             </p>
                           </div>
                         </div>
                       </div>
                     ) : (
-                      <div key={`income-${item.data.id}`} className="p-4 hover:bg-muted/20 transition-colors">
+                      <div key={`income-${item.data.id}`} className="p-3.5 notion-hover cursor-pointer">
                         <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
-                            <DollarSign size={18} className="text-green-600 dark:text-green-400" />
+                          <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
+                            <DollarSign size={16} className="text-green-600 dark:text-green-400" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground">{item.data.note || 'Inkomst'}</p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="font-medium text-foreground text-sm">{item.data.note || 'Inkomst'}</p>
+                            <p className="text-caption">
                               {household.members.find(m => m.user_id === item.data.recipient)?.name} •{' '}
                               {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
                             </p>
                           </div>
                           <div className="text-right">
-                            <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums">
+                            <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums text-sm">
                               +{(item.data.amount / 100).toLocaleString('sv-SE')} kr
                             </p>
                           </div>
@@ -337,11 +337,11 @@ const Index = () => {
             </Card>
           ) : (
             <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-12">
-                <div className="rounded-full bg-muted p-3 mb-4">
-                  <Calendar size={24} className="text-muted-foreground" />
+              <CardContent className="flex flex-col items-center justify-center py-10">
+                <div className="rounded-full bg-muted p-3 mb-3">
+                  <Calendar size={20} className="text-muted-foreground" />
                 </div>
-                <p className="text-sm text-muted-foreground">Inga aktiviteter denna månad</p>
+                <p className="text-caption">Inga aktiviteter denna månad</p>
               </CardContent>
             </Card>
           )}

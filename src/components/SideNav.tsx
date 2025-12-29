@@ -15,18 +15,18 @@ export function SideNav() {
 
   return (
     <>
-      {/* Desktop sidebar */}
-      <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col border-r border-border bg-background">
+      {/* Desktop sidebar - Notion-inspired */}
+      <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col border-r border-sidebar-border bg-sidebar">
         <div className="flex flex-col flex-1 min-h-0">
           {/* Logo */}
-          <div className="flex items-center h-16 px-6 border-b border-border">
-            <Link to="/dashboard" className="flex items-center hover:opacity-80 transition-opacity">
-              <img src={logo} alt="Päronsplit" className="h-12 w-auto" />
+          <div className="flex items-center h-14 px-4 border-b border-sidebar-border/50">
+            <Link to="/dashboard" className="flex items-center hover:opacity-70 transition-opacity">
+              <img src={logo} alt="Päronsplit" className="h-10 w-auto" />
             </Link>
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-3 py-6 space-y-1">
+          <nav className="flex-1 px-2 py-4 space-y-0.5">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.to;
@@ -36,17 +36,14 @@ export function SideNav() {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-all",
+                    "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all",
                     isActive
-                      ? "bg-primary/10 text-primary"
-                      : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                      ? "bg-sidebar-accent text-sidebar-primary"
+                      : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-primary"
                   )}
                 >
-                  <Icon size={20} />
+                  <Icon size={18} className="shrink-0" />
                   <span>{item.label}</span>
-                  {isActive && (
-                    <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
-                  )}
                 </Link>
               );
             })}
@@ -54,8 +51,8 @@ export function SideNav() {
         </div>
       </aside>
 
-      {/* Mobile bottom navigation */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 border-t border-border bg-background/95 backdrop-blur-sm">
+      {/* Mobile bottom navigation - Notion-inspired */}
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 border-t border-border bg-background/98 backdrop-blur-md shadow-notion-lg">
         <div className="grid grid-cols-4 h-16">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -66,16 +63,16 @@ export function SideNav() {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 transition-colors",
+                  "flex flex-col items-center justify-center gap-1 transition-all relative",
                   isActive
                     ? "text-primary"
-                    : "text-muted-foreground"
+                    : "text-muted-foreground hover:text-foreground"
                 )}
               >
                 <Icon size={20} />
                 <span className="text-xs font-medium">{item.label}</span>
                 {isActive && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-0.5 bg-primary" />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
                 )}
               </Link>
             );
