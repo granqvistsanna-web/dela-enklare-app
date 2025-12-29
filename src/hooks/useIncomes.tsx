@@ -57,7 +57,8 @@ export function useIncomes(groupId?: string) {
       setIncomes(data || []);
     } catch (error) {
       console.error("Error fetching incomes:", error);
-      toast.error("Kunde inte hämta inkomster");
+      // Don't show error toast for empty results - only log to console
+      setIncomes([]);
     } finally {
       setLoading(false);
     }

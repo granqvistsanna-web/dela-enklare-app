@@ -226,14 +226,35 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Group name - cleaner hierarchy */}
-        <h1 className="text-3xl font-bold text-foreground mb-8">{primaryGroup.name}</h1>
+        {/* Group name with action buttons */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <h1 className="text-3xl font-bold text-foreground">{primaryGroup.name}</h1>
+          <div className="flex gap-3">
+            <Button
+              size="default"
+              onClick={() => setIsAddModalOpen(true)}
+              className="gap-2 flex-1 sm:flex-initial hover:scale-105 active:scale-95 transition-transform shadow-sm"
+            >
+              <Plus size={16} />
+              Lägg till
+            </Button>
+            <Button
+              variant="outline"
+              size="default"
+              onClick={() => setIsImportModalOpen(true)}
+              className="gap-2 flex-1 sm:flex-initial hover:scale-105 active:scale-95 transition-transform"
+            >
+              <Upload size={16} />
+              Importera
+            </Button>
+          </div>
+        </div>
 
         {/* Summary Section - Comprehensive household overview */}
         <div className="mb-8">
           <div className="grid gap-6 mb-6">
             {/* Expenses Summary Card */}
-            <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
+            <Card className="border-border/50 shadow-sm">
               <CardContent className="p-6">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="p-2.5 rounded-lg bg-red-500/10">
@@ -298,7 +319,7 @@ const Index = () => {
 
             {/* Income Summary Card */}
             {incomeSettlement && (
-              <Card className="border-border/50 shadow-sm hover:shadow-md transition-shadow duration-200">
+              <Card className="border-border/50 shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-center gap-3 mb-4">
                     <div className="p-2.5 rounded-lg bg-green-500/10">
@@ -362,27 +383,6 @@ const Index = () => {
             selectedYear={new Date().getFullYear()}
             selectedMonth={new Date().getMonth() + 1}
           />
-        </div>
-
-        {/* Primary Actions - Moved up below summary */}
-        <div className="flex gap-3 mb-8">
-          <Button
-            size="default"
-            onClick={() => setIsAddModalOpen(true)}
-            className="gap-2 flex-1 sm:flex-initial hover:scale-105 active:scale-95 transition-transform shadow-sm"
-          >
-            <Plus size={16} />
-            Lägg till
-          </Button>
-          <Button
-            variant="outline"
-            size="default"
-            onClick={() => setIsImportModalOpen(true)}
-            className="gap-2 flex-1 sm:flex-initial hover:scale-105 active:scale-95 transition-transform"
-          >
-            <Upload size={16} />
-            Importera
-          </Button>
         </div>
 
         {/* Main Content Tabs */}
@@ -517,7 +517,7 @@ const Index = () => {
                             currentUserId={user?.id}
                           />
                         ) : (
-                          <div key={`income-${item.data.id}`} className="p-4 hover:bg-muted/30 transition-colors">
+                          <div key={`income-${item.data.id}`} className="p-4">
                             <div className="flex items-center gap-3">
                               <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
                                 <DollarSign size={18} className="text-green-600 dark:text-green-400" />
@@ -565,44 +565,74 @@ const Index = () => {
             )}
           </TabsContent>
 
-          {/* Analytics tab - Charts and insights */}
-          <TabsContent value="analytics" className="mt-0">
-            <div className="space-y-6">
-              {/* Utgiftsfördelning per kategori */}
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3 uppercase tracking-wide">Utgiftsfördelning per kategori</h3>
-                {expenses.length > 0 ? (
-                  <Card className="border-border/50 shadow-sm">
-                    <CardContent className="p-6">
-                      <div className="space-y-4">
-                        {(() => {
-                          const categoryTotals = expenses.reduce((acc, expense) => {
-                            acc[expense.category] = (acc[expense.category] || 0) + expense.amount;
-                            return acc;
-                          }, {} as Record<string, number>);
+          {/* Utgifter tab */}
+          <TabsContent value="utgifter" className="mt-0">
+            {expenses.length > 0 ? (
+              <Card className="border-border/50 shadow-sm">
+                <CardContent className="p-0">
+                  <div className="divide-y divide-border/50">
+                    {expenses.map((expense, index) => (
+                      <ExpenseItem
+                        key={expense.id}
+                        expense={expense}
+                        members={primaryGroup.members}
+                        index={index}
+                        onEdit={handleEditExpense}
+                        onDelete={handleDeleteExpense}
+                        currentUserId={user?.id}
+                      />
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card className="border-border/50 border-dashed">
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <div className="rounded-full bg-muted p-3 mb-4">
+                    <TrendingUp size={24} className="text-muted-foreground" />
+                  </div>
+                  <p className="text-sm text-muted-foreground mb-4">Inga utgifter ännu</p>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsAddModalOpen(true)}
+                    className="gap-2"
+                  >
+                    <Plus size={14} />
+                    Lägg till första utgiften
+                  </Button>
+                </CardContent>
+              </Card>
+            )}
+          </TabsContent>
 
-                          const total = Object.values(categoryTotals).reduce((sum, val) => sum + val, 0);
-
-                          return Object.entries(categoryTotals)
-                            .sort(([, a], [, b]) => b - a)
-                            .map(([category, amount]) => {
-                              const percentage = total > 0 ? (amount / total) * 100 : 0;
-                              return (
-                                <div key={category}>
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className="text-sm font-medium text-foreground capitalize">{category}</span>
-                                    <span className="text-sm text-muted-foreground tabular-nums">{amount.toLocaleString('sv-SE')} kr ({percentage.toFixed(0)}%)</span>
-                                  </div>
-                                  <div className="w-full bg-muted rounded-full h-2">
-                                    <div
-                                      className="bg-primary h-2 rounded-full transition-all duration-300"
-                                      style={{ width: `${percentage}%` }}
-                                    />
-                                  </div>
-                                </div>
-                              );
-                            });
-                        })()}
+          {/* Inkomster tab */}
+          <TabsContent value="inkomster" className="mt-0">
+            {incomes.length > 0 ? (
+              <Card className="border-border/50 shadow-sm">
+                <CardContent className="p-4">
+                  <div className="space-y-3">
+                    {incomes.map((income) => (
+                      <div key={income.id} className="p-3 rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
+                            <DollarSign size={18} className="text-green-600 dark:text-green-400" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="font-medium text-foreground">
+                              {income.note || 'Inkomst'}
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              {primaryGroup.members.find(m => m.user_id === income.recipient)?.name} •
+                              {new Date(income.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums">
+                              +{(income.amount / 100).toLocaleString('sv-SE')} kr
+                            </p>
+                          </div>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
