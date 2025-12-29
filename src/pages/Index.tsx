@@ -30,13 +30,7 @@ import {
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { groups, loading: groupsLoading } = useGroups();
-
-  // Find the primary household economy group (first group or one named "Hushållsekonomi")
-  const primaryGroup = useMemo(() => {
-    if (!groups || groups.length === 0) return null;
-    return groups.find(g => g.name.toLowerCase().includes("hushåll")) || groups[0];
-  }, [groups]);
+  const { household, loading: householdLoading } = useGroups();
 
   const {
     expenses,
@@ -45,11 +39,11 @@ const Index = () => {
     addExpenses,
     updateExpense,
     deleteExpense,
-  } = useExpenses(primaryGroup?.id);
+  } = useExpenses(household?.id);
 
-  const { incomes, loading: incomesLoading } = useIncomes(primaryGroup?.id);
+  const { incomes, loading: incomesLoading } = useIncomes(household?.id);
 
-  const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(primaryGroup?.id);
+  const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(household?.id);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -57,7 +51,7 @@ const Index = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
 
-  const loading = groupsLoading || expensesLoading || incomesLoading || settlementsLoading;
+  const loading = householdLoading || expensesLoading || incomesLoading || settlementsLoading;
 
   // Get current month and year
   const now = new Date();
@@ -67,8 +61,8 @@ const Index = () => {
 
   // Calculate expense balances
   const expenseBalances = useMemo(
-    () => (primaryGroup ? calculateBalance(expenses, primaryGroup.members) : []),
-    [expenses, primaryGroup]
+    () => (household ? calculateBalance(expenses, household.members) : []),
+    [expenses, household]
   );
 
   // Calculate expense summary
@@ -79,22 +73,22 @@ const Index = () => {
     return {
       positiveBalance: posBalance,
       negativeBalance: negBalance,
-      positiveUser: posBalance ? primaryGroup?.members.find((u) => u.user_id === posBalance.userId) : undefined,
-      negativeUser: negBalance ? primaryGroup?.members.find((u) => u.user_id === negBalance.userId) : undefined,
+      positiveUser: posBalance ? household?.members.find((u) => u.user_id === posBalance.userId) : undefined,
+      negativeUser: negBalance ? household?.members.find((u) => u.user_id === negBalance.userId) : undefined,
       oweAmount: negBalance ? Math.abs(negBalance.balance) : 0,
       totalExpenses: expenses.reduce((sum, e) => {
         const amount = Number.isFinite(e.amount) ? e.amount : 0;
         return sum + amount;
       }, 0),
     };
-  }, [expenseBalances, primaryGroup?.members, expenses]);
+  }, [expenseBalances, household?.members, expenses]);
 
   // Calculate income settlement
   const incomeSettlement = useMemo(() => {
-    if (!primaryGroup || primaryGroup.members.length < 2) {
+    if (!household || household.members.length < 2) {
       return null;
     }
-    const [personA, personB] = primaryGroup.members;
+    const [personA, personB] = household.members;
     return calculateIncomeSettlement(
       incomes,
       personA.user_id,
@@ -102,7 +96,7 @@ const Index = () => {
       currentYear,
       currentMonthNum
     );
-  }, [incomes, primaryGroup, currentYear, currentMonthNum]);
+  }, [incomes, household, currentYear, currentMonthNum]);
 
   const handleAddExpense = useCallback(async (newExpense: {
     group_id: string;
@@ -147,16 +141,16 @@ const Index = () => {
   }, [deleteExpense]);
 
   const handleSettle = useCallback(async () => {
-    if (!expenseSummary.negativeUser || !expenseSummary.positiveUser || !primaryGroup?.id) return;
+    if (!expenseSummary.negativeUser || !expenseSummary.positiveUser || !household?.id) return;
 
     await addSettlement({
-      group_id: primaryGroup.id,
+      group_id: household.id,
       from_user: expenseSummary.negativeUser.user_id,
       to_user: expenseSummary.positiveUser.user_id,
       amount: Math.round(expenseSummary.oweAmount),
     });
     setIsSettleModalOpen(false);
-  }, [expenseSummary.negativeUser, expenseSummary.positiveUser, primaryGroup?.id, addSettlement, expenseSummary.oweAmount]);
+  }, [expenseSummary.negativeUser, expenseSummary.positiveUser, household?.id, addSettlement, expenseSummary.oweAmount]);
 
   // Combine expenses and incomes for "Denna månad" view
   const combinedItems = useMemo(() => {
@@ -192,7 +186,7 @@ const Index = () => {
   }
 
   // No groups state
-  if (!primaryGroup) {
+  if (!household) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -225,7 +219,7 @@ const Index = () => {
 
         {/* Group name with action buttons */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <h1 className="text-3xl font-bold text-foreground">{primaryGroup.name}</h1>
+          <h1 className="text-3xl font-bold text-foreground">{household.name}</h1>
           <div className="flex gap-3">
             <Button
               size="default"
@@ -260,11 +254,11 @@ const Index = () => {
                   </p>
                 </div>
 
-                {primaryGroup.members.length > 1 && (
+                {household.members.length > 1 && (
                   <>
                     <div className="space-y-2 mb-4">
                       {expenseBalances.map((b) => {
-                        const member = primaryGroup.members.find((u) => u.user_id === b.userId);
+                        const member = household.members.find((u) => u.user_id === b.userId);
                         return (
                           <div key={b.userId} className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">{member?.name || "Okänd"} betalat</span>
@@ -320,10 +314,10 @@ const Index = () => {
                     </p>
                   </div>
 
-                  {primaryGroup.members.length > 1 && (
+                  {household.members.length > 1 && (
                     <>
                       <div className="space-y-2 mb-4">
-                        {primaryGroup.members.map((member, idx) => {
+                        {household.members.map((member, idx) => {
                           const income = idx === 0 ? incomeSettlement.personAIncome : incomeSettlement.personBIncome;
                           return (
                             <div key={member.user_id} className="flex items-center justify-between text-sm">
@@ -342,11 +336,11 @@ const Index = () => {
                         {incomeSettlement.transferAmount > 0 && incomeSettlement.transferFrom && incomeSettlement.transferTo ? (
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-foreground">
-                              {primaryGroup.members.find(m => m.user_id === incomeSettlement.transferFrom)?.name}
+                              {household.members.find(m => m.user_id === incomeSettlement.transferFrom)?.name}
                             </span>
                             <span className="text-muted-foreground">→</span>
                             <span className="text-sm font-medium text-foreground">
-                              {primaryGroup.members.find(m => m.user_id === incomeSettlement.transferTo)?.name}
+                              {household.members.find(m => m.user_id === incomeSettlement.transferTo)?.name}
                             </span>
                             <span className="ml-auto text-lg font-bold text-blue-600 dark:text-blue-400 tabular-nums">
                               {(incomeSettlement.transferAmount / 100).toLocaleString("sv-SE")} kr
@@ -366,7 +360,7 @@ const Index = () => {
           {/* Income Overview */}
           <IncomeOverviewCard
             incomes={incomes}
-            members={primaryGroup.members}
+            members={household.members}
             selectedYear={new Date().getFullYear()}
             selectedMonth={new Date().getMonth() + 1}
           />
@@ -411,7 +405,7 @@ const Index = () => {
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium text-foreground">{item.data.description || item.data.category}</p>
                                   <p className="text-sm text-muted-foreground">
-                                    {primaryGroup.members.find(m => m.user_id === item.data.paid_by)?.name} •
+                                    {household.members.find(m => m.user_id === item.data.paid_by)?.name} •
                                     {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
                                   </p>
                                 </div>
@@ -431,7 +425,7 @@ const Index = () => {
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium text-foreground">{item.data.note || 'Inkomst'}</p>
                                   <p className="text-sm text-muted-foreground">
-                                    {primaryGroup.members.find(m => m.user_id === item.data.recipient)?.name} •
+                                    {household.members.find(m => m.user_id === item.data.recipient)?.name} •
                                     {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
                                   </p>
                                 </div>
@@ -496,7 +490,7 @@ const Index = () => {
                           <ExpenseItem
                             key={`expense-${item.data.id}`}
                             expense={item.data}
-                            members={primaryGroup.members}
+                            members={household.members}
                             index={index}
                             onEdit={handleEditExpense}
                             onDelete={handleDeleteExpense}
@@ -510,7 +504,7 @@ const Index = () => {
                                   {item.data.note || 'Inkomst'}
                                 </p>
                                 <p className="text-sm text-muted-foreground mt-0.5">
-                                  {primaryGroup.members.find(m => m.user_id === item.data.recipient)?.name} •
+                                  {household.members.find(m => m.user_id === item.data.recipient)?.name} •
                                   {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
                                 </p>
                               </div>
@@ -560,7 +554,7 @@ const Index = () => {
                                 {income.note || 'Inkomst'}
                               </p>
                               <p className="text-sm text-muted-foreground mt-0.5">
-                                {primaryGroup.members.find(m => m.user_id === income.recipient)?.name} •
+                                {household.members.find(m => m.user_id === income.recipient)?.name} •
                                 {new Date(income.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}
                               </p>
                             </div>
@@ -608,15 +602,15 @@ const Index = () => {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onAdd={handleAddExpense}
-        groupId={primaryGroup.id}
-        members={primaryGroup.members}
+        groupId={household.id}
+        members={household.members}
       />
 
       <ImportModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImport={handleImportExpenses}
-        groupId={primaryGroup.id}
+        groupId={household.id}
         currentUserId={user?.id || ""}
       />
 
@@ -628,7 +622,7 @@ const Index = () => {
         }}
         onSave={handleSaveExpense}
         expense={editingExpense}
-        members={primaryGroup.members}
+        members={household.members}
       />
 
       {expenseSummary.negativeUser && expenseSummary.positiveUser && (

@@ -69,7 +69,7 @@ const AppContent = () => {
           <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
           <Route path="/auth" element={<PublicRoute><Auth /></PublicRoute>} />
           <Route path="/dashboard" element={<ProtectedRoute><Index /></ProtectedRoute>} />
-          <Route path="/grupp/:id" element={<ProtectedRoute><GroupPage /></ProtectedRoute>} />
+          <Route path="/hushall" element={<ProtectedRoute><GroupPage /></ProtectedRoute>} />
           <Route path="/installningar" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
