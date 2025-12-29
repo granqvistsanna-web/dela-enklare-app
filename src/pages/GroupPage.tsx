@@ -56,7 +56,8 @@ const GroupPage = () => {
   const { expenses, loading: expensesLoading, addExpense, addExpenses, updateExpense, deleteExpense } = useExpenses(id);
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(id);
 
-  const group = groups.find((g) => g.id === id);
+  // Memoize group lookup to prevent recalculation and potential race conditions
+  const group = useMemo(() => groups.find((g) => g.id === id), [groups, id]);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -205,7 +206,8 @@ const GroupPage = () => {
   }, [group?.invite_code]);
 
   // Conditional returns must come after ALL hooks
-  if (loading) {
+  // Show loading state if any data is still loading OR if group data is inconsistent
+  if (loading || (id && !group && groups.length > 0)) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -222,7 +224,8 @@ const GroupPage = () => {
     );
   }
 
-  if (!group) {
+  // Show not found state only when we're done loading and group is definitely not found
+  if (!group && !loading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -234,6 +237,11 @@ const GroupPage = () => {
         </main>
       </div>
     );
+  }
+
+  // Final safety check - should never happen due to above conditions
+  if (!group) {
+    return null;
   }
 
   return (
