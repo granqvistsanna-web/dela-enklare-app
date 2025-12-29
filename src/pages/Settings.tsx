@@ -9,9 +9,10 @@ import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
 import { useGroups } from "@/hooks/useGroups";
 import { useTheme } from "@/hooks/useTheme";
+import { useMonthSelection } from "@/hooks/useMonthSelection";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink, Palette, Sun, Moon, Monitor, Edit2, Check, X } from "lucide-react";
+import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink, Palette, Sun, Moon, Monitor, Edit2, Check, X, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -29,6 +30,7 @@ const Settings = () => {
   const { profile, signOut, updatePassword, updateProfile } = useAuth();
   const { household, loading: householdLoading, updateHouseholdName } = useGroups();
   const { theme, setTheme } = useTheme();
+  const { selectedYear, selectedMonth, goToCurrentMonth, isCurrentMonth } = useMonthSelection();
 
   const [newName, setNewName] = useState("");
   const [isChangingName, setIsChangingName] = useState(false);
@@ -342,6 +344,53 @@ const Settings = () => {
                 <p className="text-xs text-muted-foreground mt-2">
                   Systemläget matchar ditt operativsystems inställningar
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Month Selection Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Calendar className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Månadsvisning</CardTitle>
+              </div>
+              <CardDescription>Hantera månadsval och tidsperioder</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 bg-background">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Aktuell visad månad</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {new Date(selectedYear, selectedMonth - 1).toLocaleDateString('sv-SE', {
+                        month: 'long',
+                        year: 'numeric'
+                      })}
+                    </p>
+                  </div>
+                  {!isCurrentMonth && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        goToCurrentMonth();
+                        toast.success("Återställd till aktuell månad");
+                      }}
+                    >
+                      Återställ
+                    </Button>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
+                    Du kan bläddra mellan månader på hemsidan med månadsväljaren.
+                    Appen visar alltid data för den valda månaden.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Historisk data finns tillgänglig för alla tidigare månader.
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
