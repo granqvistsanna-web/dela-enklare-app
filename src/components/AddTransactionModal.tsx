@@ -10,6 +10,7 @@ import { ExpenseSplit } from "@/hooks/useExpenses";
 import { IncomeType, IncomeRepeat, IncomeInput, Income } from "@/hooks/useIncomes";
 import { getIncomeTypeIcon, getIncomeTypeLabel } from "@/lib/incomeUtils";
 import { toast } from "sonner";
+import { useAuth } from "@/hooks/useAuth";
 
 interface AddTransactionModalProps {
   isOpen: boolean;
@@ -40,6 +41,8 @@ export function AddTransactionModal({
   members,
   defaultType = "expense",
 }: AddTransactionModalProps) {
+  const { user } = useAuth();
+
   // Transaction type
   const [transactionType, setTransactionType] = useState<"expense" | "income">(defaultType);
 
@@ -54,7 +57,8 @@ export function AddTransactionModal({
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
 
   // Income-specific fields
-  const [recipient, setRecipient] = useState(members[0]?.user_id || "");
+  // Use current user as fallback if members list is empty
+  const [recipient, setRecipient] = useState(members[0]?.user_id || user?.id || "");
   const [incomeType, setIncomeType] = useState<IncomeType>("salary");
   const [note, setNote] = useState("");
   const [repeat, setRepeat] = useState<IncomeRepeat>("none");
@@ -77,8 +81,11 @@ export function AddTransactionModal({
   useEffect(() => {
     if (members.length > 0 && !recipient) {
       setRecipient(members[0].user_id);
+    } else if (members.length === 0 && !recipient && user?.id) {
+      // Fallback to current user if no members
+      setRecipient(user.id);
     }
-  }, [members, recipient]);
+  }, [members, recipient, user]);
 
   const handleSplitChange = (userId: string, value: string) => {
     setCustomSplits((prev) => ({
@@ -101,7 +108,7 @@ export function AddTransactionModal({
     setDescription("");
     setUseCustomSplit(false);
     setCustomSplits({});
-    setRecipient(members[0]?.user_id || "");
+    setRecipient(members[0]?.user_id || user?.id || "");
     setIncomeType("salary");
     setNote("");
     setRepeat("none");
@@ -433,11 +440,17 @@ export function AddTransactionModal({
                         className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         required
                       >
-                        {members.map((member) => (
-                          <option key={member.user_id} value={member.user_id}>
-                            {member.name}
-                          </option>
-                        ))}
+                        {members.length > 0 ? (
+                          members.map((member) => (
+                            <option key={member.user_id} value={member.user_id}>
+                              {member.name}
+                            </option>
+                          ))
+                        ) : user?.id ? (
+                          <option value={user.id}>Mig själv</option>
+                        ) : (
+                          <option value="">Välj mottagare</option>
+                        )}
                       </select>
                     </div>
 
