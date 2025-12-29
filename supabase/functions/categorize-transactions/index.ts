@@ -1,5 +1,5 @@
 /**
- * Edge function for categorizing transactions using AI
+ * Edge function for categorizing transactions using OpenAI ChatGPT
  *
  * SECURITY NOTE: This function uses origin-based CORS to prevent unauthorized access.
  * Configure the ALLOWED_ORIGINS environment variable with your application's URL(s).
@@ -7,6 +7,8 @@
  *
  * Multiple origins can be comma-separated:
  * ALLOWED_ORIGINS=https://yourdomain.com,https://www.yourdomain.com
+ *
+ * OPENAI_API_KEY is required. Set via: supabase secrets set OPENAI_API_KEY=sk-...
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
@@ -38,10 +40,10 @@ serve(async (req) => {
 
   try {
     const { transactions, existingRules } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+
+    if (!OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is not configured");
     }
 
     console.log(`Categorizing ${transactions.length} transactions...`);
@@ -72,14 +74,14 @@ ${transactions.map((t: Transaction, i: number) => `${i}. ${t.date} | ${t.descrip
 
 Return ONLY valid JSON array, no other text.`;
 
-    const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        Authorization: `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o-mini",
         messages: [
           { role: "system", content: "You are a helpful assistant that categorizes Swedish bank transactions. Always respond with valid JSON only." },
           { role: "user", content: prompt }
