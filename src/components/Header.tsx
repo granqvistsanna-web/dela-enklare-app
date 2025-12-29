@@ -52,7 +52,7 @@ export function Header() {
           {profile && (
             <Link
               to="/installningar"
-              className="flex items-center gap-2 ml-2 pl-2 border-l border-border hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 ml-2 pl-2 hover:opacity-80 transition-opacity"
             >
               <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
                 {profile.name?.charAt(0).toUpperCase() || "?"}
@@ -119,7 +119,7 @@ export function Header() {
               <Link
                 to="/installningar"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="pt-4 mt-2 border-t border-border"
+                className="pt-4 mt-2"
               >
                 <div className="flex items-center gap-3 px-4 py-3 bg-secondary/30 rounded-lg hover:bg-secondary/50 transition-colors">
                   <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-base font-semibold text-primary shrink-0">
