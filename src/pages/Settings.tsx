@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Header } from "@/components/Header";
+import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -157,19 +156,10 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header />
-
-      <main className="container py-8 sm:py-12 px-4 sm:px-6 max-w-3xl mx-auto">
-        <div className="mb-8 sm:mb-10">
-          <Link
-            to="/dashboard"
-            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Tillbaka
-          </Link>
-          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mt-4">Inställningar</h1>
+    <div className="lg:pl-64">
+      <main className="container max-w-3xl py-8 sm:py-12 px-4 sm:px-6 pb-24 lg:pb-8 mx-auto">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground">Inställningar</h1>
         </div>
 
         <div className="space-y-6">
