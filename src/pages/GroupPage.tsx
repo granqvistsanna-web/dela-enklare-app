@@ -32,6 +32,7 @@ import { IncomeItem } from "@/components/IncomeItem";
 import { AddIncomeModal } from "@/components/AddIncomeModal";
 import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
+import { Analytics } from "@/components/Analytics";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes, Income, IncomeType } from "@/hooks/useIncomes";
@@ -50,7 +51,8 @@ import {
   TrendingUp,
   Users,
   RefreshCw,
-  UserMinus
+  UserMinus,
+  BarChart3
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -555,6 +557,10 @@ const GroupPage = () => {
                   </span>
                 )}
               </TabsTrigger>
+              <TabsTrigger value="analytics" className="gap-2 flex-1 sm:flex-initial">
+                <BarChart3 size={14} className="hidden sm:inline" />
+                Analys
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex gap-2">
@@ -750,6 +756,10 @@ const GroupPage = () => {
                 <SettlementHistory settlements={settlements} members={group.members} />
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="analytics" className="mt-0">
+            <Analytics expenses={expenses} />
           </TabsContent>
         </Tabs>
       </main>
