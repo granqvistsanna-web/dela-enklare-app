@@ -78,9 +78,6 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
         className="group flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background"
       >
       <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-        <div className="flex items-center justify-center w-10 h-10 sm:w-10 sm:h-10 rounded-lg bg-muted/50 shrink-0">
-          <span className="text-lg">{category?.icon || "📦"}</span>
-        </div>
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-foreground truncate">{expense.description || "Utgift"}</p>
           <p className="text-xs text-muted-foreground mt-0.5">

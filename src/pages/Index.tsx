@@ -21,12 +21,6 @@ import { calculateIncomeSettlement } from "@/lib/incomeUtils";
 import {
   Plus,
   Upload,
-  TrendingUp,
-  TrendingDown,
-  ArrowRight,
-  Calendar,
-  Receipt,
-  DollarSign,
 } from "lucide-react";
 
 const Index = () => {
@@ -220,8 +214,7 @@ const Index = () => {
       <main className="container max-w-4xl py-8 px-4 sm:px-6">
         {/* Month selector - non-intrusive at top */}
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar size={16} className="opacity-60" />
+          <div className="text-sm text-muted-foreground">
             <span className="capitalize font-medium">{currentMonth}</span>
           </div>
         </div>
@@ -256,16 +249,11 @@ const Index = () => {
             {/* Expenses Summary Card */}
             <Card className="border-border/50 shadow-sm">
               <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2.5 rounded-lg bg-red-500/10">
-                    <TrendingUp size={20} className="text-red-600 dark:text-red-400" />
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Utgifter</p>
-                    <p className="text-2xl font-bold text-foreground tabular-nums mt-0.5">
-                      {expenseSummary.totalExpenses.toLocaleString("sv-SE")} kr
-                    </p>
-                  </div>
+                <div className="mb-4">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Utgifter</p>
+                  <p className="text-2xl font-bold text-foreground tabular-nums">
+                    {expenseSummary.totalExpenses.toLocaleString("sv-SE")} kr
+                  </p>
                 </div>
 
                 {primaryGroup.members.length > 1 && (
@@ -302,7 +290,7 @@ const Index = () => {
                       {expenseSummary.oweAmount > 0 && expenseSummary.negativeUser && expenseSummary.positiveUser ? (
                         <div className="flex items-center gap-2">
                           <span className="text-sm font-medium text-foreground">{expenseSummary.negativeUser.name}</span>
-                          <ArrowRight size={16} className="text-orange-600 dark:text-orange-400" />
+                          <span className="text-muted-foreground">→</span>
                           <span className="text-sm font-medium text-foreground">{expenseSummary.positiveUser.name}</span>
                           <span className="ml-auto text-lg font-bold text-orange-600 dark:text-orange-400 tabular-nums">
                             {Math.round(expenseSummary.oweAmount).toLocaleString("sv-SE")} kr
@@ -321,16 +309,11 @@ const Index = () => {
             {incomeSettlement && (
               <Card className="border-border/50 shadow-sm">
                 <CardContent className="p-6">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="p-2.5 rounded-lg bg-green-500/10">
-                      <DollarSign size={20} className="text-green-600 dark:text-green-400" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Inkomster</p>
-                      <p className="text-2xl font-bold text-foreground tabular-nums mt-0.5">
-                        {(incomeSettlement.totalIncome / 100).toLocaleString("sv-SE")} kr
-                      </p>
-                    </div>
+                  <div className="mb-4">
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-2">Inkomster</p>
+                    <p className="text-2xl font-bold text-foreground tabular-nums">
+                      {(incomeSettlement.totalIncome / 100).toLocaleString("sv-SE")} kr
+                    </p>
                   </div>
 
                   {primaryGroup.members.length > 1 && (
@@ -357,7 +340,7 @@ const Index = () => {
                             <span className="text-sm font-medium text-foreground">
                               {primaryGroup.members.find(m => m.user_id === incomeSettlement.transferFrom)?.name}
                             </span>
-                            <ArrowRight size={16} className="text-blue-600 dark:text-blue-400" />
+                            <span className="text-muted-foreground">→</span>
                             <span className="text-sm font-medium text-foreground">
                               {primaryGroup.members.find(m => m.user_id === incomeSettlement.transferTo)?.name}
                             </span>
@@ -494,9 +477,8 @@ const Index = () => {
                       variant="outline"
                       size="sm"
                       onClick={() => setIsSettleModalOpen(true)}
-                      className="gap-2 text-xs hover:scale-105 transition-transform"
+                      className="text-xs hover:scale-105 transition-transform"
                     >
-                      <Receipt size={14} />
                       Settla denna månad
                     </Button>
                   </div>
@@ -517,16 +499,13 @@ const Index = () => {
                             currentUserId={user?.id}
                           />
                         ) : (
-                          <div key={`income-${item.data.id}`} className="p-4">
-                            <div className="flex items-center gap-3">
-                              <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
-                                <DollarSign size={18} className="text-green-600 dark:text-green-400" />
-                              </div>
+                          <div key={`income-${item.data.id}`} className="p-4 sm:p-6">
+                            <div className="flex items-center justify-between gap-4">
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-foreground">
                                   {item.data.note || 'Inkomst'}
                                 </p>
-                                <p className="text-sm text-muted-foreground">
+                                <p className="text-sm text-muted-foreground mt-0.5">
                                   {primaryGroup.members.find(m => m.user_id === item.data.recipient)?.name} •
                                   {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
                                 </p>
@@ -547,9 +526,6 @@ const Index = () => {
             ) : (
               <Card className="border-border/50 border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <div className="rounded-full bg-muted p-3 mb-4">
-                    <Calendar size={24} className="text-muted-foreground" />
-                  </div>
                   <p className="text-sm text-muted-foreground mb-4">Inga transaktioner denna månad</p>
                   <Button
                     variant="outline"
@@ -588,9 +564,6 @@ const Index = () => {
             ) : (
               <Card className="border-border/50 border-dashed">
                 <CardContent className="flex flex-col items-center justify-center py-12">
-                  <div className="rounded-full bg-muted p-3 mb-4">
-                    <TrendingUp size={24} className="text-muted-foreground" />
-                  </div>
                   <p className="text-sm text-muted-foreground mb-4">Inga utgifter ännu</p>
                   <Button
                     variant="outline"
@@ -614,15 +587,12 @@ const Index = () => {
                   <div className="space-y-3">
                     {incomes.map((income) => (
                       <div key={income.id} className="p-3 rounded-lg">
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-lg bg-green-500/10 shrink-0">
-                            <DollarSign size={18} className="text-green-600 dark:text-green-400" />
-                          </div>
+                        <div className="flex items-center justify-between gap-4">
                           <div className="flex-1 min-w-0">
                             <p className="font-medium text-foreground">
                               {income.note || 'Inkomst'}
                             </p>
-                            <p className="text-sm text-muted-foreground">
+                            <p className="text-sm text-muted-foreground mt-0.5">
                               {primaryGroup.members.find(m => m.user_id === income.recipient)?.name} •
                               {new Date(income.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}
                             </p>

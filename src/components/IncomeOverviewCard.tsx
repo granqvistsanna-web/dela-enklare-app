@@ -3,7 +3,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Income } from "@/hooks/useIncomes";
 import { GroupMember } from "@/hooks/useGroups";
 import { calculateIncomeSettlement, formatAmount } from "@/lib/incomeUtils";
-import { ArrowRight, TrendingUp } from "lucide-react";
 
 interface IncomeOverviewCardProps {
   incomes: Income[];
@@ -70,14 +69,9 @@ export function IncomeOverviewCard({
       {/* Total Income Card */}
       <Card className="border-border/50">
         <CardContent className="p-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="p-2 rounded-lg bg-green-500/10">
-              <TrendingUp size={18} className="text-green-600" />
-            </div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Total inkomst
-            </p>
-          </div>
+          <p className="text-sm font-medium text-muted-foreground mb-2">
+            Total inkomst
+          </p>
           <p className="text-3xl font-semibold text-foreground tabular-nums">
             {formatAmount(settlement.totalIncome)}
           </p>
@@ -164,29 +158,9 @@ export function IncomeOverviewCard({
       {/* Settlement Transfer Card */}
       <Card className="border-border/50">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <div
-                className={`p-2 rounded-lg ${
-                  settlement.transferAmount > 0
-                    ? "bg-orange-500/10"
-                    : "bg-green-500/10"
-                }`}
-              >
-                <ArrowRight
-                  size={18}
-                  className={
-                    settlement.transferAmount > 0
-                      ? "text-orange-600"
-                      : "text-green-600"
-                  }
-                />
-              </div>
-              <p className="text-sm font-medium text-muted-foreground">
-                Inkomstbalans
-              </p>
-            </div>
-          </div>
+          <p className="text-sm font-medium text-muted-foreground mb-2">
+            Inkomstbalans
+          </p>
           {settlement.transferAmount > 0 && transferFrom && transferTo ? (
             <div>
               <p className="text-base text-muted-foreground mb-1">
