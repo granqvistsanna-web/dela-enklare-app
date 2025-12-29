@@ -189,7 +189,7 @@ const Index = () => {
     );
   }
 
-  // No groups state
+  // No household state
   if (!household) {
     return (
       <div className="min-h-screen bg-background">
@@ -198,11 +198,8 @@ const Index = () => {
           <div className="text-center py-20">
             <h1 className="text-2xl font-semibold text-foreground mb-4">Välkommen!</h1>
             <p className="text-muted-foreground mb-8">
-              Du har inga grupper ännu. Gå till Inställningar för att skapa din första grupp.
+              Ditt hushåll skapas automatiskt. Vänta ett ögonblick...
             </p>
-            <Button onClick={() => navigate("/installningar")}>
-              Gå till Inställningar
-            </Button>
           </div>
         </main>
       </div>
