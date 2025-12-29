@@ -59,6 +59,12 @@ const Index = () => {
   const currentMonthNum = now.getMonth() + 1; // 1-12
   const currentMonth = now.toLocaleDateString("sv-SE", { month: "long", year: "numeric" });
 
+  // Create member lookup map for O(1) access instead of O(n) finds
+  const memberMap = useMemo(() => {
+    if (!household?.members) return new Map();
+    return new Map(household.members.map(m => [m.user_id, m]));
+  }, [household?.members]);
+
   // Calculate expense balances
   const expenseBalances = useMemo(
     () => (household ? calculateBalance(expenses, household.members) : []),
@@ -73,15 +79,15 @@ const Index = () => {
     return {
       positiveBalance: posBalance,
       negativeBalance: negBalance,
-      positiveUser: posBalance ? household?.members.find((u) => u.user_id === posBalance.userId) : undefined,
-      negativeUser: negBalance ? household?.members.find((u) => u.user_id === negBalance.userId) : undefined,
+      positiveUser: posBalance ? memberMap.get(posBalance.userId) : undefined,
+      negativeUser: negBalance ? memberMap.get(negBalance.userId) : undefined,
       oweAmount: negBalance ? Math.abs(negBalance.balance) : 0,
       totalExpenses: expenses.reduce((sum, e) => {
         const amount = Number.isFinite(e.amount) ? e.amount : 0;
         return sum + amount;
       }, 0),
     };
-  }, [expenseBalances, household?.members, expenses]);
+  }, [expenseBalances, memberMap, expenses]);
 
   // Calculate income settlement
   const incomeSettlement = useMemo(() => {
@@ -262,7 +268,7 @@ const Index = () => {
                   <>
                     <div className="space-y-2 mb-4">
                       {expenseBalances.map((b) => {
-                        const member = household.members.find((u) => u.user_id === b.userId);
+                        const member = memberMap.get(b.userId);
                         return (
                           <div key={b.userId} className="flex items-center justify-between text-sm">
                             <span className="text-muted-foreground">{member?.name || "Okänd"} betalat</span>
@@ -340,11 +346,11 @@ const Index = () => {
                         {incomeSettlement.transferAmount > 0 && incomeSettlement.transferFrom && incomeSettlement.transferTo ? (
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-foreground">
-                              {household.members.find(m => m.user_id === incomeSettlement.transferFrom)?.name}
+                              {memberMap.get(incomeSettlement.transferFrom)?.name}
                             </span>
                             <span className="text-muted-foreground">→</span>
                             <span className="text-sm font-medium text-foreground">
-                              {household.members.find(m => m.user_id === incomeSettlement.transferTo)?.name}
+                              {memberMap.get(incomeSettlement.transferTo)?.name}
                             </span>
                             <span className="ml-auto text-lg font-bold text-blue-600 dark:text-blue-400 tabular-nums">
                               {(incomeSettlement.transferAmount / 100).toLocaleString("sv-SE")} kr
@@ -409,7 +415,7 @@ const Index = () => {
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium text-foreground">{item.data.description || item.data.category}</p>
                                   <p className="text-sm text-muted-foreground">
-                                    {household.members.find(m => m.user_id === item.data.paid_by)?.name} •
+                                    {memberMap.get(item.data.paid_by)?.name} •
                                     {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
                                   </p>
                                 </div>
@@ -429,7 +435,7 @@ const Index = () => {
                                 <div className="flex-1 min-w-0">
                                   <p className="font-medium text-foreground">{item.data.note || 'Inkomst'}</p>
                                   <p className="text-sm text-muted-foreground">
-                                    {household.members.find(m => m.user_id === item.data.recipient)?.name} •
+                                    {memberMap.get(item.data.recipient)?.name} •
                                     {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
                                   </p>
                                 </div>
@@ -508,7 +514,7 @@ const Index = () => {
                                   {item.data.note || 'Inkomst'}
                                 </p>
                                 <p className="text-sm text-muted-foreground mt-0.5">
-                                  {household.members.find(m => m.user_id === item.data.recipient)?.name} •
+                                  {memberMap.get(item.data.recipient)?.name} •
                                   {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
                                 </p>
                               </div>
@@ -558,7 +564,7 @@ const Index = () => {
                                 {income.note || 'Inkomst'}
                               </p>
                               <p className="text-sm text-muted-foreground mt-0.5">
-                                {household.members.find(m => m.user_id === income.recipient)?.name} •
+                                {memberMap.get(income.recipient)?.name} •
                                 {new Date(income.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'long', year: 'numeric' })}
                               </p>
                             </div>
