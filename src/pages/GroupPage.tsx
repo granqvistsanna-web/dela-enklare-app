@@ -54,22 +54,17 @@ import {
 import { toast } from "sonner";
 
 const GroupPage = () => {
-  const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { groups, loading: groupsLoading, deleteGroup, addMembers, removeMember, regenerateInviteCode, refetch } = useGroups();
-  const { expenses, loading: expensesLoading, addExpense, addExpenses, updateExpense, deleteExpense, refetch: refetchExpenses } = useExpenses(id);
-  const { incomes, loading: incomesLoading, addIncome, updateIncome, deleteIncome, refetch: refetchIncomes } = useIncomes(id);
-  const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(id);
-
-  // Memoize group lookup to prevent recalculation and potential race conditions
-  const group = useMemo(() => groups.find((g) => g.id === id), [groups, id]);
+  const { household, loading: householdLoading, addMembers, removeMember, regenerateInviteCode } = useGroups();
+  const { expenses, loading: expensesLoading, addExpense, addExpenses, updateExpense, deleteExpense } = useExpenses(household?.id);
+  const { incomes, loading: incomesLoading, addIncome, updateIncome, deleteIncome } = useIncomes(household?.id);
+  const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(household?.id);
 
   const [isAddTransactionModalOpen, setIsAddTransactionModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isSettleModalOpen, setIsSettleModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false);
   const [isRemoveMemberDialogOpen, setIsRemoveMemberDialogOpen] = useState(false);
   const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string } | null>(null);
@@ -92,11 +87,11 @@ const GroupPage = () => {
   // Track active tab
   const [activeTab, setActiveTab] = useState("expenses");
 
-  const loading = groupsLoading || expensesLoading || incomesLoading || settlementsLoading;
+  const loading = householdLoading || expensesLoading || incomesLoading || settlementsLoading;
 
   const balances = useMemo(
-    () => (group ? calculateBalance(expenses, group.members) : []),
-    [expenses, group]
+    () => (household ? calculateBalance(expenses, household.members) : []),
+    [expenses, household]
   );
 
   // Optimize repeated find() calls by combining them into a single useMemo
@@ -107,15 +102,15 @@ const GroupPage = () => {
     return {
       positiveBalance: posBalance,
       negativeBalance: negBalance,
-      positiveUser: posBalance ? group?.members.find((u) => u.user_id === posBalance.userId) : undefined,
-      negativeUser: negBalance ? group?.members.find((u) => u.user_id === negBalance.userId) : undefined,
+      positiveUser: posBalance ? household?.members.find((u) => u.user_id === posBalance.userId) : undefined,
+      negativeUser: negBalance ? household?.members.find((u) => u.user_id === negBalance.userId) : undefined,
       oweAmount: negBalance ? Math.abs(negBalance.balance) : 0,
       totalExpenses: expenses.reduce((sum, e) => {
         const amount = Number.isFinite(e.amount) ? e.amount : 0;
         return sum + amount;
       }, 0)
     };
-  }, [balances, group?.members, expenses]);
+  }, [balances, household?.members, expenses]);
 
   // All useCallback hooks must be called before any conditional returns
   const handleAddExpense = useCallback(async (newExpense: {
@@ -218,52 +213,43 @@ const GroupPage = () => {
   }, [incomes, selectedYear, selectedMonth, filterRecipient, filterType, filterIncluded]);
 
   const handleSettle = useCallback(async () => {
-    if (!negativeUser || !positiveUser || !id) return;
+    if (!negativeUser || !positiveUser || !household?.id) return;
 
     await addSettlement({
-      group_id: id,
+      group_id: household.id,
       from_user: negativeUser.user_id,
       to_user: positiveUser.user_id,
       amount: Math.round(oweAmount),
     });
     setIsSettleModalOpen(false);
-  }, [negativeUser, positiveUser, id, addSettlement, oweAmount]);
-
-  const handleDeleteGroup = useCallback(async () => {
-    if (!id) return;
-    await deleteGroup(id);
-    navigate("/dashboard");
-  }, [id, deleteGroup, navigate]);
+  }, [negativeUser, positiveUser, household?.id, addSettlement, oweAmount]);
 
   const handleAddMembers = useCallback(async (userIds: string[]) => {
-    if (!id) return;
-    await addMembers(id, userIds);
-    // addMembers already calls fetchGroups internally, no need to refetch
-  }, [id, addMembers]);
+    await addMembers(userIds);
+  }, [addMembers]);
 
   const handleRemoveMember = useCallback(async () => {
-    if (!id || !memberToRemove) return;
-    await removeMember(id, memberToRemove.id);
+    if (!memberToRemove) return;
+    await removeMember(memberToRemove.id);
     setIsRemoveMemberDialogOpen(false);
     setMemberToRemove(null);
-  }, [id, memberToRemove, removeMember]);
+  }, [memberToRemove, removeMember]);
 
   const handleRegenerateCode = useCallback(async () => {
-    if (!id) return;
     setIsRegeneratingCode(true);
     try {
-      await regenerateInviteCode(id);
+      await regenerateInviteCode();
     } finally {
       setIsRegeneratingCode(false);
     }
-  }, [id, regenerateInviteCode]);
+  }, [regenerateInviteCode]);
 
   const handleCopyCode = useCallback(async () => {
-    if (!group?.invite_code) return;
+    if (!household?.invite_code) return;
 
     try {
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(group.invite_code);
+        await navigator.clipboard.writeText(household.invite_code);
         setCopiedCode(true);
         toast.success("Kod kopierad!");
         setTimeout(() => setCopiedCode(false), 2000);
@@ -275,11 +261,11 @@ const GroupPage = () => {
       console.error("Failed to copy invite code:", error);
       toast.error("Kunde inte kopiera kod");
     }
-  }, [group?.invite_code]);
+  }, [household?.invite_code]);
 
   // Conditional returns must come after ALL hooks
-  // Show loading state if any data is still loading OR if group data is inconsistent
-  if (loading || (id && !group && groups.length > 0)) {
+  // Show loading state if any data is still loading
+  if (loading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -296,13 +282,13 @@ const GroupPage = () => {
     );
   }
 
-  // Show not found state only when we're done loading and group is definitely not found
-  if (!group && !loading) {
+  // Show not found state only when we're done loading and household is not found
+  if (!household && !loading) {
     return (
       <div className="min-h-screen bg-background">
         <Header />
         <main className="container py-12">
-          <p className="text-muted-foreground mb-4">Gruppen hittades inte.</p>
+          <p className="text-muted-foreground mb-4">Hushållet hittades inte.</p>
           <Link to="/dashboard" className="text-sm text-foreground hover:underline">
             ← Tillbaka
           </Link>
@@ -312,7 +298,7 @@ const GroupPage = () => {
   }
 
   // Final safety check - should never happen due to above conditions
-  if (!group) {
+  if (!household) {
     return null;
   }
 
@@ -333,16 +319,11 @@ const GroupPage = () => {
           <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 sm:gap-3 mb-3 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-semibold text-foreground break-words">{group.name}</h1>
-                {group.is_temporary && (
-                  <span className="inline-flex items-center rounded-full bg-muted px-3 py-1 text-xs font-medium text-muted-foreground shrink-0">
-                    Tillfällig
-                  </span>
-                )}
+                <h1 className="text-2xl sm:text-3xl font-semibold text-foreground break-words">{household.name}</h1>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Users size={16} />
-                <span>{group.members.length} {group.members.length === 1 ? 'medlem' : 'medlemmar'}</span>
+                <span>{household.members.length} {household.members.length === 1 ? 'medlem' : 'medlemmar'}</span>
               </div>
             </div>
 
@@ -361,13 +342,13 @@ const GroupPage = () => {
                 ) : (
                   <>
                     <Copy size={14} />
-                    <span className="hidden sm:inline">Kod: {group.invite_code}</span>
-                    <span className="sm:hidden">{group.invite_code}</span>
+                    <span className="hidden sm:inline">Kod: {household.invite_code}</span>
+                    <span className="sm:hidden">{household.invite_code}</span>
                   </>
                 )}
               </Button>
 
-              {user?.id === group.created_by && (
+              {user?.id === household.created_by && (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-9 w-9 p-0">
@@ -379,20 +360,20 @@ const GroupPage = () => {
                       <Users size={14} className="mr-2" />
                       Lägg till medlemmar
                     </DropdownMenuItem>
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={handleRegenerateCode}
                       disabled={isRegeneratingCode}
                     >
                       <RefreshCw size={14} className={`mr-2 ${isRegeneratingCode ? 'animate-spin' : ''}`} />
                       {isRegeneratingCode ? 'Genererar...' : 'Ny inbjudningskod'}
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    {group.members.length > 1 && (
+                    {household.members.length > 1 && (
                       <>
+                        <DropdownMenuSeparator />
                         <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
                           Ta bort medlem
                         </div>
-                        {group.members
+                        {household.members
                           .filter(m => m.user_id !== user?.id)
                           .map(member => (
                             <DropdownMenuItem
@@ -408,16 +389,8 @@ const GroupPage = () => {
                             </DropdownMenuItem>
                           ))
                         }
-                        <DropdownMenuSeparator />
                       </>
                     )}
-                    <DropdownMenuItem
-                      onClick={() => setIsDeleteDialogOpen(true)}
-                      className="text-destructive focus:text-destructive py-3 sm:py-2"
-                    >
-                      <Trash2 size={14} className="mr-2" />
-                      Radera grupp
-                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
               )}
@@ -444,7 +417,7 @@ const GroupPage = () => {
             </Card>
 
             {/* Balance Card */}
-            {group.members.length > 1 ? (
+            {household.members.length > 1 ? (
               <Card className="border-border/50">
                 <CardContent className="p-6">
                   <div className="flex items-center justify-between mb-2">
@@ -485,10 +458,10 @@ const GroupPage = () => {
           </div>
 
           {/* Per-person breakdown */}
-          {group.members.length > 1 && (
+          {household.members.length > 1 && (
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {balances.map((b) => {
-                const member = group.members.find((u) => u.user_id === b.userId);
+                const member = household.members.find((u) => u.user_id === b.userId);
                 const isPositive = b.balance >= 0;
                 const isZero = b.balance === 0;
                 return (
@@ -592,7 +565,7 @@ const GroupPage = () => {
                       <ExpenseItem
                         key={expense.id}
                         expense={expense}
-                        members={group.members}
+                        members={household.members}
                         index={index}
                         onEdit={handleEditExpense}
                         onDelete={handleDeleteExpense}
@@ -665,7 +638,7 @@ const GroupPage = () => {
                         className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
                       >
                         <option value="all">Alla</option>
-                        {group.members.map((member) => (
+                        {household.members.map((member) => (
                           <option key={member.user_id} value={member.user_id}>
                             {member.name}
                           </option>
@@ -691,7 +664,7 @@ const GroupPage = () => {
               {/* Income overview card */}
               <IncomeOverviewCard
                 incomes={incomes}
-                members={group.members}
+                members={household.members}
                 selectedYear={selectedYear}
                 selectedMonth={selectedMonth}
               />
@@ -705,7 +678,7 @@ const GroupPage = () => {
                         <IncomeItem
                           key={income.id}
                           income={income}
-                          members={group.members}
+                          members={household.members}
                           onEdit={handleEditIncome}
                           onDelete={handleDeleteIncome}
                           currentUserId={user?.id}
@@ -741,7 +714,7 @@ const GroupPage = () => {
           <TabsContent value="history" className="mt-0">
             <Card className="border-border/50">
               <CardContent className="p-6">
-                <SettlementHistory settlements={settlements} members={group.members} />
+                <SettlementHistory settlements={settlements} members={household.members} />
               </CardContent>
             </Card>
           </TabsContent>
@@ -754,8 +727,8 @@ const GroupPage = () => {
         onClose={() => setIsAddTransactionModalOpen(false)}
         onAddExpense={handleAddExpense}
         onAddIncome={handleAddIncome}
-        groupId={group.id}
-        members={group.members}
+        groupId={household.id}
+        members={household.members}
         defaultType={activeTab === "incomes" ? "income" : "expense"}
       />
 
@@ -763,7 +736,7 @@ const GroupPage = () => {
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
         onImport={handleImportExpenses}
-        groupId={group.id}
+        groupId={household.id}
         currentUserId={user?.id || ""}
       />
 
@@ -775,7 +748,7 @@ const GroupPage = () => {
         }}
         onSave={handleSaveExpense}
         expense={editingExpense}
-        members={group.members}
+        members={household.members}
       />
 
       {negativeUser && positiveUser && (
@@ -793,28 +766,8 @@ const GroupPage = () => {
         isOpen={isAddMembersModalOpen}
         onClose={() => setIsAddMembersModalOpen(false)}
         onSubmit={handleAddMembers}
-        currentMembers={group?.members || []}
+        currentMembers={household?.members || []}
       />
-
-      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Radera grupp</AlertDialogTitle>
-            <AlertDialogDescription>
-              Är du säker på att du vill radera gruppen "{group.name}"? Detta kommer permanent ta bort gruppen och alla dess utgifter och avräkningar. Denna åtgärd kan inte ångras.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Avbryt</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteGroup}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Radera
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
       <AlertDialog open={isRemoveMemberDialogOpen} onOpenChange={setIsRemoveMemberDialogOpen}>
         <AlertDialogContent>
@@ -845,7 +798,7 @@ const GroupPage = () => {
         }}
         onSave={handleSaveIncome}
         income={editingIncome}
-        members={group.members}
+        members={household.members}
       />
     </div>
   );

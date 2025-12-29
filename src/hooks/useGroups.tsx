@@ -32,54 +32,93 @@ export interface Group {
 
 export function useGroups() {
   const { user } = useAuth();
-  const [groups, setGroups] = useState<Group[]>([]);
+  const [household, setHousehold] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
+
+  const ensureHouseholdExists = async (): Promise<string | null> => {
+    if (!user) return null;
+
+    try {
+      // Check if user already has a household
+      const { data: memberData } = await supabase
+        .from("group_members")
+        .select("group_id")
+        .eq("user_id", user.id)
+        .limit(1)
+        .single();
+
+      if (memberData?.group_id) {
+        return memberData.group_id;
+      }
+
+      // Create household if it doesn't exist (fallback for existing users)
+      const { data: groupData, error: groupError } = await supabase
+        .from("groups")
+        .insert({
+          name: "Mitt hushåll",
+          is_temporary: false,
+        } as { name: string; is_temporary: boolean; invite_code: string })
+        .select()
+        .single();
+
+      if (groupError) throw groupError;
+
+      // Add user as member
+      const { error: memberError } = await supabase
+        .from("group_members")
+        .insert({
+          group_id: groupData.id,
+          user_id: user.id,
+        });
+
+      if (memberError) throw memberError;
+
+      return groupData.id;
+    } catch (error) {
+      console.error("Error ensuring household exists:", error);
+      return null;
+    }
+  };
 
   const fetchGroups = useCallback(async () => {
     if (!user) {
-      setGroups([]);
+      setHousehold(null);
       setLoading(false);
       return;
     }
 
     try {
-      // Fetch groups the user is a member of
-      const { data: memberData, error: memberError } = await supabase
-        .from("group_members")
-        .select("group_id")
-        .eq("user_id", user.id);
+      // Ensure household exists
+      const householdId = await ensureHouseholdExists();
 
-      if (memberError) throw memberError;
-
-      if (!memberData || memberData.length === 0) {
-        setGroups([]);
+      if (!householdId) {
+        setHousehold(null);
         setLoading(false);
         return;
       }
 
-      const groupIds = memberData.map((m) => m.group_id);
-
-      // Fetch groups and members in parallel
-      const [groupsResult, membersResult] = await Promise.all([
+      // Fetch household data and members in parallel
+      const [groupResult, membersResult] = await Promise.all([
         supabase
           .from("groups")
           .select("*")
-          .in("id", groupIds),
+          .eq("id", householdId)
+          .single(),
         supabase
           .from("group_members")
           .select("group_id, user_id")
-          .in("group_id", groupIds)
+          .eq("group_id", householdId)
       ]);
 
-      if (groupsResult.error) throw groupsResult.error;
+      if (groupResult.error) throw groupResult.error;
       if (membersResult.error) throw membersResult.error;
 
-      const groupsData = groupsResult.data;
+      const groupData = groupResult.data;
       const membersData = membersResult.data;
 
       // Get unique user IDs to fetch profiles
       const userIds = [...new Set(membersData?.map(m => m.user_id) || [])];
-      
+
       // Fetch profiles for all members
       const profilesMap = new Map<string, { id: string; user_id: string; name: string }>();
 
@@ -99,13 +138,11 @@ export function useGroups() {
         });
       }
 
-      // Build a map of group_id -> members with profiles
-      const groupMembersMap = new Map<string, GroupMember[]>();
-
-      membersData?.forEach((member) => {
+      // Build members list with profiles
+      const members: GroupMember[] = membersData.map((member) => {
         const profile = profilesMap.get(member.user_id);
 
-        const groupMember: GroupMember = profile
+        return profile
           ? {
               id: profile.id,
               user_id: profile.user_id,
@@ -116,28 +153,23 @@ export function useGroups() {
               user_id: member.user_id,
               name: "Okänd användare",
             };
-
-        if (!groupMembersMap.has(member.group_id)) {
-          groupMembersMap.set(member.group_id, []);
-        }
-        groupMembersMap.get(member.group_id)!.push(groupMember);
       });
 
-      // Build groups with members
-      const groupsWithMembers: Group[] = (groupsData || []).map((group) => ({
-        id: group.id,
-        name: group.name,
-        is_temporary: group.is_temporary,
-        created_by: group.created_by,
-        created_at: group.created_at,
-        invite_code: group.invite_code,
-        members: groupMembersMap.get(group.id) || [],
-      }));
+      // Build household with members
+      const householdWithMembers: Group = {
+        id: groupData.id,
+        name: groupData.name,
+        is_temporary: groupData.is_temporary,
+        created_by: groupData.created_by,
+        created_at: groupData.created_at,
+        invite_code: groupData.invite_code,
+        members,
+      };
 
-      setGroups(groupsWithMembers);
+      setHousehold(householdWithMembers);
     } catch (error) {
-      console.error("Error fetching groups:", error);
-      toast.error("Kunde inte hämta grupper");
+      console.error("Error fetching household:", error);
+      toast.error("Kunde inte hämta hushåll");
     } finally {
       setLoading(false);
     }
@@ -147,78 +179,15 @@ export function useGroups() {
     fetchGroups();
   }, [fetchGroups]);
 
-  const createGroup = async (name: string, isTemporary: boolean = false, selectedUserIds: string[] = []) => {
-    if (!user) {
-      toast.error("Du måste vara inloggad");
-      return null;
+  const addMembers = async (userIds: string[]) => {
+    if (!household) {
+      toast.error("Hushåll finns inte");
+      return;
     }
 
-    try {
-      // Create the group - member and invite_code are auto-added via database triggers
-      // invite_code is generated by a trigger, so we cast to bypass TypeScript requirement
-      const { data: groupData, error: groupError } = await supabase
-        .from("groups")
-        .insert({
-          name,
-          is_temporary: isTemporary,
-        } as { name: string; is_temporary: boolean; invite_code: string })
-        .select()
-        .single();
-
-      if (groupError) {
-        console.error("Group creation error:", groupError.code, groupError.message);
-        throw groupError;
-      }
-
-      // Add selected users as members
-      if (selectedUserIds.length > 0) {
-        const membersToAdd = selectedUserIds.map(userId => ({
-          group_id: groupData.id,
-          user_id: userId,
-        }));
-
-        const { error: membersError } = await supabase
-          .from("group_members")
-          .insert(membersToAdd);
-
-        if (membersError) {
-          console.error("Error adding members:", membersError);
-          toast.error("Grupp skapad men kunde inte lägga till alla medlemmar");
-        }
-      }
-
-      await fetchGroups();
-      toast.success("Grupp skapad!");
-      return groupData;
-    } catch (error) {
-      console.error("Error creating group:", error);
-      const errorMessage = error instanceof Error ? error.message : "Kunde inte skapa grupp";
-      toast.error(errorMessage);
-      return null;
-    }
-  };
-
-  const deleteGroup = async (groupId: string) => {
-    try {
-      const { error } = await supabase
-        .from("groups")
-        .delete()
-        .eq("id", groupId);
-
-      if (error) throw error;
-
-      await fetchGroups();
-      toast.success("Grupp borttagen");
-    } catch (error) {
-      console.error("Error deleting group:", error);
-      toast.error("Kunde inte ta bort grupp");
-    }
-  };
-
-  const addMembers = async (groupId: string, userIds: string[]) => {
     try {
       const membersToAdd = userIds.map(userId => ({
-        group_id: groupId,
+        group_id: household.id,
         user_id: userId,
       }));
 
@@ -241,17 +210,22 @@ export function useGroups() {
       toast.success(`${userIds.length} ${userIds.length === 1 ? 'medlem' : 'medlemmar'} tillagd${userIds.length === 1 ? '' : 'a'}!`);
     } catch (error) {
       console.error("Error adding members:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : "Kunde inte lägga till medlemmar";
       toast.error(errorMessage);
     }
   };
 
-  const removeMember = async (groupId: string, userId: string) => {
+  const removeMember = async (userId: string) => {
+    if (!household) {
+      toast.error("Hushåll finns inte");
+      return;
+    }
+
     try {
       const { error } = await supabase.rpc("remove_group_member", {
-        group_id_param: groupId,
+        group_id_param: household.id,
         user_id_param: userId,
       }) as { data: boolean | null; error: Error | null };
 
@@ -264,17 +238,22 @@ export function useGroups() {
       toast.success("Medlem borttagen");
     } catch (error) {
       console.error("Error removing member:", error);
-      const errorMessage = error instanceof Error 
-        ? error.message 
+      const errorMessage = error instanceof Error
+        ? error.message
         : "Kunde inte ta bort medlem";
       toast.error(errorMessage);
     }
   };
 
-  const regenerateInviteCode = async (groupId: string) => {
+  const regenerateInviteCode = async () => {
+    if (!household) {
+      toast.error("Hushåll finns inte");
+      return null;
+    }
+
     try {
       const { data: newCode, error } = await supabase.rpc("regenerate_invite_code", {
-        group_id_param: groupId,
+        group_id_param: household.id,
       }) as { data: string | null; error: Error | null };
 
       if (error) {
@@ -295,38 +274,41 @@ export function useGroups() {
     }
   };
 
-  const updateGroup = async (groupId: string, name: string) => {
+  const updateHouseholdName = async (name: string) => {
+    if (!household) {
+      toast.error("Hushåll finns inte");
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from("groups")
         .update({ name })
-        .eq("id", groupId);
+        .eq("id", household.id);
 
       if (error) {
-        console.error("Error updating group:", error);
+        console.error("Error updating household:", error);
         throw error;
       }
 
       await fetchGroups();
-      toast.success("Gruppnamn uppdaterat");
+      toast.success("Hushållsnamn uppdaterat");
     } catch (error) {
-      console.error("Error updating group:", error);
+      console.error("Error updating household:", error);
       const errorMessage = error instanceof Error
         ? error.message
-        : "Kunde inte uppdatera gruppnamn";
+        : "Kunde inte uppdatera hushållsnamn";
       toast.error(errorMessage);
     }
   };
 
   return {
-    groups,
+    household,
     loading,
-    createGroup,
-    deleteGroup,
     addMembers,
     removeMember,
     regenerateInviteCode,
-    updateGroup,
+    updateHouseholdName,
     refetch: fetchGroups,
   };
 }

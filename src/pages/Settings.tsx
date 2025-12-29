@@ -24,13 +24,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { CreateGroupModal } from "@/components/CreateGroupModal";
-import { JoinGroupModal } from "@/components/JoinGroupModal";
-
 const Settings = () => {
   const navigate = useNavigate();
   const { profile, signOut, updatePassword, updateProfile } = useAuth();
-  const { groups, loading: groupsLoading, createGroup, updateGroup, refetch } = useGroups();
+  const { household, loading: householdLoading, updateHouseholdName } = useGroups();
   const { theme, setTheme } = useTheme();
 
   const [newName, setNewName] = useState("");
@@ -41,11 +38,8 @@ const Settings = () => {
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isDeletingAccount, setIsDeletingAccount] = useState(false);
 
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
-
-  const [editingGroupId, setEditingGroupId] = useState<string | null>(null);
-  const [editingGroupName, setEditingGroupName] = useState("");
+  const [isEditingHouseholdName, setIsEditingHouseholdName] = useState(false);
+  const [editingHouseholdName, setEditingHouseholdName] = useState("");
 
   const handleNameChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -137,30 +131,27 @@ const Settings = () => {
     }
   };
 
-  const handleCreateGroup = async (name: string, isTemporary: boolean, selectedUserIds: string[]) => {
-    await createGroup(name, isTemporary, selectedUserIds);
-    setIsCreateModalOpen(false);
+  const handleEditHouseholdName = () => {
+    if (household) {
+      setEditingHouseholdName(household.name);
+      setIsEditingHouseholdName(true);
+    }
   };
 
-  const handleEditGroupName = (groupId: string, currentName: string) => {
-    setEditingGroupId(groupId);
-    setEditingGroupName(currentName);
-  };
-
-  const handleSaveGroupName = async (groupId: string) => {
-    if (editingGroupName.trim().length < 2) {
-      toast.error("Gruppnamn måste vara minst 2 tecken");
+  const handleSaveHouseholdName = async () => {
+    if (editingHouseholdName.trim().length < 2) {
+      toast.error("Hushållsnamn måste vara minst 2 tecken");
       return;
     }
 
-    await updateGroup(groupId, editingGroupName.trim());
-    setEditingGroupId(null);
-    setEditingGroupName("");
+    await updateHouseholdName(editingHouseholdName.trim());
+    setIsEditingHouseholdName(false);
+    setEditingHouseholdName("");
   };
 
-  const handleCancelEditGroupName = () => {
-    setEditingGroupId(null);
-    setEditingGroupName("");
+  const handleCancelEditHouseholdName = () => {
+    setIsEditingHouseholdName(false);
+    setEditingHouseholdName("");
   };
 
   return (
@@ -180,110 +171,101 @@ const Settings = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Household Invitations Card */}
+          {/* Household Card */}
           <Card>
             <CardHeader>
               <div className="flex items-center gap-2">
                 <Users className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Hushållsinbjudningar</CardTitle>
+                <CardTitle>Mitt hushåll</CardTitle>
               </div>
-              <CardDescription>Bjud in andra användare till ditt hushåll</CardDescription>
+              <CardDescription>Hantera ditt hushåll och medlemmar</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
-              {groupsLoading ? (
+              {householdLoading ? (
                 <div className="space-y-2">
                   {[1, 2].map((i) => (
                     <div key={i} className="h-16 rounded-lg bg-secondary/50 animate-pulse" />
                   ))}
                 </div>
-              ) : groups.length > 0 ? (
+              ) : household ? (
                 <>
-                <div className="space-y-2">
-                  {groups.map((group) => (
-                    <div
-                      key={group.id}
-                      className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-secondary/30 transition-colors"
-                    >
-                      <div className="flex-1 min-w-0">
-                        {editingGroupId === group.id ? (
-                          <div className="flex items-center gap-2">
-                            <Input
-                              value={editingGroupName}
-                              onChange={(e) => setEditingGroupName(e.target.value)}
-                              className="max-w-xs"
-                              autoFocus
-                              onKeyDown={(e) => {
-                                if (e.key === "Enter") {
-                                  handleSaveGroupName(group.id);
-                                } else if (e.key === "Escape") {
-                                  handleCancelEditGroupName();
-                                }
-                              }}
-                            />
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleSaveGroupName(group.id)}
-                              className="h-8 w-8 p-0"
-                            >
-                              <Check size={14} className="text-green-600" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={handleCancelEditGroupName}
-                              className="h-8 w-8 p-0"
-                            >
-                              <X size={14} className="text-red-600" />
-                            </Button>
-                          </div>
-                        ) : (
-                          <div className="flex items-center gap-2">
-                            <p className="font-medium text-foreground truncate">{group.name}</p>
-                            {group.is_temporary && (
-                              <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground shrink-0">
-                                Tillfällig
-                              </span>
-                            )}
-                          </div>
-                        )}
-                        <p className="text-sm text-muted-foreground">
-                          {group.members.length} {group.members.length === 1 ? "medlem" : "medlemmar"}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        {editingGroupId !== group.id && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditGroupName(group.id, group.name)}
-                              className="gap-2"
-                            >
-                              <Edit2 size={14} />
-                              <span className="hidden sm:inline">Ändra namn</span>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => navigate(`/grupp/${group.id}`)}
-                              className="gap-2"
-                            >
-                              <span className="hidden sm:inline">Öppna</span>
-                              <ExternalLink size={14} />
-                            </Button>
-                          </>
-                        )}
-                      </div>
+                  {/* Household Info */}
+                  <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-secondary/30 transition-colors">
+                    <div className="flex-1 min-w-0">
+                      {isEditingHouseholdName ? (
+                        <div className="flex items-center gap-2">
+                          <Input
+                            value={editingHouseholdName}
+                            onChange={(e) => setEditingHouseholdName(e.target.value)}
+                            className="max-w-xs"
+                            autoFocus
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                handleSaveHouseholdName();
+                              } else if (e.key === "Escape") {
+                                handleCancelEditHouseholdName();
+                              }
+                            }}
+                          />
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleSaveHouseholdName}
+                            className="h-8 w-8 p-0"
+                          >
+                            <Check size={14} className="text-green-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleCancelEditHouseholdName}
+                            className="h-8 w-8 p-0"
+                          >
+                            <X size={14} className="text-red-600" />
+                          </Button>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="font-medium text-foreground truncate">{household.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {household.members.length} {household.members.length === 1 ? "medlem" : "medlemmar"}
+                          </p>
+                        </div>
+                      )}
                     </div>
-                  ))}
+                    <div className="flex items-center gap-2 shrink-0">
+                      {!isEditingHouseholdName && (
+                        <>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleEditHouseholdName}
+                            className="gap-2"
+                          >
+                            <Edit2 size={14} />
+                            <span className="hidden sm:inline">Ändra namn</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => navigate('/hushall')}
+                            className="gap-2"
+                          >
+                            <span className="hidden sm:inline">Öppna</span>
+                            <ExternalLink size={14} />
+                          </Button>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   {/* Members List */}
                   <div className="space-y-3">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Medlemmar ({groups[0]?.members.length || 0})</p>
+                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                      Medlemmar ({household.members.length})
+                    </p>
                     <div className="space-y-2">
-                      {groups[0]?.members.map((member) => (
+                      {household.members.map((member) => (
                         <div
                           key={member.user_id}
                           className="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-background hover:bg-muted/20 transition-colors"
@@ -301,36 +283,10 @@ const Settings = () => {
                       ))}
                     </div>
                   </div>
-
-                  {/* Join Another Household */}
-                  <div className="pt-2 border-t border-border/50">
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsJoinModalOpen(true)}
-                      className="w-full sm:w-auto"
-                    >
-                      Gå med i ett hushåll
-                    </Button>
-                  </div>
                 </>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-sm text-muted-foreground mb-4">Du har inget hushåll ännu</p>
-                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                    <Button
-                      onClick={() => setIsCreateModalOpen(true)}
-                      className="gap-2"
-                    >
-                      <Plus size={14} />
-                      Skapa hushåll
-                    </Button>
-                    <Button
-                      variant="outline"
-                      onClick={() => setIsJoinModalOpen(true)}
-                    >
-                      Gå med i hushåll
-                    </Button>
-                  </div>
+                  <p className="text-sm text-muted-foreground">Laddar hushåll...</p>
                 </div>
               )}
             </CardContent>
@@ -576,19 +532,6 @@ const Settings = () => {
           </div>
         </div>
       </main>
-
-      {/* Modals */}
-      <CreateGroupModal
-        isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
-        onSubmit={handleCreateGroup}
-      />
-
-      <JoinGroupModal
-        isOpen={isJoinModalOpen}
-        onClose={() => setIsJoinModalOpen(false)}
-        onSuccess={refetch}
-      />
     </div>
   );
 };
