@@ -82,13 +82,18 @@ export function useGroups() {
       
       // Fetch profiles for all members
       let profilesMap = new Map<string, { id: string; user_id: string; name: string }>();
-      
+
       if (userIds.length > 0) {
-        const { data: profilesData } = await supabase
+        const { data: profilesData, error: profilesError } = await supabase
           .from("public_profiles")
           .select("id, user_id, name")
           .in("user_id", userIds);
-        
+
+        if (profilesError) {
+          console.error("Error fetching member profiles:", profilesError);
+          // Continue anyway - members will show with fallback names
+        }
+
         profilesData?.forEach(profile => {
           profilesMap.set(profile.user_id, profile);
         });
