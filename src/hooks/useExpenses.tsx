@@ -70,12 +70,6 @@ export function useExpenses(groupId?: string) {
     }
 
     try {
-      console.log("Adding expense:", {
-        ...expense,
-        paid_by: user.id,
-        user_id: user.id,
-      });
-
       const { data, error } = await supabase
         .from("expenses")
         .insert({

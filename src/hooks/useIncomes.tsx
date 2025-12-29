@@ -75,8 +75,6 @@ export function useIncomes(groupId?: string) {
     }
 
     try {
-      console.log("Adding income:", income);
-
       const { data, error } = await supabase
         .from("incomes")
         .insert({

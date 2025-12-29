@@ -174,7 +174,7 @@ export function AddTransactionModal({
     onAddExpense({
       group_id: groupId,
       amount: totalAmount,
-      paid_by: "",
+      paid_by: user?.id || "",
       category,
       description,
       date,

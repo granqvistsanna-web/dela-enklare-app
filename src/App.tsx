@@ -60,7 +60,6 @@ const AppContent = () => {
     if (!user) {
       // User logged out - clear all cached queries
       queryClientInstance.clear();
-      console.log("Cleared React Query cache after logout");
     }
   }, [user, queryClientInstance]);
 

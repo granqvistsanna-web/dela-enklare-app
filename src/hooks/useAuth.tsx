@@ -101,14 +101,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       setLoading(false);
+    }).catch((error) => {
+      console.error("Error initializing auth session:", error);
+      if (mounted) {
+        setLoading(false);
+      }
     });
 
     // Set up auth state listener for changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
-
-        console.log("Auth state changed:", event, session?.user?.id);
 
         setSession(session);
         setUser(session?.user ?? null);
@@ -195,6 +198,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return { error: error as Error | null };
   }, []);
 
+  const refreshProfile = useCallback(async () => {
+    if (user) {
+      await fetchProfile(user);
+    }
+  }, [user]);
+
   const updateProfile = useCallback(async (name: string) => {
     if (!user) {
       return { error: new Error("Ingen användare är inloggad") };
@@ -210,7 +219,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return { error: error as Error | null };
-  }, [user]);
+  }, [user, refreshProfile]);
 
   const deleteAccount = useCallback(async () => {
     // First sign out, then the account deletion would need a backend function
@@ -218,12 +227,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signOut();
     return { error: null };
   }, [signOut]);
-
-  const refreshProfile = useCallback(async () => {
-    if (user) {
-      await fetchProfile(user);
-    }
-  }, [user]);
 
   const value = useMemo(() => ({
     user,
