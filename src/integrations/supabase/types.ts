@@ -239,8 +239,36 @@ export type Database = {
     }
     Functions: {
       generate_invite_code: { Args: never; Returns: string }
+      get_all_users: {
+        Args: never
+        Returns: {
+          id: string
+          name: string
+          user_id: string
+        }[]
+      }
+      is_group_admin: {
+        Args: { group_id_param: string; user_id_param: string }
+        Returns: boolean
+      }
       is_group_member: {
         Args: { _group_id: string; _user_id: string }
+        Returns: boolean
+      }
+      lookup_group_by_invite_code: {
+        Args: { code: string }
+        Returns: {
+          created_by: string
+          id: string
+          name: string
+        }[]
+      }
+      regenerate_invite_code: {
+        Args: { group_id_param: string }
+        Returns: string
+      }
+      remove_group_member: {
+        Args: { group_id_param: string; user_id_param: string }
         Returns: boolean
       }
     }

@@ -22,7 +22,11 @@ export function useAllUsers() {
       }
 
       try {
-        const { data, error } = await supabase.rpc("get_all_users");
+        // Use the get_all_users RPC function
+        const { data, error } = await supabase.rpc("get_all_users") as { 
+          data: PublicUser[] | null; 
+          error: Error | null 
+        };
 
         if (error) {
           console.error("Error fetching all users:", error);

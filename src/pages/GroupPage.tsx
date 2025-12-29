@@ -42,7 +42,9 @@ import {
   MoreHorizontal,
   ArrowRight,
   TrendingUp,
-  Users
+  Users,
+  RefreshCw,
+  UserMinus
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -50,7 +52,7 @@ const GroupPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { groups, loading: groupsLoading, deleteGroup, addMembers, refetch } = useGroups();
+  const { groups, loading: groupsLoading, deleteGroup, addMembers, removeMember, regenerateInviteCode, refetch } = useGroups();
   const { expenses, loading: expensesLoading, addExpense, updateExpense, deleteExpense } = useExpenses(id);
   const { settlements, loading: settlementsLoading, addSettlement } = useSettlements(id);
 
@@ -62,8 +64,11 @@ const GroupPage = () => {
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false);
+  const [isRemoveMemberDialogOpen, setIsRemoveMemberDialogOpen] = useState(false);
+  const [memberToRemove, setMemberToRemove] = useState<{ id: string; name: string } | null>(null);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [copiedCode, setCopiedCode] = useState(false);
+  const [isRegeneratingCode, setIsRegeneratingCode] = useState(false);
 
   const loading = groupsLoading || expensesLoading || settlementsLoading;
 
@@ -185,6 +190,23 @@ const GroupPage = () => {
     await refetch();
   };
 
+  const handleRemoveMember = async () => {
+    if (!id || !memberToRemove) return;
+    await removeMember(id, memberToRemove.id);
+    setIsRemoveMemberDialogOpen(false);
+    setMemberToRemove(null);
+  };
+
+  const handleRegenerateCode = async () => {
+    if (!id) return;
+    setIsRegeneratingCode(true);
+    try {
+      await regenerateInviteCode(id);
+    } finally {
+      setIsRegeneratingCode(false);
+    }
+  };
+
   const handleCopyCode = async () => {
     if (!group?.invite_code) return;
 
@@ -272,7 +294,38 @@ const GroupPage = () => {
                       <Users size={14} className="mr-2" />
                       Lägg till medlemmar
                     </DropdownMenuItem>
+                    <DropdownMenuItem 
+                      onClick={handleRegenerateCode}
+                      disabled={isRegeneratingCode}
+                    >
+                      <RefreshCw size={14} className={`mr-2 ${isRegeneratingCode ? 'animate-spin' : ''}`} />
+                      {isRegeneratingCode ? 'Genererar...' : 'Ny inbjudningskod'}
+                    </DropdownMenuItem>
                     <DropdownMenuSeparator />
+                    {group.members.length > 1 && (
+                      <>
+                        <div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">
+                          Ta bort medlem
+                        </div>
+                        {group.members
+                          .filter(m => m.user_id !== user?.id)
+                          .map(member => (
+                            <DropdownMenuItem
+                              key={member.user_id}
+                              onClick={() => {
+                                setMemberToRemove({ id: member.user_id, name: member.name });
+                                setIsRemoveMemberDialogOpen(true);
+                              }}
+                              className="text-orange-600 focus:text-orange-600"
+                            >
+                              <UserMinus size={14} className="mr-2" />
+                              {member.name}
+                            </DropdownMenuItem>
+                          ))
+                        }
+                        <DropdownMenuSeparator />
+                      </>
+                    )}
                     <DropdownMenuItem
                       onClick={() => setIsDeleteDialogOpen(true)}
                       className="text-destructive focus:text-destructive"
@@ -543,6 +596,26 @@ const GroupPage = () => {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Radera
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isRemoveMemberDialogOpen} onOpenChange={setIsRemoveMemberDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Ta bort medlem</AlertDialogTitle>
+            <AlertDialogDescription>
+              Är du säker på att du vill ta bort {memberToRemove?.name} från gruppen? Medlemmen kommer inte längre kunna se gruppens utgifter.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setMemberToRemove(null)}>Avbryt</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleRemoveMember}
+              className="bg-orange-600 text-white hover:bg-orange-700"
+            >
+              Ta bort
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
