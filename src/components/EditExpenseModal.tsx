@@ -46,17 +46,31 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
     }
   }, [expense]);
 
-  // Initialize custom splits when toggled on
-  // Note: customSplits intentionally not in deps to avoid infinite loop
+  // Initialize custom splits when toggled on or when amount/members change
   useEffect(() => {
-    if (useCustomSplit && amount && Object.keys(customSplits).length === 0 && members.length > 0) {
+    if (useCustomSplit && amount && members.length > 0) {
       const totalAmount = parseFloat(amount) || 0;
-      const perPerson = totalAmount / members.length;
-      const splits: Record<string, string> = {};
-      members.forEach((member) => {
-        splits[member.user_id] = perPerson.toFixed(2);
-      });
-      setCustomSplits(splits);
+      const currentSum = calculateSplitSum();
+
+      // If splits are empty or don't exist for all members, initialize with equal split
+      const hasAllMembers = members.every(m => m.user_id in customSplits);
+      if (Object.keys(customSplits).length === 0 || !hasAllMembers) {
+        const perPerson = totalAmount / members.length;
+        const splits: Record<string, string> = {};
+        members.forEach((member) => {
+          splits[member.user_id] = perPerson.toFixed(2);
+        });
+        setCustomSplits(splits);
+      } else if (currentSum > 0 && Math.abs(currentSum - totalAmount) > 0.01) {
+        // If amount changed and splits exist, scale them proportionally
+        const scaleFactor = totalAmount / currentSum;
+        const splits: Record<string, string> = {};
+        members.forEach((member) => {
+          const currentValue = parseFloat(customSplits[member.user_id] || "0");
+          splits[member.user_id] = (currentValue * scaleFactor).toFixed(2);
+        });
+        setCustomSplits(splits);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useCustomSplit, amount, members]);
