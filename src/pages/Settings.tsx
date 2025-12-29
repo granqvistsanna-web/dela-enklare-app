@@ -4,11 +4,12 @@ import { Header } from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { useAuth } from "@/hooks/useAuth";
-import { useGroups } from "@/hooks/useGroups";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { User, Lock, Tag, LogOut, Trash2, ChevronLeft } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -134,119 +135,168 @@ const Settings = () => {
 
       <main className="container py-8 sm:py-12 px-4 sm:px-6 max-w-3xl mx-auto">
         <div className="mb-8 sm:mb-10">
-          <Link to="/dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-            ← Tillbaka
+          <Link
+            to="/dashboard"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <ChevronLeft className="h-4 w-4" />
+            Tillbaka
           </Link>
-          <h1 className="text-xl sm:text-2xl font-semibold text-foreground mt-4">Inställningar</h1>
+          <h1 className="text-2xl sm:text-3xl font-semibold text-foreground mt-4">Inställningar</h1>
         </div>
 
-        <div className="space-y-8 sm:space-y-10">
-          {/* Profile */}
-          <section>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">Profil</h2>
-            {profile && (
-              <div className="flex items-center gap-3 sm:gap-4">
-                <div className="h-12 w-12 sm:h-14 sm:w-14 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-lg sm:text-xl font-semibold text-primary">
-                  {profile.name?.[0]?.toUpperCase() || "?"}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="text-base font-medium text-foreground truncate">{profile.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">{profile.email}</p>
-                </div>
+        <div className="space-y-6">
+          {/* Profile Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <User className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Profil</CardTitle>
               </div>
-            )}
-          </section>
+              <CardDescription>Din personliga information</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              {profile && (
+                <div className="flex items-center gap-4">
+                  <div className="h-14 w-14 sm:h-16 sm:w-16 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-xl sm:text-2xl font-semibold text-primary">
+                    {profile.name?.[0]?.toUpperCase() || "?"}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-base font-medium text-foreground truncate">{profile.name}</p>
+                    <p className="text-sm text-muted-foreground truncate">{profile.email}</p>
+                  </div>
+                </div>
+              )}
 
-          <hr className="border-border" />
-
-          {/* Change Name */}
-          <section>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">Byt namn</h2>
-            <form onSubmit={handleNameChange} className="space-y-4 max-w-full sm:max-w-sm">
-              <div className="space-y-2">
-                <Label htmlFor="newName" className="text-sm text-muted-foreground">
-                  Nytt namn
-                </Label>
-                <Input
-                  id="newName"
-                  type="text"
-                  placeholder={profile?.name || "Ditt namn"}
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                />
+              <div className="pt-2">
+                <form onSubmit={handleNameChange} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="newName" className="text-sm font-medium">
+                      Ändra namn
+                    </Label>
+                    <Input
+                      id="newName"
+                      type="text"
+                      placeholder={profile?.name || "Ditt namn"}
+                      value={newName}
+                      onChange={(e) => setNewName(e.target.value)}
+                      className="max-w-sm"
+                    />
+                  </div>
+                  <Button type="submit" disabled={isChangingName} className="w-full sm:w-auto">
+                    {isChangingName ? "Sparar..." : "Uppdatera namn"}
+                  </Button>
+                </form>
               </div>
-              <Button type="submit" variant="outline" disabled={isChangingName} className="w-full sm:w-auto">
-                {isChangingName ? "Sparar..." : "Uppdatera namn"}
+            </CardContent>
+          </Card>
+
+          {/* Security Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Lock className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Säkerhet</CardTitle>
+              </div>
+              <CardDescription>Hantera ditt lösenord</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handlePasswordChange} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword" className="text-sm font-medium">
+                    Nytt lösenord
+                  </Label>
+                  <Input
+                    id="newPassword"
+                    type="password"
+                    placeholder="••••••"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="max-w-sm"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirmPassword" className="text-sm font-medium">
+                    Bekräfta lösenord
+                  </Label>
+                  <Input
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="••••••"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="max-w-sm"
+                  />
+                </div>
+                <Button type="submit" disabled={isChangingPassword} className="w-full sm:w-auto">
+                  {isChangingPassword ? "Sparar..." : "Uppdatera lösenord"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Categories Card */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Tag className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Kategorier</CardTitle>
+              </div>
+              <CardDescription>Tillgängliga utgiftskategorier</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {DEFAULT_CATEGORIES.map((category) => (
+                  <div
+                    key={category.id}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/50 border border-border/50 text-sm"
+                  >
+                    <span>{category.icon}</span>
+                    <span className="text-foreground font-medium">{category.name}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Account Actions */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <LogOut className="h-5 w-5 text-muted-foreground" />
+                <CardTitle>Konto</CardTitle>
+              </div>
+              <CardDescription>Logga ut från ditt konto</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                variant="outline"
+                onClick={handleSignOut}
+                className="w-full sm:w-auto"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logga ut
               </Button>
-            </form>
-          </section>
+            </CardContent>
+          </Card>
 
-          <hr className="border-border" />
-
-          {/* Categories */}
-          <section>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">Kategorier</h2>
-            <div className="flex flex-wrap gap-2">
-              {DEFAULT_CATEGORIES.map((category) => (
-                <div
-                  key={category.id}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-md border border-border text-sm"
-                >
-                  <span>{category.icon}</span>
-                  <span className="text-foreground">{category.name}</span>
-                </div>
-              ))}
-            </div>
-          </section>
-
-          <hr className="border-border" />
-
-          {/* Change Password */}
-          <section>
-            <h2 className="text-sm font-medium text-muted-foreground mb-4">Byt lösenord</h2>
-            <form onSubmit={handlePasswordChange} className="space-y-4 max-w-full sm:max-w-sm">
-              <div className="space-y-2">
-                <Label htmlFor="newPassword" className="text-sm text-muted-foreground">
-                  Nytt lösenord
-                </Label>
-                <Input
-                  id="newPassword"
-                  type="password"
-                  placeholder="••••••"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
+          {/* Danger Zone */}
+          <Card className="border-destructive/50 bg-destructive/5">
+            <CardHeader>
+              <div className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-destructive" />
+                <CardTitle className="text-destructive">Riskzon</CardTitle>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm text-muted-foreground">
-                  Bekräfta
-                </Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="••••••"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </div>
-              <Button type="submit" variant="outline" disabled={isChangingPassword} className="w-full sm:w-auto">
-                {isChangingPassword ? "Sparar..." : "Uppdatera"}
-              </Button>
-            </form>
-          </section>
-
-          <hr className="border-border" />
-
-          {/* Sign Out & Delete */}
-          <section className="space-y-4">
-            <Button variant="ghost" onClick={handleSignOut} className="text-muted-foreground w-full sm:w-auto justify-start sm:justify-center h-10">
-              Logga ut
-            </Button>
-
-            <div className="pt-6">
+              <CardDescription>Permanenta åtgärder som inte kan ångras</CardDescription>
+            </CardHeader>
+            <CardContent>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
-                  <Button variant="ghost" className="text-destructive hover:text-destructive hover:bg-destructive/10 w-full sm:w-auto justify-start sm:justify-center h-10">
+                  <Button
+                    variant="destructive"
+                    className="w-full sm:w-auto"
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
                     Radera konto
                   </Button>
                 </AlertDialogTrigger>
@@ -254,32 +304,32 @@ const Settings = () => {
                   <AlertDialogHeader>
                     <AlertDialogTitle>Radera konto?</AlertDialogTitle>
                     <AlertDialogDescription>
-                      Detta raderar permanent ditt konto och all data.
+                      Detta raderar permanent ditt konto och all data. Denna åtgärd kan inte ångras.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                    <AlertDialogCancel className="border-border m-0 w-full sm:w-auto">Avbryt</AlertDialogCancel>
+                    <AlertDialogCancel className="border-border m-0 w-full sm:w-auto">
+                      Avbryt
+                    </AlertDialogCancel>
                     <AlertDialogAction
                       onClick={handleDeleteAccount}
                       className="bg-destructive text-destructive-foreground hover:bg-destructive/90 m-0 w-full sm:w-auto"
                       disabled={isDeletingAccount}
                     >
-                      {isDeletingAccount ? "Raderar..." : "Radera"}
+                      {isDeletingAccount ? "Raderar..." : "Radera permanent"}
                     </AlertDialogAction>
                   </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </div>
-          </section>
-
-          <hr className="border-border" />
+            </CardContent>
+          </Card>
 
           {/* About */}
-          <section className="text-center py-4">
+          <div className="text-center py-6">
             <p className="text-sm text-muted-foreground">
               Päronsplit · v1.0
             </p>
-          </section>
+          </div>
         </div>
       </main>
     </div>
