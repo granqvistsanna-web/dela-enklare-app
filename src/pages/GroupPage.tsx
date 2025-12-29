@@ -33,7 +33,7 @@ import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense, ExpenseSplit } from "@/hooks/useExpenses";
-import { useIncomes, Income, IncomeType } from "@/hooks/useIncomes";
+import { useIncomes, Income, IncomeInput, IncomeType } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { getIncomesForMonth } from "@/lib/incomeUtils";
@@ -164,7 +164,7 @@ const GroupPage = () => {
   }, [deleteExpense]);
 
   // Income handlers
-  const handleAddIncome = useCallback(async (newIncome: any) => {
+  const handleAddIncome = useCallback(async (newIncome: IncomeInput) => {
     return await addIncome(newIncome);
   }, [addIncome]);
 
@@ -649,7 +649,11 @@ const GroupPage = () => {
                       <label className="text-xs text-muted-foreground">Status</label>
                       <select
                         value={filterIncluded}
-                        onChange={(e) => setFilterIncluded(e.target.value as any)}
+                        onChange={(e) =>
+                          setFilterIncluded(
+                            e.target.value as "all" | "included" | "excluded"
+                          )
+                        }
                         className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm"
                       >
                         <option value="all">Alla</option>

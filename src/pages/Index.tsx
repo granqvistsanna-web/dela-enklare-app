@@ -13,7 +13,7 @@ import { ImportModal } from "@/components/ImportModal";
 import { IncomeOverviewCard } from "@/components/IncomeOverviewCard";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
-import { useIncomes, Income } from "@/hooks/useIncomes";
+import { useIncomes, Income, IncomeInput } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { calculateBalance } from "@/lib/balanceUtils";
@@ -109,7 +109,7 @@ const Index = () => {
     await addExpense(newExpense);
   }, [addExpense]);
 
-  const handleAddIncome = useCallback(async (newIncome: any) => {
+  const handleAddIncome = useCallback(async (newIncome: IncomeInput) => {
     return await addIncome(newIncome);
   }, [addIncome]);
 
