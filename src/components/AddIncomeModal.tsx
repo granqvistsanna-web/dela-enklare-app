@@ -292,19 +292,30 @@ export function AddIncomeModal({
                     </Label>
                   </div>
 
-                  <div className="flex gap-2">
-                    <Button type="submit" className="flex-1" disabled={isCheckingDuplicates}>
-                      {isCheckingDuplicates ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        "Spara"
-                      )}
-                    </Button>
+                  <div className="flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={onClose}
+                        className="flex-1"
+                        disabled={isCheckingDuplicates}
+                      >
+                        Avbryt
+                      </Button>
+                      <Button type="submit" className="flex-1" disabled={isCheckingDuplicates}>
+                        {isCheckingDuplicates ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          "Spara"
+                        )}
+                      </Button>
+                    </div>
                     <Button
                       type="button"
                       variant="outline"
                       onClick={(e) => handleSubmit(e, true)}
-                      className="flex-1"
+                      className="w-full"
                       disabled={isCheckingDuplicates}
                     >
                       {isCheckingDuplicates ? (

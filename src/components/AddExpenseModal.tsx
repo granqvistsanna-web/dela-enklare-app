@@ -350,16 +350,27 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
                     )}
                   </div>
 
-                  <Button type="submit" className="w-full" disabled={isCheckingDuplicates}>
-                    {isCheckingDuplicates ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Kontrollerar...
-                      </>
-                    ) : (
-                      "Lägg till"
-                    )}
-                  </Button>
+                  <div className="flex gap-2 sm:gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={onClose}
+                      className="flex-1"
+                      disabled={isCheckingDuplicates}
+                    >
+                      Avbryt
+                    </Button>
+                    <Button type="submit" className="flex-1" disabled={isCheckingDuplicates}>
+                      {isCheckingDuplicates ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Kontrollerar...
+                        </>
+                      ) : (
+                        "Lägg till"
+                      )}
+                    </Button>
+                  </div>
                 </form>
               </div>
             </motion.div>

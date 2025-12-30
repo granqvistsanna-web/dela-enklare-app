@@ -332,6 +332,14 @@ export function EditExpenseModal({ isOpen, onClose, onSave, onDelete, expense, m
               {/* Sticky footer */}
               <div className="shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-background safe-area-pb">
                 <div className="flex gap-3">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={onClose}
+                    className="flex-1 h-12 sm:h-10"
+                  >
+                    Avbryt
+                  </Button>
                   {onDelete && (
                     <Button
                       type="button"
@@ -347,10 +355,10 @@ export function EditExpenseModal({ isOpen, onClose, onSave, onDelete, expense, m
                       Ta bort
                     </Button>
                   )}
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     form="edit-expense-form"
-                    className={`h-12 sm:h-10 ${onDelete ? "flex-1" : "w-full"}`}
+                    className="flex-1 h-12 sm:h-10"
                   >
                     Spara
                   </Button>
