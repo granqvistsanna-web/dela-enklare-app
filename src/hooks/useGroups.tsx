@@ -97,7 +97,7 @@ export function useGroups() {
         return;
       }
 
-      // Fetch household data and members in parallel
+      // Fetch household data and members with profiles in parallel using a join
       const [groupResult, membersResult] = await Promise.all([
         supabase
           .from("groups")
@@ -106,7 +106,15 @@ export function useGroups() {
           .single(),
         supabase
           .from("group_members")
-          .select("group_id, user_id")
+          .select(`
+            group_id,
+            user_id,
+            profiles:public_profiles!inner (
+              id,
+              user_id,
+              name
+            )
+          `)
           .eq("group_id", householdId)
       ]);
 
@@ -116,31 +124,10 @@ export function useGroups() {
       const groupData = groupResult.data;
       const membersData = membersResult.data;
 
-      // Get unique user IDs to fetch profiles
-      const userIds = [...new Set(membersData?.map(m => m.user_id) || [])];
-
-      // Fetch profiles for all members
-      const profilesMap = new Map<string, { id: string; user_id: string; name: string }>();
-
-      if (userIds.length > 0) {
-        const { data: profilesData, error: profilesError } = await supabase
-          .from("public_profiles")
-          .select("id, user_id, name")
-          .in("user_id", userIds);
-
-        if (profilesError) {
-          console.error("Error fetching member profiles:", profilesError);
-          // Continue anyway - members will show with fallback names
-        }
-
-        profilesData?.forEach(profile => {
-          profilesMap.set(profile.user_id, profile);
-        });
-      }
-
-      // Build members list with profiles
-      const members: GroupMember[] = membersData.map((member) => {
-        const profile = profilesMap.get(member.user_id);
+      // Build members list from joined data
+      const members: GroupMember[] = (membersData || []).map((member: any) => {
+        // Handle both array and object profile responses
+        const profile = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
 
         return profile
           ? {
