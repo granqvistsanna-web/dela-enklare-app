@@ -116,7 +116,7 @@ export function SwishModal({
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-background border border-border rounded-md p-6 w-full max-w-sm">
+            <div className="bg-white border border-border rounded-md p-6 w-full max-w-sm overflow-x-hidden">
               {/* Header */}
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">

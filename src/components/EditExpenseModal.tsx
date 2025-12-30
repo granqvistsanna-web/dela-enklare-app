@@ -172,7 +172,7 @@ export function EditExpenseModal({ isOpen, onClose, onSave, onDelete, expense, m
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
           >
-            <div className="bg-background border border-border rounded-t-xl sm:rounded-xl w-full sm:max-w-md max-h-[90vh] sm:max-h-[calc(100vh-2rem)] flex flex-col">
+            <div className="bg-white border border-border rounded-t-xl sm:rounded-xl w-full sm:max-w-md max-h-[90vh] sm:max-h-[calc(100vh-2rem)] flex flex-col overflow-x-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-4 shrink-0">
                 <h2 className="text-lg font-medium text-foreground">Redigera utgift</h2>
@@ -350,7 +350,7 @@ export function EditExpenseModal({ isOpen, onClose, onSave, onDelete, expense, m
               </div>
 
               {/* Sticky footer */}
-              <div className="shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-background safe-area-pb">
+              <div className="shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-white safe-area-pb">
                 <div className="flex gap-3">
                   <Button
                     type="button"
