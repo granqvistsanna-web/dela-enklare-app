@@ -219,6 +219,11 @@ export function useExpenses(groupId?: string) {
   };
 
   const deleteExpense = async (expenseId: string) => {
+    if (!user) {
+      toast.error("Du måste vara inloggad");
+      return;
+    }
+
     try {
       // Find the expense to delete (for potential undo)
       const expenseToDelete = expenses.find(e => e.id === expenseId);
@@ -227,11 +232,18 @@ export function useExpenses(groupId?: string) {
         return;
       }
 
+      // Verify the user owns this expense
+      if (expenseToDelete.paid_by !== user.id) {
+        toast.error("Du kan bara ta bort utgifter du själv betalat");
+        return;
+      }
+
       // Delete from database
       const { error } = await supabase
         .from("expenses")
         .delete()
-        .eq("id", expenseId);
+        .eq("id", expenseId)
+        .eq("paid_by", user.id); // Additional safety check at DB level
 
       if (error) throw error;
 
