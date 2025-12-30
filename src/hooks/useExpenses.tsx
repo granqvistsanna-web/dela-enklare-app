@@ -197,16 +197,10 @@ export function useExpenses(groupId?: string) {
         return;
       }
 
-      if (expense.paid_by !== user.id) {
-        toast.error("Du kan bara redigera utgifter du själv betalat");
-        return;
-      }
-
       const { error } = await supabase
         .from("expenses")
         .update(updates)
-        .eq("id", expenseId)
-        .eq("paid_by", user.id); // Additional safety check at DB level
+        .eq("id", expenseId);
 
       if (error) throw error;
 
