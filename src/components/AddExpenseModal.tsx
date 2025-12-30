@@ -39,6 +39,7 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
   const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
   const [showDuplicateWarning, setShowDuplicateWarning] = useState(false);
   const [potentialDuplicates, setPotentialDuplicates] = useState<PotentialDuplicate[]>([]);
+  const [showAllCategories, setShowAllCategories] = useState(false);
 
   // Initialize custom splits when toggled on, when members change, or when amount changes
   useEffect(() => {
@@ -250,7 +251,7 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
                   <div className="space-y-2">
                     <Label className="text-sm text-muted-foreground">Kategori</Label>
                     <div className="flex flex-wrap gap-2">
-                      {DEFAULT_CATEGORIES.map((cat) => (
+                      {(showAllCategories ? DEFAULT_CATEGORIES : DEFAULT_CATEGORIES.slice(0, 5)).map((cat) => (
                         <button
                           key={cat.id}
                           type="button"
@@ -265,6 +266,25 @@ export function AddExpenseModal({ isOpen, onClose, onAdd, groupId, members }: Ad
                           <span className="text-foreground">{cat.name}</span>
                         </button>
                       ))}
+                      {!showAllCategories && DEFAULT_CATEGORIES.length > 5 && (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllCategories(true)}
+                          className="flex items-center gap-2 rounded-md border border-dashed border-border px-3 py-2 sm:py-1.5 text-sm text-muted-foreground hover:text-foreground hover:border-muted-foreground transition-colors"
+                        >
+                          <span>+{DEFAULT_CATEGORIES.length - 5}</span>
+                          <span>Visa fler</span>
+                        </button>
+                      )}
+                      {showAllCategories && (
+                        <button
+                          type="button"
+                          onClick={() => setShowAllCategories(false)}
+                          className="flex items-center gap-2 rounded-md border border-dashed border-border px-3 py-2 sm:py-1.5 text-sm text-muted-foreground hover:text-foreground hover:border-muted-foreground transition-colors"
+                        >
+                          <span>Visa färre</span>
+                        </button>
+                      )}
                     </div>
                   </div>
 
