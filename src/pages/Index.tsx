@@ -228,12 +228,12 @@ const Index = () => {
       <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
         {/* Header */}
         <div className="mb-6 animate-fade-in">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div>
+          <div className="flex items-start sm:items-center justify-between gap-3 sm:gap-4">
+            <div className="flex-1 min-w-0">
               <h1 className="text-heading text-2xl mb-1">Hem</h1>
               <p className="text-caption">{household.name}</p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0">
               <GroupSelector
                 groups={allGroups}
                 selectedGroupId={household.id}
