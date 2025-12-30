@@ -118,9 +118,9 @@ export function SideNav() {
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col border-r border-sidebar-border bg-sidebar">
         <div className="flex flex-col flex-1 min-h-0">
           {/* Logo */}
-          <div className="flex items-center h-14 px-4 border-b border-sidebar-border/50">
+          <div className="flex items-center h-20 px-4 py-2 border-b border-sidebar-border/50">
             <Link to="/dashboard" className="flex items-center hover:opacity-70 transition-opacity">
-              <img src={logo} alt="Päronsplit" className="h-16 w-auto" />
+              <img src={logo} alt="Päronsplit" className="h-14 w-auto object-contain" />
             </Link>
           </div>
 
