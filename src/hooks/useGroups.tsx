@@ -30,8 +30,11 @@ export interface Group {
   members: GroupMember[];
 }
 
+const SELECTED_GROUP_KEY = "selected_group_id";
+
 export function useGroups() {
   const { user } = useAuth();
+  const [allGroups, setAllGroups] = useState<Group[]>([]);
   const [household, setHousehold] = useState<Group | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -83,48 +86,58 @@ export function useGroups() {
   const fetchGroups = useCallback(async () => {
     if (!user) {
       setHousehold(null);
+      setAllGroups([]);
       setLoading(false);
       return;
     }
 
     try {
-      // Ensure household exists
-      const householdId = await ensureHouseholdExists();
+      // Ensure at least one household exists
+      await ensureHouseholdExists();
 
-      if (!householdId) {
+      // Fetch all group memberships for user
+      const { data: memberships, error: membershipError } = await supabase
+        .from("group_members")
+        .select("group_id")
+        .eq("user_id", user.id);
+
+      if (membershipError) throw membershipError;
+      
+      const groupIds = memberships?.map(m => m.group_id) || [];
+      
+      if (groupIds.length === 0) {
         setHousehold(null);
+        setAllGroups([]);
         setLoading(false);
         return;
       }
 
-      // Fetch household data and members separately (no FK relationship for join)
-      const [groupResult, membersResult] = await Promise.all([
-        supabase
-          .from("groups")
-          .select("*")
-          .eq("id", householdId)
-          .single(),
-        supabase
-          .from("group_members")
-          .select("group_id, user_id")
-          .eq("group_id", householdId)
-      ]);
+      // Fetch all groups the user is a member of
+      const { data: groupsData, error: groupsError } = await supabase
+        .from("groups")
+        .select("*")
+        .in("id", groupIds)
+        .order("created_at", { ascending: false });
 
-      if (groupResult.error) throw groupResult.error;
-      if (membersResult.error) throw membersResult.error;
+      if (groupsError) throw groupsError;
 
-      const groupData = groupResult.data;
-      const membersData = membersResult.data || [];
+      // Fetch all members for all groups
+      const { data: allMembersData, error: membersError } = await supabase
+        .from("group_members")
+        .select("group_id, user_id")
+        .in("group_id", groupIds);
 
-      // Fetch profiles for all member user_ids
-      const userIds = membersData.map(m => m.user_id);
+      if (membersError) throw membersError;
+
+      // Fetch profiles for all unique user_ids
+      const allUserIds = [...new Set(allMembersData?.map(m => m.user_id) || [])];
       let profiles: PublicProfile[] = [];
       
-      if (userIds.length > 0) {
+      if (allUserIds.length > 0) {
         const { data: profilesData, error: profilesError } = await supabase
           .from("public_profiles")
           .select("id, user_id, name")
-          .in("user_id", userIds);
+          .in("user_id", allUserIds);
         
         if (profilesError) {
           console.error("Error fetching profiles:", profilesError);
@@ -133,41 +146,64 @@ export function useGroups() {
         }
       }
 
-      // Build members list by matching profiles to members
-      const members: GroupMember[] = membersData.map((member) => {
-        const profile = profiles.find(p => p.user_id === member.user_id);
-        return profile
-          ? {
-              id: profile.id,
-              user_id: profile.user_id,
-              name: profile.name,
-            }
-          : {
-              id: member.user_id,
-              user_id: member.user_id,
-              name: "Okänd användare",
-            };
+      // Build groups with members
+      const groupsWithMembers: Group[] = (groupsData || []).map(groupData => {
+        const groupMembers = (allMembersData || []).filter(m => m.group_id === groupData.id);
+        
+        const members: GroupMember[] = groupMembers.map((member) => {
+          const profile = profiles.find(p => p.user_id === member.user_id);
+          return profile
+            ? {
+                id: profile.id,
+                user_id: profile.user_id,
+                name: profile.name,
+              }
+            : {
+                id: member.user_id,
+                user_id: member.user_id,
+                name: "Okänd användare",
+              };
+        });
+
+        return {
+          id: groupData.id,
+          name: groupData.name,
+          is_temporary: groupData.is_temporary,
+          created_by: groupData.created_by,
+          created_at: groupData.created_at,
+          invite_code: groupData.invite_code,
+          members,
+        };
       });
 
-      // Build household with members
-      const householdWithMembers: Group = {
-        id: groupData.id,
-        name: groupData.name,
-        is_temporary: groupData.is_temporary,
-        created_by: groupData.created_by,
-        created_at: groupData.created_at,
-        invite_code: groupData.invite_code,
-        members,
-      };
+      setAllGroups(groupsWithMembers);
 
-      setHousehold(householdWithMembers);
+      // Determine which group to select
+      const savedGroupId = localStorage.getItem(SELECTED_GROUP_KEY);
+      let selectedGroup = groupsWithMembers.find(g => g.id === savedGroupId);
+      
+      // Fallback to first group if saved group not found
+      if (!selectedGroup && groupsWithMembers.length > 0) {
+        selectedGroup = groupsWithMembers[0];
+        localStorage.setItem(SELECTED_GROUP_KEY, selectedGroup.id);
+      }
+
+      setHousehold(selectedGroup || null);
     } catch (error) {
-      console.error("Error fetching household:", error);
-      toast.error("Kunde inte hämta hushåll");
+      console.error("Error fetching groups:", error);
+      toast.error("Kunde inte hämta grupper");
     } finally {
       setLoading(false);
     }
   }, [user, ensureHouseholdExists]);
+
+  const selectGroup = useCallback((groupId: string) => {
+    const group = allGroups.find(g => g.id === groupId);
+    if (group) {
+      setHousehold(group);
+      localStorage.setItem(SELECTED_GROUP_KEY, groupId);
+    }
+  }, [allGroups]);
 
   useEffect(() => {
     fetchGroups();
@@ -298,7 +334,9 @@ export function useGroups() {
 
   return {
     household,
+    allGroups,
     loading,
+    selectGroup,
     addMembers,
     removeMember,
     regenerateInviteCode,
