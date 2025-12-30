@@ -411,7 +411,6 @@ export default function Aktivitet() {
         onSave={handleSaveIncome}
         onDelete={handleDeleteIncome}
         income={editingIncome}
-        members={household.members}
       />
     </div>
   );

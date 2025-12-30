@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GroupMember } from "@/hooks/useGroups";
 import { Income, IncomeType, IncomeRepeat } from "@/hooks/useIncomes";
 import { getIncomeTypeIcon, getIncomeTypeLabel } from "@/lib/incomeUtils";
 import { toast } from "sonner";
@@ -15,7 +14,6 @@ interface EditIncomeModalProps {
   onSave: (income: Income) => void;
   onDelete?: (incomeId: string) => void;
   income: Income | null;
-  members: GroupMember[];
 }
 
 const INCOME_TYPES: IncomeType[] = ["salary", "bonus", "benefit", "other"];
@@ -26,10 +24,8 @@ export function EditIncomeModal({
   onSave,
   onDelete,
   income,
-  members,
 }: EditIncomeModalProps) {
   const [amount, setAmount] = useState("");
-  const [recipient, setRecipient] = useState("");
   const [type, setType] = useState<IncomeType>("salary");
   const [note, setNote] = useState("");
   const [date, setDate] = useState("");
@@ -40,7 +36,6 @@ export function EditIncomeModal({
     if (income) {
       // Convert cents to kr
       setAmount((income.amount / 100).toFixed(2));
-      setRecipient(income.recipient);
       setType(income.type);
       setNote(income.note || "");
       setDate(income.date);
@@ -51,7 +46,7 @@ export function EditIncomeModal({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!income || !amount || !recipient) return;
+    if (!income || !amount) return;
 
     const amountKr = parseFloat(amount);
 
@@ -71,7 +66,6 @@ export function EditIncomeModal({
     onSave({
       ...income,
       amount: amountCents,
-      recipient,
       type,
       note: note.trim() || null,
       date,
@@ -81,8 +75,6 @@ export function EditIncomeModal({
 
     onClose();
   };
-
-  const recipientMember = members.find((m) => m.user_id === income?.recipient);
 
   return (
     <AnimatePresence>
@@ -136,25 +128,6 @@ export function EditIncomeModal({
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="edit-recipient" className="text-sm text-muted-foreground">
-                    Mottagare
-                  </Label>
-                  <select
-                    id="edit-recipient"
-                    value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none cursor-pointer"
-                    style={{ fontSize: '16px' }}
-                    required
-                  >
-                    {members.map((member) => (
-                      <option key={member.user_id} value={member.user_id}>
-                        {member.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Typ</Label>
