@@ -48,11 +48,11 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-lg touch-pan-y">
+    <div className="group relative overflow-hidden touch-pan-y">
       {/* Delete background - shown when swiping */}
       {canModify && onDelete && (
         <div
-          className="absolute inset-0 bg-destructive flex items-center justify-end px-6 pointer-events-none rounded-lg"
+          className="absolute inset-0 bg-destructive flex items-center justify-end px-6 pointer-events-none"
           style={{
             opacity: Math.min(Math.abs(dragX) / 100, 1),
           }}
@@ -71,15 +71,15 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
         onDragEnd={handleDragEnd}
         onClick={() => canModify && onEdit?.(expense)}
         className={`
-          w-full text-left appearance-none border-0 rounded-lg
-          flex items-center justify-between py-4 px-3 sm:px-4 min-h-[64px]
-          bg-card transition-all duration-150
+          w-full text-left appearance-none border-0
+          flex items-center justify-between py-3.5 px-0 min-h-[68px]
+          bg-background transition-all duration-150
           ${canModify && onEdit
-            ? "cursor-pointer hover:bg-secondary/50 active:bg-secondary/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+            ? "cursor-pointer hover:bg-secondary/30 active:bg-secondary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
             : ""}
         `}
-        whileHover={canModify ? { scale: 1.005 } : undefined}
-        whileTap={canModify ? { scale: 0.995 } : undefined}
+        whileHover={canModify ? { x: 2 } : undefined}
+        whileTap={canModify ? { scale: 0.99 } : undefined}
       >
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 pointer-events-none">
           <div className="p-1.5 rounded-md bg-expense-bg shrink-0">
@@ -95,18 +95,25 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
                 </span>
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {payer?.name || "Okänd"} · {formattedDate}
-              {hasCustomSplit && <span className="ml-1 text-primary">· Anpassad delning</span>}
-            </p>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+              <span className="font-medium text-foreground/80">{payer?.name || "Okänd"}</span>
+              <span>·</span>
+              <span>{formattedDate}</span>
+              {hasCustomSplit && (
+                <>
+                  <span>·</span>
+                  <span className="text-primary font-medium">Delad</span>
+                </>
+              )}
+            </div>
             {hasCustomSplit && (
-              <div className="mt-2 text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-1">
+              <div className="mt-1.5 flex flex-wrap gap-x-2.5 gap-y-0.5 text-xs">
                 {Object.entries(expense.splits!).map(([userId, amount]) => {
                   const member = members.find((m) => m.user_id === userId);
                   const safeSplitAmount = Number.isFinite(amount) && amount >= 0 ? amount : 0;
                   return (
-                    <span key={userId} className="whitespace-nowrap">
-                      {member?.name || "Okänd"}: {safeSplitAmount.toLocaleString("sv-SE")} kr
+                    <span key={userId} className="text-muted-foreground/80 whitespace-nowrap">
+                      {member?.name || "?"}: <span className="font-medium text-foreground/70 tabular-nums">{safeSplitAmount.toLocaleString("sv-SE")}</span>
                     </span>
                   );
                 })}
@@ -115,12 +122,15 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0 pointer-events-none">
-          <span className="text-number text-foreground">
-            {safeAmount.toLocaleString("sv-SE")} kr
-          </span>
+        <div className="flex items-center gap-2.5 shrink-0 pointer-events-none">
+          <div className="text-right">
+            <span className="text-base sm:text-lg font-semibold text-foreground tabular-nums block">
+              {safeAmount.toLocaleString("sv-SE")}
+            </span>
+            <span className="text-xs text-muted-foreground">kr</span>
+          </div>
           {canModify && (
-            <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-lg transition-all duration-150 group-hover:translate-x-0.5">
+            <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-xl transition-all duration-150">
               ›
             </span>
           )}

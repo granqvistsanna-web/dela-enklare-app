@@ -52,11 +52,11 @@ export const IncomeItem = memo(function IncomeItem({
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-lg touch-pan-y">
+    <div className="group relative overflow-hidden touch-pan-y">
       {/* Delete background - shown when swiping */}
       {canModify && onDelete && (
         <div
-          className="absolute inset-0 bg-destructive flex items-center justify-end px-6 pointer-events-none rounded-lg"
+          className="absolute inset-0 bg-destructive flex items-center justify-end px-6 pointer-events-none"
           style={{
             opacity: Math.min(Math.abs(dragX) / 100, 1),
           }}
@@ -75,15 +75,15 @@ export const IncomeItem = memo(function IncomeItem({
         onDragEnd={handleDragEnd}
         onClick={() => canModify && onEdit?.(income)}
         className={`
-          w-full text-left appearance-none border-0 rounded-lg
-          flex items-center justify-between py-4 px-3 sm:px-4 min-h-[64px]
-          bg-card transition-all duration-150
+          w-full text-left appearance-none border-0
+          flex items-center justify-between py-3.5 px-0 min-h-[68px]
+          bg-background transition-all duration-150
           ${canModify && onEdit
-            ? "cursor-pointer hover:bg-secondary/50 active:bg-secondary/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+            ? "cursor-pointer hover:bg-secondary/30 active:bg-secondary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
             : ""}
         `}
-        whileHover={canModify ? { scale: 1.005 } : undefined}
-        whileTap={canModify ? { scale: 0.995 } : undefined}
+        whileHover={canModify ? { x: 2 } : undefined}
+        whileTap={canModify ? { scale: 0.99 } : undefined}
       >
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 pointer-events-none">
           <div className="relative shrink-0">
@@ -112,25 +112,29 @@ export const IncomeItem = memo(function IncomeItem({
                 </span>
               )}
             </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
               <span className="font-medium text-foreground/80">{recipient?.name || "Okänd"}</span>
-              <span className="mx-1">·</span>
-              {formattedDate}
-            </p>
-            {income.note && (
-              <p className="text-xs text-muted-foreground mt-1 truncate">
-                {income.note}
-              </p>
-            )}
+              <span>·</span>
+              <span>{formattedDate}</span>
+              {income.note && (
+                <>
+                  <span>·</span>
+                  <span className="truncate">{income.note}</span>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0 pointer-events-none">
-          <span className="text-number text-income">
-            +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 0 })} kr
-          </span>
+        <div className="flex items-center gap-2.5 shrink-0 pointer-events-none">
+          <div className="text-right">
+            <span className="text-base sm:text-lg font-semibold text-income tabular-nums block">
+              +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 0 })}
+            </span>
+            <span className="text-xs text-muted-foreground">kr</span>
+          </div>
           {canModify && (
-            <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-lg transition-all duration-150 group-hover:translate-x-0.5">
+            <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-xl transition-all duration-150">
               ›
             </span>
           )}

@@ -317,8 +317,8 @@ export default function Aktivitet() {
           </div>
         </div>
 
-        {/* Search and filters */}
-        <div className="mb-6 animate-fade-in bg-card rounded-lg p-3 sm:p-4" style={{ animationDelay: '50ms' }}>
+        {/* Search and filters - sticky on mobile */}
+        <div className="mb-6 animate-fade-in bg-card rounded-lg p-3 sm:p-4 sticky top-14 lg:top-0 z-10 shadow-sm" style={{ animationDelay: '50ms' }}>
           <div className="flex flex-col sm:flex-row gap-3">
             {/* Search */}
             <div className="flex-1 relative">
@@ -372,22 +372,22 @@ export default function Aktivitet() {
                   style={{ animationDelay: `${100 + groupIdx * 50}ms` }}
                 >
                   {/* Month header - sticky on scroll */}
-                  <div className="flex items-baseline justify-between mb-1 pb-2 border-b border-border/40">
-                    <h2 className="text-label-mono">
+                  <div className="flex items-baseline justify-between mb-3 pb-2.5 border-b border-border/40 sticky top-[132px] lg:top-[76px] bg-background/95 backdrop-blur-sm z-[5] -mx-1 px-1">
+                    <h2 className="text-label-mono font-semibold">
                       {monthName} {year}
                     </h2>
-                    <div className="flex gap-3 text-xs">
-                      <span className="text-income text-money-sm">
+                    <div className="flex gap-4 text-xs font-medium tabular-nums">
+                      <span className="text-income">
                         +{totalIncomes.toLocaleString("sv-SE")}
                       </span>
-                      <span className="text-expense text-money-sm">
+                      <span className="text-expense">
                         -{totalExpenses.toLocaleString("sv-SE")}
                       </span>
                     </div>
                   </div>
 
-                  {/* Items for this month - simple list without card wrapper */}
-                  <div className="divide-y divide-border/30">
+                  {/* Items for this month - clean list with dividers */}
+                  <div className="divide-y divide-border/30 bg-card rounded-lg px-3 sm:px-4 shadow-sm">
                     {items.map((item, index) => {
                       if (item.type === 'expense') {
                         const expense = item.data as Expense;
