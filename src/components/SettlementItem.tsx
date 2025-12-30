@@ -24,9 +24,9 @@ export function SettlementItem({
 
   return (
     <motion.div
-      whileHover={canEdit ? { backgroundColor: "hsl(var(--muted) / 0.5)" } : undefined}
+      whileHover={canEdit ? { backgroundColor: "hsl(var(--secondary) / 0.5)" } : undefined}
       whileTap={canEdit ? { scale: 0.995 } : undefined}
-      className={`py-5 px-4 sm:px-6 min-h-[72px] transition-colors touch-pan-y ${
+      className={`py-4 px-3 sm:px-4 min-h-[64px] rounded-lg bg-card transition-colors touch-pan-y ${
         canEdit
           ? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           : "cursor-default"

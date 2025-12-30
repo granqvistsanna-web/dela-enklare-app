@@ -318,49 +318,47 @@ export default function Aktivitet() {
         </div>
 
         {/* Search and filters */}
-        <Card className="mb-6 animate-fade-in" style={{ animationDelay: '50ms' }}>
-          <CardContent className="p-4">
-            <div className="grid gap-3 md:grid-cols-3">
-              {/* Search */}
-              <div className="md:col-span-2 relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
-                <Input
-                  placeholder="Sök aktivitet..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
-                />
-              </div>
-
-              {/* Sort options */}
-              <div className="flex gap-2">
-                <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
-                  <SelectTrigger className="h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="date">Datum</SelectItem>
-                    <SelectItem value="amount">Summa</SelectItem>
-                    <SelectItem value="category">Kategori</SelectItem>
-                  </SelectContent>
-                </Select>
-                <Button variant="outline" size="icon" onClick={toggleSortDirection} className="h-9 w-9 shrink-0">
-                  <ArrowUpDown size={16} />
-                </Button>
-              </div>
+        <div className="mb-6 animate-fade-in bg-card rounded-lg p-3 sm:p-4" style={{ animationDelay: '50ms' }}>
+          <div className="flex flex-col sm:flex-row gap-3">
+            {/* Search */}
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={16} />
+              <Input
+                placeholder="Sök aktivitet..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-9 bg-background"
+              />
             </div>
 
-            {/* Results count */}
-            <div className="mt-3 text-caption">
-              {filteredItems.length} {filteredItems.length === 1 ? 'aktivitet' : 'aktiviteter'}
-              {searchQuery && ` hittades för "${searchQuery}"`}
+            {/* Sort options */}
+            <div className="flex gap-2">
+              <Select value={sortBy} onValueChange={(v) => setSortBy(v as SortOption)}>
+                <SelectTrigger className="h-9 w-full sm:w-[120px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="date">Datum</SelectItem>
+                  <SelectItem value="amount">Summa</SelectItem>
+                  <SelectItem value="category">Kategori</SelectItem>
+                </SelectContent>
+              </Select>
+              <Button variant="outline" size="icon" onClick={toggleSortDirection} className="h-9 w-9 shrink-0">
+                <ArrowUpDown size={16} />
+              </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+
+          {/* Results count */}
+          <div className="mt-2 text-caption text-xs">
+            {filteredItems.length} {filteredItems.length === 1 ? 'aktivitet' : 'aktiviteter'}
+            {searchQuery && ` för "${searchQuery}"`}
+          </div>
+        </div>
 
         {/* Activity list grouped by month */}
         {groupedByMonth.length > 0 ? (
-          <div className="space-y-6">
+          <div className="space-y-8">
             {groupedByMonth.map(({ monthKey, items }, groupIdx) => {
               const [year, month] = monthKey.split('-');
               const monthName = MONTHS[parseInt(month) - 1];
@@ -373,96 +371,87 @@ export default function Aktivitet() {
                   className="animate-fade-in"
                   style={{ animationDelay: `${100 + groupIdx * 50}ms` }}
                 >
-                  {/* Month header */}
-                  <div className="mb-3">
-                    <div className="flex items-center justify-between mb-2">
-                      <h2 className="text-heading text-base">
-                        {monthName} {year}
-                      </h2>
-                      <div className="flex gap-3 text-sm font-medium">
-                        <span className="text-income text-money-sm">
-                          +{totalIncomes.toLocaleString("sv-SE")} kr
-                        </span>
-                        <span className="text-expense text-money-sm">
-                          -{totalExpenses.toLocaleString("sv-SE")} kr
-                        </span>
-                      </div>
+                  {/* Month header - sticky on scroll */}
+                  <div className="flex items-baseline justify-between mb-1 pb-2 border-b border-border/40">
+                    <h2 className="text-label-mono">
+                      {monthName} {year}
+                    </h2>
+                    <div className="flex gap-3 text-xs">
+                      <span className="text-income text-money-sm">
+                        +{totalIncomes.toLocaleString("sv-SE")}
+                      </span>
+                      <span className="text-expense text-money-sm">
+                        -{totalExpenses.toLocaleString("sv-SE")}
+                      </span>
                     </div>
-                    <div className="h-px bg-border/60" />
                   </div>
 
-                  {/* Items for this month */}
-                  <Card>
-                    <CardContent className="p-0">
-                      <div className="divide-y divide-border/40">
-                        {items.map((item, index) => {
-                          if (item.type === 'expense') {
-                            const expense = item.data as Expense;
-                            return (
-                              <ExpenseItem
-                                key={`expense-${expense.id}`}
-                                expense={expense}
-                                members={household.members}
-                                index={index}
-                                onEdit={handleEditExpense}
-                                onDelete={handleDeleteExpense}
-                                currentUserId={user?.id}
-                              />
-                            );
-                          } else if (item.type === 'income') {
-                            const income = item.data as Income;
-                            return (
-                              <IncomeItem
-                                key={`income-${income.id}`}
-                                income={income}
-                                members={household.members}
-                                onEdit={handleEditIncome}
-                                onDelete={handleDeleteIncome}
-                                currentUserId={user?.id}
-                              />
-                            );
-                          } else {
-                            const settlement = item.data as Settlement;
-                            return (
-                              <SettlementItem
-                                key={`settlement-${settlement.id}`}
-                                settlement={settlement}
-                                members={household.members}
-                                index={index}
-                                onEdit={handleEditSettlement}
-                                currentUserId={user?.id}
-                              />
-                            );
-                          }
-                        })}
-                      </div>
-                    </CardContent>
-                  </Card>
+                  {/* Items for this month - simple list without card wrapper */}
+                  <div className="divide-y divide-border/30">
+                    {items.map((item, index) => {
+                      if (item.type === 'expense') {
+                        const expense = item.data as Expense;
+                        return (
+                          <ExpenseItem
+                            key={`expense-${expense.id}`}
+                            expense={expense}
+                            members={household.members}
+                            index={index}
+                            onEdit={handleEditExpense}
+                            onDelete={handleDeleteExpense}
+                            currentUserId={user?.id}
+                          />
+                        );
+                      } else if (item.type === 'income') {
+                        const income = item.data as Income;
+                        return (
+                          <IncomeItem
+                            key={`income-${income.id}`}
+                            income={income}
+                            members={household.members}
+                            onEdit={handleEditIncome}
+                            onDelete={handleDeleteIncome}
+                            currentUserId={user?.id}
+                          />
+                        );
+                      } else {
+                        const settlement = item.data as Settlement;
+                        return (
+                          <SettlementItem
+                            key={`settlement-${settlement.id}`}
+                            settlement={settlement}
+                            members={household.members}
+                            index={index}
+                            onEdit={handleEditSettlement}
+                            currentUserId={user?.id}
+                          />
+                        );
+                      }
+                    })}
+                  </div>
                 </div>
               );
             })}
           </div>
         ) : (
-          <Card className="border-dashed border-2 bg-muted/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <CardContent className="flex flex-col items-center justify-center py-16 px-6">
-              <div className="rounded-full bg-muted p-5 mb-5">
-                <Plus size={28} className="text-muted-foreground" />
-              </div>
-              <p className="font-medium text-foreground text-lg mb-2">Inga aktiviteter</p>
-              <p className="text-caption text-center mb-6 max-w-xs">
-                {searchQuery ? 'Inga resultat matchade din sökning' : 'Börja genom att lägga till din första utgift eller inkomst'}
-              </p>
-              {!searchQuery && (
-                <Button
-                  onClick={() => setIsAddModalOpen(true)}
-                  className="gap-2"
-                >
-                  <Plus size={18} />
-                  Lägg till transaktion
-                </Button>
-              )}
-            </CardContent>
-          </Card>
+          <div className="flex flex-col items-center justify-center py-16 px-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
+            <div className="rounded-full bg-card p-5 mb-5">
+              <Plus size={28} className="text-muted-foreground" />
+            </div>
+            <p className="font-medium text-foreground text-lg mb-2">Inga aktiviteter</p>
+            <p className="text-caption text-center mb-6 max-w-xs">
+              {searchQuery ? 'Inga resultat matchade din sökning' : 'Börja genom att lägga till din första utgift eller inkomst'}
+            </p>
+            {!searchQuery && (
+              <Button
+                onClick={() => setIsAddModalOpen(true)}
+                className="gap-2"
+              >
+                <Plus size={18} />
+                Lägg till transaktion
+              </Button>
+            )}
+          </div>
         )}
       </main>
 
