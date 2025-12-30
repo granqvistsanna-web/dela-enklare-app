@@ -77,14 +77,14 @@
     /* Border radius - slightly reduced for Notion feel */
     --radius: 0.375rem;
 
-    /* Sidebar - Notion-inspired navigation */
-    --sidebar-background: 40 6% 96%;
+    /* Sidebar - matches main background */
+    --sidebar-background: 40 6% 94%;
     --sidebar-foreground: 0 0% 35%;
     --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 40 4% 92%;
+    --sidebar-accent: 0 0% 100%;
     --sidebar-accent-foreground: 0 0% 9%;
-    --sidebar-border: 40 4% 90%;
+    --sidebar-border: 40 4% 88%;
     --sidebar-ring: 0 0% 9%;
   }
 

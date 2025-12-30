@@ -46,7 +46,7 @@ export function MonthSelector() {
   };
 
   return (
-    <div className="flex items-center justify-between gap-2 p-2 sm:p-2.5 rounded-lg bg-secondary/50">
+    <div className="flex items-center justify-between gap-2 p-2 sm:p-2.5 rounded-lg bg-card">
       {/* Navigation arrows */}
       <div className="flex items-center gap-1">
         <Button
