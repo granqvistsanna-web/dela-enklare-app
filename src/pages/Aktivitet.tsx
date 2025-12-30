@@ -372,64 +372,62 @@ export default function Aktivitet() {
                   style={{ animationDelay: `${100 + groupIdx * 50}ms` }}
                 >
                   {/* Month header */}
-                  <div className="flex items-center justify-between mb-2 px-1 sm:px-2">
-                    <h2 className="text-sm font-semibold text-foreground/70 uppercase tracking-wide">
+                  <div className="flex items-center justify-between mb-1">
+                    <h2 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       {monthName} {year}
                     </h2>
-                    <div className="flex gap-3 text-xs font-medium">
-                      <span className="text-income tabular-nums">
+                    <div className="flex gap-3 text-xs font-medium tabular-nums">
+                      <span className="text-income">
                         +{totalIncomes.toLocaleString("sv-SE")}
                       </span>
-                      <span className="text-expense tabular-nums">
+                      <span className="text-expense">
                         -{totalExpenses.toLocaleString("sv-SE")}
                       </span>
                     </div>
                   </div>
 
-                  {/* Items card */}
-                  <div className="bg-card rounded-xl border border-border/50 overflow-hidden">
-                    <div className="divide-y divide-border/40">
-                      {items.map((item, index) => {
-                        if (item.type === 'expense') {
-                          const expense = item.data as Expense;
-                          return (
-                            <ExpenseItem
-                              key={`expense-${expense.id}`}
-                              expense={expense}
-                              members={household.members}
-                              index={index}
-                              onEdit={handleEditExpense}
-                              onDelete={handleDeleteExpense}
-                              currentUserId={user?.id}
-                            />
-                          );
-                        } else if (item.type === 'income') {
-                          const income = item.data as Income;
-                          return (
-                            <IncomeItem
-                              key={`income-${income.id}`}
-                              income={income}
-                              members={household.members}
-                              onEdit={handleEditIncome}
-                              onDelete={handleDeleteIncome}
-                              currentUserId={user?.id}
-                            />
-                          );
-                        } else {
-                          const settlement = item.data as Settlement;
-                          return (
-                            <SettlementItem
-                              key={`settlement-${settlement.id}`}
-                              settlement={settlement}
-                              members={household.members}
-                              index={index}
-                              onEdit={handleEditSettlement}
-                              currentUserId={user?.id}
-                            />
-                          );
-                        }
-                      })}
-                    </div>
+                  {/* Items list */}
+                  <div className="divide-y divide-border/30">
+                    {items.map((item, index) => {
+                      if (item.type === 'expense') {
+                        const expense = item.data as Expense;
+                        return (
+                          <ExpenseItem
+                            key={`expense-${expense.id}`}
+                            expense={expense}
+                            members={household.members}
+                            index={index}
+                            onEdit={handleEditExpense}
+                            onDelete={handleDeleteExpense}
+                            currentUserId={user?.id}
+                          />
+                        );
+                      } else if (item.type === 'income') {
+                        const income = item.data as Income;
+                        return (
+                          <IncomeItem
+                            key={`income-${income.id}`}
+                            income={income}
+                            members={household.members}
+                            onEdit={handleEditIncome}
+                            onDelete={handleDeleteIncome}
+                            currentUserId={user?.id}
+                          />
+                        );
+                      } else {
+                        const settlement = item.data as Settlement;
+                        return (
+                          <SettlementItem
+                            key={`settlement-${settlement.id}`}
+                            settlement={settlement}
+                            members={household.members}
+                            index={index}
+                            onEdit={handleEditSettlement}
+                            currentUserId={user?.id}
+                          />
+                        );
+                      }
+                    })}
                   </div>
                 </div>
               );

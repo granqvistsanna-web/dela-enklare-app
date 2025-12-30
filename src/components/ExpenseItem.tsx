@@ -62,9 +62,9 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
         onClick={() => canModify && onEdit?.(expense)}
         className={`
           w-full text-left appearance-none border-0
-          flex items-center gap-3 py-3.5 sm:py-4 px-3 sm:px-4
+          flex items-center gap-3 py-3 sm:py-3.5 px-0
           bg-transparent transition-colors duration-150
-          ${canModify && onEdit ? "cursor-pointer active:bg-muted/50 focus:outline-none focus-visible:bg-muted/50" : ""}
+          ${canModify && onEdit ? "cursor-pointer active:bg-muted/30 focus:outline-none focus-visible:bg-muted/30 -mx-2 px-2 rounded-lg" : ""}
         `}
         whileTap={canModify ? { scale: 0.995 } : undefined}
       >
