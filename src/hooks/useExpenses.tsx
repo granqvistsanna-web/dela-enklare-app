@@ -226,18 +226,11 @@ export function useExpenses(groupId?: string) {
         return;
       }
 
-      // Verify the user owns this expense
-      if (expenseToDelete.paid_by !== user.id) {
-        toast.error("Du kan bara ta bort utgifter du själv betalat");
-        return;
-      }
-
-      // Delete from database
+      // Delete from database - any group member can delete expenses
       const { error } = await supabase
         .from("expenses")
         .delete()
-        .eq("id", expenseId)
-        .eq("paid_by", user.id); // Additional safety check at DB level
+        .eq("id", expenseId);
 
       if (error) throw error;
 
