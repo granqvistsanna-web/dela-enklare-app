@@ -2,7 +2,6 @@ import { useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Upload, Loader2, ArrowUpRight, ArrowDownLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { parseFile, ParsedTransaction } from "@/lib/fileParser";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
@@ -160,12 +159,6 @@ export function ImportModal({
     if (file) handleFileUpload(file);
   }, [handleFileUpload]);
 
-  const toggleTransaction = (id: string) => {
-    setTransactions(prev => 
-      prev.map(t => t.id === id ? { ...t, selected: !t.selected } : t)
-    );
-  };
-
   const updateCategory = (id: string, category: string) => {
     setTransactions(prev =>
       prev.map(t => t.id === id ? { ...t, category } : t)
@@ -188,16 +181,17 @@ export function ImportModal({
   };
 
   const handleImport = () => {
-    const selected = transactions.filter(t => t.selected);
+    // Only import transactions marked as shared
+    const toImport = transactions.filter(t => t.isShared);
 
-    if (selected.length === 0) {
-      toast.error("Välj minst en transaktion att importera");
+    if (toImport.length === 0) {
+      toast.error("Inga delade transaktioner att importera");
       return;
     }
 
     // Split into expenses and incomes
-    const selectedExpenses = selected.filter(t => t.transactionType === "expense" && t.isShared);
-    const selectedIncomes = selected.filter(t => t.transactionType === "income");
+    const selectedExpenses = toImport.filter(t => t.transactionType === "expense");
+    const selectedIncomes = toImport.filter(t => t.transactionType === "income");
 
     // Validate and prepare expenses
     const expenses = selectedExpenses
@@ -260,7 +254,7 @@ export function ImportModal({
       return;
     }
 
-    const skipped = selected.length - (expenses.length + incomes.length);
+    const skipped = toImport.length - (expenses.length + incomes.length);
     if (skipped > 0) {
       toast.warning(`${skipped} ogiltiga transaktioner hoppades över`);
     }
@@ -278,12 +272,13 @@ export function ImportModal({
     onClose();
   };
 
-  const selectedExpenses = transactions.filter(t => t.selected && t.transactionType === "expense" && t.isShared);
-  const selectedIncomes = transactions.filter(t => t.selected && t.transactionType === "income");
-  const totalSelected = selectedExpenses.length + selectedIncomes.length;
-  
-  const totalExpenseAmount = selectedExpenses.reduce((sum, t) => sum + t.amount, 0);
-  const totalIncomeAmount = selectedIncomes.reduce((sum, t) => sum + t.amount, 0);
+  // Calculate shared transactions for import preview
+  const sharedExpenses = transactions.filter(t => t.isShared && t.transactionType === "expense");
+  const sharedIncomes = transactions.filter(t => t.isShared && t.transactionType === "income");
+  const totalToImport = sharedExpenses.length + sharedIncomes.length;
+
+  const totalExpenseAmount = sharedExpenses.reduce((sum, t) => sum + t.amount, 0);
+  const totalIncomeAmount = sharedIncomes.reduce((sum, t) => sum + t.amount, 0);
 
   return (
     <AnimatePresence>
@@ -368,10 +363,12 @@ export function ImportModal({
                 {step === "review" && (
                   <div className="space-y-3 sm:space-y-4">
                     {/* Instructions */}
-                    <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
-                      <p className="font-medium text-foreground mb-1">Granska och importera</p>
-                      <ul className="space-y-1 text-xs">
-                        <li>• Bocka i de transaktioner du vill importera</li>
+                    <div className="bg-muted/50 rounded-lg p-3 sm:p-4 text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground mb-2 text-base">Granska och importera</p>
+                      <p className="text-sm leading-relaxed">
+                        Importen hämtar delade transaktioner till hushållsgruppen. Privata transaktioner lämnas utanför.
+                      </p>
+                      <ul className="space-y-1 text-xs mt-2">
                         <li>• Klicka på pilen för att byta mellan utgift/inkomst</li>
                         <li>• "Delad" = ingår i 50/50-delningen mellan hushållet</li>
                       </ul>
@@ -380,17 +377,17 @@ export function ImportModal({
                     {/* Summary */}
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <p className="text-sm text-muted-foreground">
-                        {totalSelected} av {transactions.length} valda
+                        {totalToImport} av {transactions.length} kommer importeras
                       </p>
                       <div className="flex gap-3 text-sm">
-                        {selectedExpenses.length > 0 && (
+                        {sharedExpenses.length > 0 && (
                           <span className="text-expense font-medium tabular-nums">
-                            {selectedExpenses.length} utgifter: -{totalExpenseAmount.toLocaleString("sv-SE")} kr
+                            {sharedExpenses.length} utgifter: -{totalExpenseAmount.toLocaleString("sv-SE")} kr
                           </span>
                         )}
-                        {selectedIncomes.length > 0 && (
+                        {sharedIncomes.length > 0 && (
                           <span className="text-income font-medium tabular-nums">
-                            {selectedIncomes.length} inkomster: +{totalIncomeAmount.toLocaleString("sv-SE")} kr
+                            {sharedIncomes.length} inkomster: +{totalIncomeAmount.toLocaleString("sv-SE")} kr
                           </span>
                         )}
                       </div>
@@ -402,7 +399,6 @@ export function ImportModal({
                         <TransactionRow
                           key={t.id}
                           transaction={t}
-                          onToggle={() => toggleTransaction(t.id)}
                           onCategoryChange={(cat) => updateCategory(t.id, cat)}
                           onToggleShared={() => toggleShared(t.id)}
                           onToggleType={() => toggleTransactionType(t.id)}
@@ -415,12 +411,12 @@ export function ImportModal({
                       <Button variant="outline" className="flex-1" onClick={handleClose}>
                         Avbryt
                       </Button>
-                      <Button 
-                        className="flex-1" 
+                      <Button
+                        className="flex-1 h-12 sm:h-10 text-base sm:text-sm"
                         onClick={handleImport}
-                        disabled={totalSelected === 0}
+                        disabled={totalToImport === 0}
                       >
-                        Importera ({totalSelected})
+                        Importera ({totalToImport})
                       </Button>
                     </div>
                   </div>
@@ -436,20 +432,18 @@ export function ImportModal({
 
 function TransactionRow({
   transaction,
-  onToggle,
   onCategoryChange,
   onToggleShared,
   onToggleType,
 }: {
   transaction: ExtendedTransaction;
-  onToggle: () => void;
   onCategoryChange: (category: string) => void;
   onToggleShared: () => void;
   onToggleType: () => void;
 }) {
   const category = DEFAULT_CATEGORIES.find(c => c.id === transaction.category);
   const isExpense = transaction.transactionType === "expense";
-  const isActive = transaction.selected && (isExpense ? transaction.isShared : true);
+  const isActive = transaction.isShared;
 
   // Safe date parsing with fallback
   let formattedDate = "Ogiltigt datum";
@@ -469,34 +463,28 @@ function TransactionRow({
 
   return (
     <div className={`
-      rounded-lg border p-3 transition-all
+      rounded-lg border p-3 sm:p-4 transition-all
       ${isActive ? "border-primary/30 bg-card" : "border-border bg-muted/30 opacity-60"}
     `}>
-      {/* Top row: Checkbox, Type toggle, Description */}
+      {/* Top row: Type toggle, Description, Amount */}
       <div className="flex items-start gap-2 sm:gap-3">
-        <Checkbox 
-          checked={transaction.selected} 
-          onCheckedChange={onToggle}
-          className="mt-0.5"
-        />
-        
-        {/* Type toggle button */}
+        {/* Type toggle button - mobile optimized */}
         <button
           onClick={onToggleType}
-          className={`p-1.5 rounded-md shrink-0 transition-colors ${
+          className={`p-2 sm:p-1.5 rounded-md shrink-0 transition-colors min-w-[36px] min-h-[36px] sm:min-w-0 sm:min-h-0 flex items-center justify-center ${
             isExpense ? "bg-expense-bg" : "bg-income-bg"
           }`}
           title={isExpense ? "Utgift - klicka för att ändra till inkomst" : "Inkomst - klicka för att ändra till utgift"}
         >
           {isExpense ? (
-            <ArrowUpRight size={14} className="text-expense" />
+            <ArrowUpRight size={16} className="text-expense sm:w-3.5 sm:h-3.5" />
           ) : (
-            <ArrowDownLeft size={14} className="text-income" />
+            <ArrowDownLeft size={16} className="text-income sm:w-3.5 sm:h-3.5" />
           )}
         </button>
-        
+
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-foreground text-sm truncate">
+          <p className="font-medium text-foreground text-sm sm:text-sm truncate">
             {transaction.description}
           </p>
           <p className="text-xs text-muted-foreground mt-0.5">
@@ -504,7 +492,7 @@ function TransactionRow({
           </p>
         </div>
 
-        <p className={`font-semibold text-sm tabular-nums shrink-0 ${
+        <p className={`font-semibold text-base sm:text-sm tabular-nums shrink-0 ${
           isExpense ? "text-expense" : "text-income"
         }`}>
           {isExpense ? "-" : "+"}{safeAmount.toLocaleString("sv-SE")} kr
@@ -512,13 +500,13 @@ function TransactionRow({
       </div>
 
       {/* Bottom row: Category & Shared toggle */}
-      <div className="flex items-center gap-2 mt-2 pl-7 sm:pl-9">
+      <div className="flex items-center gap-2 mt-2 pl-0 sm:pl-0">
         {isExpense && (
           <>
             <select
               value={transaction.category || "ovrigt"}
               onChange={(e) => onCategoryChange(e.target.value)}
-              className="text-xs border border-border rounded-md px-2 py-1 bg-background flex-1 max-w-[140px]"
+              className="text-sm sm:text-xs border border-border rounded-md px-3 py-2 sm:px-2 sm:py-1 bg-background flex-1 max-w-[160px] sm:max-w-[140px] min-h-[40px] sm:min-h-0"
             >
               {DEFAULT_CATEGORIES.map(cat => (
                 <option key={cat.id} value={cat.id}>
@@ -529,13 +517,13 @@ function TransactionRow({
 
             <button
               onClick={onToggleShared}
-              className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+              className={`px-3 py-2 sm:px-2 sm:py-1 rounded text-sm sm:text-xs font-medium transition-colors min-h-[40px] sm:min-h-0 ${
                 transaction.isShared
                   ? "bg-primary/10 text-primary border border-primary/20"
                   : "bg-muted text-muted-foreground border border-transparent"
               }`}
-              title={transaction.isShared 
-                ? "Delad utgift - ingår i 50/50-delningen" 
+              title={transaction.isShared
+                ? "Delad utgift - ingår i 50/50-delningen"
                 : "Privat utgift - ingår ej i delningen"
               }
             >
@@ -543,17 +531,17 @@ function TransactionRow({
             </button>
           </>
         )}
-        
+
         {!isExpense && (
           <button
             onClick={onToggleShared}
-            className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+            className={`px-3 py-2 sm:px-2 sm:py-1 rounded text-sm sm:text-xs font-medium transition-colors min-h-[40px] sm:min-h-0 ${
               transaction.isShared
                 ? "bg-primary/10 text-primary border border-primary/20"
                 : "bg-muted text-muted-foreground border border-transparent"
             }`}
-            title={transaction.isShared 
-              ? "Inkomsten ingår i 50/50-delningen" 
+            title={transaction.isShared
+              ? "Inkomsten ingår i 50/50-delningen"
               : "Inkomsten ingår ej i delningen"
             }
           >
