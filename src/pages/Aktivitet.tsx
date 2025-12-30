@@ -8,10 +8,11 @@ import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes, Income, IncomeInput } from "@/hooks/useIncomes";
 import { ExpenseItem } from "@/components/ExpenseItem";
+import { IncomeItem } from "@/components/IncomeItem";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { useAuth } from "@/hooks/useAuth";
-import { Search, ArrowUpDown, Calendar, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { Search, ArrowUpDown, Calendar } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -321,32 +322,14 @@ export default function Aktivitet() {
                           } else {
                             const income = item.data as Income;
                             return (
-                              <div
+                              <IncomeItem
                                 key={`income-${income.id}`}
-                                className="p-3.5 notion-hover cursor-pointer"
-                              >
-                                <div className="flex items-center gap-3">
-                                  <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
-                                    <DollarSign size={16} className="text-green-600 dark:text-green-400" />
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-foreground text-sm">{income.note || 'Inkomst'}</p>
-                                    <p className="text-caption">
-                                      {household.members.find(m => m.user_id === income.recipient)?.name} •{' '}
-                                      {new Date(income.date).toLocaleDateString('sv-SE', {
-                                        day: 'numeric',
-                                        month: 'short',
-                                        year: 'numeric'
-                                      })}
-                                    </p>
-                                  </div>
-                                  <div className="text-right">
-                                    <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums text-sm">
-                                      +{(income.amount / 100).toLocaleString('sv-SE')} kr
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
+                                income={income}
+                                members={household.members}
+                                onEdit={handleEditIncome}
+                                onDelete={handleDeleteIncome}
+                                currentUserId={user?.id}
+                              />
                             );
                           }
                         })}
