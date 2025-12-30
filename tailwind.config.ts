@@ -81,6 +81,26 @@ export default {
           800: "hsl(var(--gray-800))",
           900: "hsl(var(--gray-900))",
         },
+        // Notion-inspired pastel icon colors
+        icon: {
+          blue: "hsl(var(--icon-blue))",
+          "blue-bg": "hsl(var(--icon-blue-bg))",
+          purple: "hsl(var(--icon-purple))",
+          "purple-bg": "hsl(var(--icon-purple-bg))",
+          pink: "hsl(var(--icon-pink))",
+          "pink-bg": "hsl(var(--icon-pink-bg))",
+          mint: "hsl(var(--icon-mint))",
+          "mint-bg": "hsl(var(--icon-mint-bg))",
+        },
+        // Semantic income/expense colors
+        income: {
+          DEFAULT: "hsl(var(--income))",
+          bg: "hsl(var(--income-bg))",
+        },
+        expense: {
+          DEFAULT: "hsl(var(--expense))",
+          bg: "hsl(var(--expense-bg))",
+        },
       },
       borderRadius: {
         lg: "var(--radius)",

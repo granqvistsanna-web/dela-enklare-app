@@ -76,8 +76,8 @@ export const IncomeItem = memo(function IncomeItem({
         className={`w-full text-left appearance-none border-0 flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? 'cursor-pointer active:bg-secondary/50' : ''}`}
       >
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-          <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
-            <ArrowDownLeft size={16} className="text-green-600 dark:text-green-400" />
+          <div className="p-1.5 rounded-md bg-income-bg shrink-0">
+            <ArrowDownLeft size={16} className="text-income" />
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -107,7 +107,7 @@ export const IncomeItem = memo(function IncomeItem({
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          <span className="text-sm font-semibold text-green-600 tabular-nums">
+          <span className="text-sm font-semibold text-income tabular-nums">
             +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
           </span>
           {canModify && <span className="text-muted-foreground text-lg">›</span>}

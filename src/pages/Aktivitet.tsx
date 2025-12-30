@@ -303,10 +303,10 @@ export default function Aktivitet() {
                         {monthName} {year}
                       </h2>
                       <div className="flex gap-3 text-sm font-medium">
-                        <span className="text-green-600 dark:text-green-400 tabular-nums">
+                        <span className="text-income tabular-nums">
                           +{totalIncomes.toLocaleString("sv-SE")} kr
                         </span>
-                        <span className="text-red-600 dark:text-red-400 tabular-nums">
+                        <span className="text-expense tabular-nums">
                           -{totalExpenses.toLocaleString("sv-SE")} kr
                         </span>
                       </div>
