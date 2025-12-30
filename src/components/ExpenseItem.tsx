@@ -2,7 +2,6 @@ import { memo, useState } from "react";
 import { motion, PanInfo } from "framer-motion";
 import { Expense } from "@/hooks/useExpenses";
 import { GroupMember } from "@/hooks/useGroups";
-import { DEFAULT_CATEGORIES } from "@/lib/types";
 
 interface ExpenseItemProps {
   expense: Expense;
@@ -15,7 +14,6 @@ interface ExpenseItemProps {
 
 export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId }: ExpenseItemProps) {
   const payer = members.find((u) => u.user_id === expense.paid_by);
-  const category = DEFAULT_CATEGORIES.find((c) => c.id === expense.category);
   const canModify = currentUserId === expense.paid_by;
   const [dragX, setDragX] = useState(0);
 
@@ -62,14 +60,15 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
       )}
 
       {/* Main content - draggable on mobile, tap to edit */}
-      <motion.div
+      <motion.button
+        type="button"
         drag={canModify && onDelete ? "x" : false}
         dragConstraints={{ left: -120, right: 0 }}
         dragElastic={0.1}
         onDrag={(_, info) => setDragX(info.offset.x)}
         onDragEnd={handleDragEnd}
-        onClick={() => canModify && onEdit?.(expense)}
-        className={`flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? 'cursor-pointer active:bg-secondary/50' : ''}`}
+        onTap={() => canModify && onEdit?.(expense)}
+        className={`w-full text-left appearance-none border-0 flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? "cursor-pointer active:bg-secondary/50" : ""}`}
       >
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
           <div className="min-w-0 flex-1">
@@ -100,7 +99,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
           </span>
           {canModify && <span className="text-muted-foreground text-lg">›</span>}
         </div>
-      </motion.div>
+      </motion.button>
     </div>
   );
 });

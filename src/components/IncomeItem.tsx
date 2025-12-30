@@ -64,14 +64,15 @@ export const IncomeItem = memo(function IncomeItem({
       )}
 
       {/* Main content - draggable on mobile */}
-      <motion.div
+      <motion.button
+        type="button"
         drag={canModify && onDelete ? "x" : false}
         dragConstraints={{ left: -120, right: 0 }}
         dragElastic={0.1}
         onDrag={(_, info) => setDragX(info.offset.x)}
         onDragEnd={handleDragEnd}
-        onClick={() => canModify && onEdit?.(income)}
-        className={`flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? 'cursor-pointer active:bg-secondary/50' : ''}`}
+        onTap={() => canModify && onEdit?.(income)}
+        className={`w-full text-left appearance-none border-0 flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? 'cursor-pointer active:bg-secondary/50' : ''}`}
       >
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
           <div className="min-w-0 flex-1">
@@ -107,7 +108,7 @@ export const IncomeItem = memo(function IncomeItem({
           </span>
           {canModify && <span className="text-muted-foreground text-lg">›</span>}
         </div>
-      </motion.div>
+      </motion.button>
     </div>
   );
 });
