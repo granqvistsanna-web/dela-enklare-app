@@ -1,5 +1,5 @@
-import { memo, useState } from "react";
-import { motion, PanInfo } from "framer-motion";
+import { memo } from "react";
+import { motion } from "framer-motion";
 import { Repeat } from "lucide-react";
 import { Expense } from "@/hooks/useExpenses";
 import { GroupMember } from "@/hooks/useGroups";
@@ -13,10 +13,9 @@ interface ExpenseItemProps {
   currentUserId?: string;
 }
 
-export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit, onDelete, currentUserId }: ExpenseItemProps) {
+export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit, currentUserId }: ExpenseItemProps) {
   const payer = members.find((u) => u.user_id === expense.paid_by);
   const canModify = !!currentUserId;
-  const [dragX, setDragX] = useState(0);
 
   let formattedDate = "Ogiltigt datum";
   try {
@@ -34,31 +33,10 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
   const hasCustomSplit = expense.splits && Object.keys(expense.splits).length > 0;
   const safeAmount = Number.isFinite(expense.amount) && expense.amount >= 0 ? expense.amount : 0;
 
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.x < -100 && canModify && onDelete) {
-      onDelete(expense.id);
-    }
-  };
-
   return (
-    <div className="group relative overflow-hidden touch-pan-y">
-      {/* Delete background */}
-      {canModify && onDelete && (
-        <div
-          className="absolute inset-0 bg-destructive flex items-center justify-end px-6 pointer-events-none"
-          style={{ opacity: Math.min(Math.abs(dragX) / 100, 1) }}
-        >
-          <span className="text-destructive-foreground font-medium text-sm">Ta bort</span>
-        </div>
-      )}
-
+    <div className="group relative touch-pan-y">
       <motion.button
         type="button"
-        drag={canModify && onDelete ? "x" : false}
-        dragConstraints={{ left: -120, right: 0 }}
-        dragElastic={0.1}
-        onDrag={(_, info) => setDragX(info.offset.x)}
-        onDragEnd={handleDragEnd}
         onClick={() => canModify && onEdit?.(expense)}
         className={`
           w-full text-left appearance-none border-0
