@@ -126,7 +126,7 @@ export const IncomeItem = memo(function IncomeItem({
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 pointer-events-none">
-          <span className="text-sm font-semibold text-income tabular-nums">
+          <span className="text-money-sm font-semibold text-income">
             +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
           </span>
           {canModify && (

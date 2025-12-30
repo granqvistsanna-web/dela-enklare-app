@@ -252,7 +252,7 @@ const Index = () => {
                     </div>
                     <span className="text-caption font-medium">Total in</span>
                   </div>
-                  <span className="text-lg font-semibold text-foreground tabular-nums">
+                  <span className="text-money-lg font-semibold text-foreground">
                     {totals.totalIncomes.toLocaleString("sv-SE")} kr
                   </span>
                 </div>
@@ -265,7 +265,7 @@ const Index = () => {
                     </div>
                     <span className="text-caption font-medium">Total ut</span>
                   </div>
-                  <span className="text-lg font-semibold text-foreground tabular-nums">
+                  <span className="text-money-lg font-semibold text-foreground">
                     {totals.totalExpenses.toLocaleString("sv-SE")} kr
                   </span>
                 </div>
@@ -279,7 +279,7 @@ const Index = () => {
                       </div>
                       <span className="text-caption font-medium">Netto</span>
                     </div>
-                    <span className={`text-xl font-bold tabular-nums ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
+                    <span className={`text-money-xl font-bold ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
                       {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
                     </span>
                   </div>
@@ -334,13 +334,13 @@ const Index = () => {
                   {/* Stats */}
                   <div className="pt-3 border-t border-border/60 grid grid-cols-2 gap-4 text-center">
                     <div>
-                      <p className="text-xl font-bold text-foreground tabular-nums">
+                      <p className="text-numeric text-xl font-bold text-foreground">
                         {filteredExpenses.length}
                       </p>
                       <p className="text-caption">Utgifter</p>
                     </div>
                     <div>
-                      <p className="text-xl font-bold text-foreground tabular-nums">
+                      <p className="text-numeric text-xl font-bold text-foreground">
                         {filteredIncomes.length}
                       </p>
                       <p className="text-caption">Inkomster</p>
@@ -422,7 +422,7 @@ const Index = () => {
                                 </p>
                               </div>
                               <div className="text-right flex items-center gap-2">
-                                <p className="font-semibold text-expense tabular-nums text-sm">
+                                <p className="font-semibold text-expense text-money-sm">
                                   -{expense.amount.toLocaleString('sv-SE')} kr
                                 </p>
                                 {canEdit && <span className="text-muted-foreground text-lg transition-transform group-hover:translate-x-0.5">›</span>}
@@ -457,7 +457,7 @@ const Index = () => {
                                 </p>
                               </div>
                               <div className="text-right flex items-center gap-2">
-                                <p className="font-semibold text-income tabular-nums text-sm">
+                                <p className="font-semibold text-income text-money-sm">
                                   +{(income.amount / 100).toLocaleString('sv-SE')} kr
                                 </p>
                                 {canEdit && <span className="text-muted-foreground text-lg transition-transform group-hover:translate-x-0.5">›</span>}
