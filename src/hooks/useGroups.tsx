@@ -97,7 +97,7 @@ export function useGroups() {
         return;
       }
 
-      // Fetch household data and members with profiles in parallel using a join
+      // Fetch household data and members separately (no FK relationship for join)
       const [groupResult, membersResult] = await Promise.all([
         supabase
           .from("groups")
@@ -106,15 +106,7 @@ export function useGroups() {
           .single(),
         supabase
           .from("group_members")
-          .select(`
-            group_id,
-            user_id,
-            profiles:public_profiles!inner (
-              id,
-              user_id,
-              name
-            )
-          `)
+          .select("group_id, user_id")
           .eq("group_id", householdId)
       ]);
 
@@ -122,13 +114,28 @@ export function useGroups() {
       if (membersResult.error) throw membersResult.error;
 
       const groupData = groupResult.data;
-      const membersData = membersResult.data;
+      const membersData = membersResult.data || [];
 
-      // Build members list from joined data
-      const members: GroupMember[] = (membersData || []).map((member: any) => {
-        // Handle both array and object profile responses
-        const profile = Array.isArray(member.profiles) ? member.profiles[0] : member.profiles;
+      // Fetch profiles for all member user_ids
+      const userIds = membersData.map(m => m.user_id);
+      let profiles: PublicProfile[] = [];
+      
+      if (userIds.length > 0) {
+        const { data: profilesData, error: profilesError } = await supabase
+          .from("public_profiles")
+          .select("id, user_id, name")
+          .in("user_id", userIds);
+        
+        if (profilesError) {
+          console.error("Error fetching profiles:", profilesError);
+        } else {
+          profiles = profilesData || [];
+        }
+      }
 
+      // Build members list by matching profiles to members
+      const members: GroupMember[] = membersData.map((member) => {
+        const profile = profiles.find(p => p.user_id === member.user_id);
         return profile
           ? {
               id: profile.id,
