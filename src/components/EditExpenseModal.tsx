@@ -22,6 +22,7 @@ export function EditExpenseModal({ isOpen, onClose, onSave, onDelete, expense, m
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [date, setDate] = useState("");
+  const [paidBy, setPaidBy] = useState("");
   const [useCustomSplit, setUseCustomSplit] = useState(false);
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
 
@@ -31,6 +32,7 @@ export function EditExpenseModal({ isOpen, onClose, onSave, onDelete, expense, m
       setCategory(expense.category);
       setDescription(expense.description || "");
       setDate(expense.date);
+      setPaidBy(expense.paid_by);
 
       // Load splits if they exist
       if (expense.splits) {
@@ -138,13 +140,12 @@ export function EditExpenseModal({ isOpen, onClose, onSave, onDelete, expense, m
       category,
       description,
       date,
+      paid_by: paidBy,
       splits,
     });
 
     onClose();
   };
-
-  const payer = members.find((m) => m.user_id === expense?.paid_by);
 
   return (
     <AnimatePresence>
@@ -191,9 +192,18 @@ export function EditExpenseModal({ isOpen, onClose, onSave, onDelete, expense, m
 
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Betalades av</Label>
-                  <div className="rounded-md border border-border bg-secondary/50 py-2 px-3 text-foreground">
-                    {payer?.name || "Okänd"}
-                  </div>
+                  <select
+                    value={paidBy}
+                    onChange={(e) => setPaidBy(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none cursor-pointer"
+                    style={{ fontSize: '16px' }}
+                  >
+                    {members.map((member) => (
+                      <option key={member.user_id} value={member.user_id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">

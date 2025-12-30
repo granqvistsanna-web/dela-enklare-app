@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Income, IncomeType, IncomeRepeat } from "@/hooks/useIncomes";
+import { GroupMember } from "@/hooks/useGroups";
 import { getIncomeTypeIcon, getIncomeTypeLabel } from "@/lib/incomeUtils";
 import { toast } from "sonner";
 
@@ -14,6 +15,7 @@ interface EditIncomeModalProps {
   onSave: (income: Income) => void;
   onDelete?: (incomeId: string) => void;
   income: Income | null;
+  members: GroupMember[];
 }
 
 const INCOME_TYPES: IncomeType[] = ["salary", "bonus", "benefit", "other"];
@@ -24,6 +26,7 @@ export function EditIncomeModal({
   onSave,
   onDelete,
   income,
+  members,
 }: EditIncomeModalProps) {
   const [amount, setAmount] = useState("");
   const [type, setType] = useState<IncomeType>("salary");
@@ -31,6 +34,7 @@ export function EditIncomeModal({
   const [date, setDate] = useState("");
   const [repeat, setRepeat] = useState<IncomeRepeat>("none");
   const [includedInSplit, setIncludedInSplit] = useState(true);
+  const [recipient, setRecipient] = useState("");
 
   useEffect(() => {
     if (income) {
@@ -41,6 +45,7 @@ export function EditIncomeModal({
       setDate(income.date);
       setRepeat(income.repeat);
       setIncludedInSplit(income.included_in_split);
+      setRecipient(income.recipient);
     }
   }, [income]);
 
@@ -71,6 +76,7 @@ export function EditIncomeModal({
       date,
       repeat,
       included_in_split: includedInSplit,
+      recipient,
     });
 
     onClose();
@@ -128,6 +134,21 @@ export function EditIncomeModal({
                   />
                 </div>
 
+                <div className="space-y-2">
+                  <Label className="text-sm text-muted-foreground">Mottagare</Label>
+                  <select
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none cursor-pointer"
+                    style={{ fontSize: '16px' }}
+                  >
+                    {members.map((member) => (
+                      <option key={member.user_id} value={member.user_id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Typ</Label>
