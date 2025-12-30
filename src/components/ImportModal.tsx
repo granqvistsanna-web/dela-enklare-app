@@ -381,12 +381,12 @@ export function ImportModal({
                       </p>
                       <div className="flex gap-3 text-sm">
                         {sharedExpenses.length > 0 && (
-                          <span className="text-expense font-medium tabular-nums">
+                          <span className="text-expense font-medium text-money-sm">
                             {sharedExpenses.length} utgifter: -{totalExpenseAmount.toLocaleString("sv-SE")} kr
                           </span>
                         )}
                         {sharedIncomes.length > 0 && (
-                          <span className="text-income font-medium tabular-nums">
+                          <span className="text-income font-medium text-money-sm">
                             {sharedIncomes.length} inkomster: +{totalIncomeAmount.toLocaleString("sv-SE")} kr
                           </span>
                         )}
@@ -492,7 +492,7 @@ function TransactionRow({
           </p>
         </div>
 
-        <p className={`font-semibold text-base sm:text-sm tabular-nums shrink-0 ${
+        <p className={`font-semibold text-money-sm shrink-0 ${
           isExpense ? "text-expense" : "text-income"
         }`}>
           {isExpense ? "-" : "+"}{safeAmount.toLocaleString("sv-SE")} kr
