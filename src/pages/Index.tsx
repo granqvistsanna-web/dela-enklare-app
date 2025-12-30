@@ -493,7 +493,7 @@ const Index = () => {
       <ImportModal
         isOpen={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
-        onImport={handleImportExpenses}
+        onImportExpenses={handleImportExpenses}
         groupId={household.id}
         currentUserId={user?.id || ""}
       />
