@@ -8,6 +8,7 @@ import { AddTransactionModal } from "@/components/AddTransactionModal";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { ImportModal } from "@/components/ImportModal";
+import { SwishModal } from "@/components/SwishModal";
 import { BalanceCard } from "@/components/BalanceCard";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
@@ -58,6 +59,7 @@ const Index = () => {
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [isSwishModalOpen, setIsSwishModalOpen] = useState(false);
 
   const [isEditExpenseModalOpen, setIsEditExpenseModalOpen] = useState(false);
   const [isEditIncomeModalOpen, setIsEditIncomeModalOpen] = useState(false);
@@ -470,6 +472,7 @@ const Index = () => {
       <AddFab
         onClick={() => setIsAddModalOpen(true)}
         onImportClick={() => setIsImportModalOpen(true)}
+        onSwishClick={() => setIsSwishModalOpen(true)}
       />
 
       {/* Add transaction modal */}
@@ -489,6 +492,15 @@ const Index = () => {
         onClose={() => setIsImportModalOpen(false)}
         onImportExpenses={handleImportExpenses}
         groupId={household.id}
+        currentUserId={user?.id || ""}
+      />
+
+      {/* Swish modal */}
+      <SwishModal
+        isOpen={isSwishModalOpen}
+        onClose={() => setIsSwishModalOpen(false)}
+        onSubmit={handleSettle}
+        members={household.members}
         currentUserId={user?.id || ""}
       />
 
