@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { GroupMember } from "@/hooks/useGroups";
 import { Settlement } from "@/hooks/useSettlements";
-import { ArrowRightLeft, Loader2, Trash2 } from "lucide-react";
+import { Smartphone, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface EditSettlementModalProps {
@@ -152,7 +152,7 @@ export function EditSettlementModal({
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2">
                   <div className="p-1.5 rounded-md bg-primary/10">
-                    <ArrowRightLeft size={18} className="text-primary" />
+                    <Smartphone size={18} className="text-primary" />
                   </div>
                   <h2 className="text-lg font-medium text-foreground">
                     Redigera Swish
