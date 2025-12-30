@@ -2,14 +2,7 @@ import { memo, useState } from "react";
 import { motion, PanInfo } from "framer-motion";
 import { Income } from "@/hooks/useIncomes";
 import { GroupMember } from "@/hooks/useGroups";
-import { getIncomeTypeIcon, getIncomeTypeLabel } from "@/lib/incomeUtils";
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { getIncomeTypeLabel } from "@/lib/incomeUtils";
 
 interface IncomeItemProps {
   income: Income;
@@ -77,76 +70,43 @@ export const IncomeItem = memo(function IncomeItem({
         dragElastic={0.1}
         onDrag={(_, info) => setDragX(info.offset.x)}
         onDragEnd={handleDragEnd}
-        className="group flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background"
-      >
-      <div
-        className={`flex items-center gap-3 sm:gap-4 min-w-0 flex-1 ${canModify ? 'cursor-pointer' : ''}`}
         onClick={() => canModify && onEdit?.(income)}
+        className={`flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? 'cursor-pointer active:bg-secondary/50' : ''}`}
       >
-        <div className="min-w-0 flex-1">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-foreground truncate">
-              {getIncomeTypeLabel(income.type)}
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-foreground truncate">
+                {getIncomeTypeLabel(income.type)}
+              </p>
+              {!income.included_in_split && (
+                <span className="text-xs px-1.5 py-0.5 bg-muted rounded text-muted-foreground">
+                  Ej delad
+                </span>
+              )}
+              {income.repeat === "monthly" && (
+                <span className="text-xs px-1.5 py-0.5 bg-primary/10 rounded text-primary">
+                  Månadsvis
+                </span>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {recipient?.name || "Okänd"} · {formattedDate}
             </p>
-            {!income.included_in_split && (
-              <span className="text-xs px-1.5 py-0.5 bg-muted rounded text-muted-foreground">
-                Ej delad
-              </span>
-            )}
-            {income.repeat === "monthly" && (
-              <span className="text-xs px-1.5 py-0.5 bg-primary/10 rounded text-primary">
-                Månadsvis
-              </span>
+            {income.note && (
+              <p className="text-xs text-muted-foreground mt-1 truncate">
+                {income.note}
+              </p>
             )}
           </div>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            {recipient?.name || "Okänd"} · {formattedDate}
-          </p>
-          {income.note && (
-            <p className="text-xs text-muted-foreground mt-1 truncate">
-              {income.note}
-            </p>
-          )}
         </div>
-      </div>
 
-      <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-        <span className="text-sm font-semibold text-green-600 tabular-nums">
-          +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
-        </span>
-
-        {canModify && (onEdit || onDelete) && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-11 w-11 sm:h-9 sm:w-9 text-foreground hover:bg-secondary text-xl sm:text-base"
-              >
-                ⋮
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[140px]">
-              {onEdit && (
-                <DropdownMenuItem
-                  onClick={() => onEdit(income)}
-                  className="text-sm py-3 sm:py-2"
-                >
-                  Redigera
-                </DropdownMenuItem>
-              )}
-              {onDelete && (
-                <DropdownMenuItem
-                  onClick={() => onDelete(income.id)}
-                  className="text-sm py-3 sm:py-2 text-destructive focus:text-destructive"
-                >
-                  Ta bort
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          <span className="text-sm font-semibold text-green-600 tabular-nums">
+            +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
+          </span>
+          {canModify && <span className="text-muted-foreground text-lg">›</span>}
+        </div>
       </motion.div>
     </div>
   );
