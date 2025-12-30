@@ -16,6 +16,24 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { z } from "https://deno.land/x/zod@v3.22.4/mod.ts";
+
+// Input validation schemas
+const TransactionSchema = z.object({
+  date: z.string().min(1).max(20),
+  description: z.string().min(1).max(500),
+  amount: z.number().finite(),
+});
+
+const TagRuleSchema = z.object({
+  pattern: z.string().min(1).max(200),
+  category: z.string().min(1).max(50),
+});
+
+const RequestSchema = z.object({
+  transactions: z.array(TransactionSchema).min(1).max(200),
+  existingRules: z.array(TagRuleSchema).max(100).optional(),
+});
 
 // Restrict CORS to allowed origins only - prevents unauthorized cross-origin requests
 const ALLOWED_ORIGINS = Deno.env.get("ALLOWED_ORIGINS")?.split(",") || [];
@@ -72,7 +90,25 @@ serve(async (req) => {
 
     console.log(`Authenticated request from user: ${user.id}`);
 
-    const { transactions, existingRules } = await req.json();
+    // Parse and validate input
+    const body = await req.json();
+    const validationResult = RequestSchema.safeParse(body);
+    
+    if (!validationResult.success) {
+      console.error("Input validation failed:", validationResult.error.errors);
+      return new Response(
+        JSON.stringify({ 
+          error: "Invalid request data", 
+          details: validationResult.error.errors.map(e => ({
+            path: e.path.join('.'),
+            message: e.message
+          }))
+        }),
+        { status: 400, headers: { ...corsHeaders(origin), "Content-Type": "application/json" } }
+      );
+    }
+
+    const { transactions, existingRules } = validationResult.data;
     const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
 
     if (!OPENAI_API_KEY) {
@@ -82,8 +118,8 @@ serve(async (req) => {
     console.log(`Categorizing ${transactions.length} transactions...`);
 
     const categories = ["mat", "boende", "transport", "noje", "ovrigt"];
-    const rulesContext = existingRules?.length > 0 
-      ? `\n\nExisting tag rules to follow:\n${(existingRules as TagRule[]).map((r) => `- "${r.pattern}" → ${r.category}`).join("\n")}`
+    const rulesContext = existingRules?.length 
+      ? `\n\nExisting tag rules to follow:\n${existingRules.map((r) => `- "${r.pattern}" → ${r.category}`).join("\n")}`
       : "";
 
     const prompt = `You are a Swedish expense categorizer for a household expense-sharing app. Categorize these bank transactions into one of these categories: ${categories.join(", ")}.
