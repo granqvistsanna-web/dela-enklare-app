@@ -6,7 +6,7 @@ import { Expense } from "@/hooks/useExpenses";
 import { Settlement } from "@/hooks/useSettlements";
 import { calculateBalance } from "@/lib/balanceUtils";
 import { SettlementModal } from "@/components/SettlementModal";
-import { ArrowUpRight, Check, Users, Loader2 } from "lucide-react";
+import { Check, Users, Loader2 } from "lucide-react";
 
 interface BalanceCardProps {
   expenses: Expense[];
@@ -173,19 +173,13 @@ export function BalanceCard({
           <div className="space-y-3 sm:space-y-4">
             {/* Who owes whom - stacked on mobile */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
-              <div className="flex items-center gap-3">
-                <div className="p-1.5 sm:p-2 rounded-lg bg-icon-purple-bg shrink-0">
-                  <ArrowUpRight size={16} className="text-icon-purple sm:hidden" />
-                  <ArrowUpRight size={18} className="text-icon-purple hidden sm:block" />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xs sm:text-sm text-muted-foreground">Att betala</p>
-                  <p className="text-sm sm:text-base font-medium text-foreground truncate">
-                    {negativeUser?.name} → {positiveUser?.name}
-                  </p>
-                </div>
+              <div className="min-w-0">
+                <p className="text-xs sm:text-sm text-muted-foreground">Att betala</p>
+                <p className="text-sm sm:text-base font-medium text-foreground truncate">
+                  {negativeUser?.name} → {positiveUser?.name}
+                </p>
               </div>
-              <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums pl-9 sm:pl-0">
+              <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums">
                 {Math.round(oweAmount).toLocaleString("sv-SE")} kr
               </p>
             </div>
