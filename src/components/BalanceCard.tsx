@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { GroupMember } from "@/hooks/useGroups";
 import { Expense } from "@/hooks/useExpenses";
+import { Income } from "@/hooks/useIncomes";
 import { Settlement } from "@/hooks/useSettlements";
 import { calculateBalance } from "@/lib/balanceUtils";
 import { SettlementModal } from "@/components/SettlementModal";
@@ -10,6 +11,7 @@ import { Check, Users, Loader2 } from "lucide-react";
 
 interface BalanceCardProps {
   expenses: Expense[];
+  incomes: Income[];
   members: GroupMember[];
   settlements: Settlement[];
   selectedYear: number;
@@ -20,6 +22,7 @@ interface BalanceCardProps {
 
 export function BalanceCard({
   expenses,
+  incomes,
   members,
   settlements,
   selectedYear,
@@ -40,10 +43,10 @@ export function BalanceCard({
     });
   }, [settlements, selectedYear, selectedMonth]);
 
-  // Calculate balances from expenses and settlements
+  // Calculate balances from expenses, incomes, and settlements
   const adjustedBalances = useMemo(
-    () => calculateBalance(expenses, members, monthlySettlements),
-    [expenses, members, monthlySettlements]
+    () => calculateBalance(expenses, members, monthlySettlements, incomes),
+    [expenses, members, monthlySettlements, incomes]
   );
 
   // Find who owes whom
