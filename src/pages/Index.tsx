@@ -365,6 +365,7 @@ const Index = () => {
         <div className="mb-6 animate-fade-in" style={{ animationDelay: '250ms' }}>
           <BalanceCard
             expenses={filteredExpenses}
+            incomes={filteredIncomes}
             members={household.members}
             settlements={settlements}
             selectedYear={selectedYear}
