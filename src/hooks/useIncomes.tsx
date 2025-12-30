@@ -158,21 +158,9 @@ export function useIncomes(groupId?: string) {
         return;
       }
 
-      if (income.recipient !== user.id) {
-        toast.error("Du kan bara redigera inkomster som tillhör dig");
-        return;
-      }
-
-      // Prevent changing the recipient
-      if (updates.recipient && updates.recipient !== user.id) {
-        toast.error("Du kan inte ändra mottagaren för en inkomst");
-        return;
-      }
-
       const { error } = await (supabase.from("incomes" as any) as any)
         .update(updates)
-        .eq("id", incomeId)
-        .eq("recipient", user.id); // Additional safety check at DB level
+        .eq("id", incomeId);
 
       if (error) throw error;
 

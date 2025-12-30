@@ -373,7 +373,7 @@ const Index = () => {
                     {latestActivities.map((item, idx) => {
                       if (item.type === 'expense') {
                         const expense = item.data as Expense;
-                        const canEdit = !!user?.id && expense.paid_by === user.id;
+                        const canEdit = !!user?.id;
 
                         return (
                           <div
@@ -381,10 +381,7 @@ const Index = () => {
                             className={`p-3.5 list-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
                             style={{ animationDelay: `${idx * 50}ms` }}
                             onClick={() => {
-                              if (!canEdit) {
-                                toast.error("Du kan bara redigera utgifter du själv betalat");
-                                return;
-                              }
+                              if (!canEdit) return;
                               setEditingExpense(expense);
                               setIsEditExpenseModalOpen(true);
                             }}
@@ -411,7 +408,7 @@ const Index = () => {
                         );
                       } else {
                         const income = item.data as Income;
-                        const canEdit = !!user?.id && income.recipient === user.id;
+                        const canEdit = !!user?.id;
 
                         return (
                           <div
@@ -419,10 +416,7 @@ const Index = () => {
                             className={`p-3.5 list-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
                             style={{ animationDelay: `${idx * 50}ms` }}
                             onClick={() => {
-                              if (!canEdit) {
-                                toast.error("Du kan bara redigera inkomster som tillhör dig");
-                                return;
-                              }
+                              if (!canEdit) return;
                               setEditingIncome(income);
                               setIsEditIncomeModalOpen(true);
                             }}
