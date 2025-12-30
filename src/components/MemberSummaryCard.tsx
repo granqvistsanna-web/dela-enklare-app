@@ -70,7 +70,7 @@ export const MemberSummaryCard = ({
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
                       Inkomst
                     </p>
-                    <p className="text-lg font-semibold text-income tabular-nums">
+                    <p className="text-money-lg font-semibold text-income">
                       {member.totalIncomes.toLocaleString("sv-SE")} kr
                     </p>
                   </div>
@@ -80,7 +80,7 @@ export const MemberSummaryCard = ({
                     <p className="text-xs text-muted-foreground uppercase tracking-wide">
                       Utgift
                     </p>
-                    <p className="text-lg font-semibold text-expense tabular-nums">
+                    <p className="text-money-lg font-semibold text-expense">
                       {member.totalExpenses.toLocaleString("sv-SE")} kr
                     </p>
                   </div>

@@ -213,7 +213,7 @@ export default function Analys() {
                 <p className="text-subheading">
                   Inkomster
                 </p>
-                <p className="text-2xl font-semibold text-foreground tabular-nums">
+                <p className="text-money-xl font-semibold text-foreground">
                   {totals.totalIncomes.toLocaleString("sv-SE")} kr
                 </p>
               </div>
@@ -227,7 +227,7 @@ export default function Analys() {
                 <p className="text-subheading">
                   Utgifter
                 </p>
-                <p className="text-2xl font-semibold text-foreground tabular-nums">
+                <p className="text-money-xl font-semibold text-foreground">
                   {totals.totalExpenses.toLocaleString("sv-SE")} kr
                 </p>
               </div>
@@ -241,7 +241,7 @@ export default function Analys() {
                 <p className="text-subheading">
                   Netto
                 </p>
-                <p className={`text-2xl font-semibold tabular-nums ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
+                <p className={`text-money-xl font-semibold ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
                   {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
                 </p>
               </div>
@@ -273,7 +273,7 @@ export default function Analys() {
                         <span className={`text-sm font-medium ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}`}>
                           {MONTHS[parseInt(item.month.split('-')[1]) - 1]} {item.month.split('-')[0]}
                         </span>
-                        <div className="flex gap-4 text-xs tabular-nums">
+                        <div className="flex gap-4 text-xs text-numeric">
                           <span className="text-income">
                             +{item.incomes.toLocaleString("sv-SE")}
                           </span>
@@ -350,7 +350,7 @@ export default function Analys() {
                         <span className="text-sm font-medium text-foreground">
                           {item.category}
                         </span>
-                        <span className="text-caption tabular-nums">
+                        <span className="text-caption text-numeric">
                           {item.amount.toLocaleString("sv-SE")} kr · {percentage.toFixed(0)}%
                         </span>
                       </div>

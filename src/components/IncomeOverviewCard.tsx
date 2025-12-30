@@ -72,7 +72,7 @@ export function IncomeOverviewCard({
           <p className="text-sm font-medium text-muted-foreground mb-2">
             Total inkomst
           </p>
-          <p className="text-3xl font-semibold text-foreground tabular-nums">
+          <p className="text-money-xl font-semibold text-foreground">
             {formatAmount(settlement.totalIncome)}
           </p>
         </CardContent>
@@ -88,20 +88,20 @@ export function IncomeOverviewCard({
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Intjänat:</span>
-                <span className="font-medium tabular-nums">
+                <span className="font-medium text-money-sm">
                   {formatAmount(settlement.personAIncome)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Andel (50%):</span>
-                <span className="font-medium tabular-nums">
+                <span className="font-medium text-money-sm">
                   {formatAmount(settlement.shareA)}
                 </span>
               </div>
               <div className="flex justify-between pt-1 border-t border-border">
                 <span className="text-muted-foreground">Balans:</span>
                 <span
-                  className={`font-semibold tabular-nums ${
+                  className={`font-semibold text-money-sm ${
                     settlement.balanceA > 0
                       ? "text-orange-600"
                       : settlement.balanceA < 0
@@ -125,20 +125,20 @@ export function IncomeOverviewCard({
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Intjänat:</span>
-                <span className="font-medium tabular-nums">
+                <span className="font-medium text-money-sm">
                   {formatAmount(settlement.personBIncome)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Andel (50%):</span>
-                <span className="font-medium tabular-nums">
+                <span className="font-medium text-money-sm">
                   {formatAmount(settlement.shareB)}
                 </span>
               </div>
               <div className="flex justify-between pt-1 border-t border-border">
                 <span className="text-muted-foreground">Balans:</span>
                 <span
-                  className={`font-semibold tabular-nums ${
+                  className={`font-semibold text-money-sm ${
                     settlement.balanceB > 0
                       ? "text-orange-600"
                       : settlement.balanceB < 0
@@ -172,7 +172,7 @@ export function IncomeOverviewCard({
                   {transferTo.name}
                 </span>
               </p>
-              <p className="text-2xl font-semibold text-foreground tabular-nums">
+              <p className="text-money-xl font-semibold text-foreground">
                 {formatAmount(settlement.transferAmount)}
               </p>
             </div>

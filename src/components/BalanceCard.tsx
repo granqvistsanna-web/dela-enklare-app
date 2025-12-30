@@ -133,7 +133,7 @@ export function BalanceCard({
                         <span className="text-muted-foreground truncate">
                           {from?.name} → {to?.name}
                         </span>
-                        <span className="font-medium text-foreground tabular-nums shrink-0">
+                        <span className="font-medium text-foreground text-money-sm shrink-0">
                           {s.amount.toLocaleString("sv-SE")} kr
                         </span>
                       </div>
@@ -163,7 +163,7 @@ export function BalanceCard({
                   {negativeUser?.name} → {positiveUser?.name}
                 </p>
               </div>
-              <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums">
+              <p className="text-money-lg font-bold text-foreground">
                 {Math.round(oweAmount).toLocaleString("sv-SE")} kr
               </p>
             </div>
@@ -252,7 +252,7 @@ export function BalanceCard({
                         </span>
                       </div>
                       <span
-                        className={`text-sm font-medium tabular-nums shrink-0 ${
+                        className={`text-money-sm font-medium shrink-0 ${
                           isPositive
                             ? "text-income"
                             : isNegative
@@ -287,7 +287,7 @@ export function BalanceCard({
                         <span className="text-muted-foreground truncate">
                           {from?.name} → {to?.name}
                         </span>
-                        <span className="font-medium text-foreground tabular-nums shrink-0">
+                        <span className="font-medium text-foreground text-money-sm shrink-0">
                           {s.amount.toLocaleString("sv-SE")} kr
                         </span>
                       </div>

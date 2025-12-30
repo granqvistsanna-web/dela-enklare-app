@@ -101,7 +101,7 @@ export function DuplicateWarningDialog({
                           {formatDate(dup.date)}
                         </p>
                       </div>
-                      <p className="text-sm font-semibold tabular-nums shrink-0">
+                      <p className="text-money-sm font-semibold shrink-0">
                         {formatAmount(dup.amount, entryType)} kr
                       </p>
                     </div>
