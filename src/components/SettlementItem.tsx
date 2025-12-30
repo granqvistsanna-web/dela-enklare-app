@@ -24,9 +24,9 @@ export function SettlementItem({
 
   return (
     <motion.div
-      whileHover={canEdit ? { x: 2, backgroundColor: "hsl(var(--secondary) / 0.3)" } : undefined}
-      whileTap={canEdit ? { scale: 0.99 } : undefined}
-      className={`py-3.5 px-0 min-h-[68px] bg-background transition-all duration-150 touch-pan-y ${
+      whileHover={canEdit ? { x: 3, backgroundColor: "hsl(var(--secondary) / 0.4)" } : undefined}
+      whileTap={canEdit ? { scale: 0.985 } : undefined}
+      className={`py-4 px-0 min-h-[72px] bg-background transition-all duration-200 touch-pan-y rounded-md ${
         canEdit
           ? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           : "cursor-default"
@@ -47,27 +47,27 @@ export function SettlementItem({
           : undefined
       }
     >
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3.5">
         <motion.div
-          className="p-1.5 rounded-md bg-primary/10 shrink-0"
+          className="p-2 rounded-lg bg-primary/10 shrink-0 ring-1 ring-primary/10"
           whileHover={canEdit ? { scale: 1.05 } : undefined}
         >
-          <Smartphone size={16} className="text-primary pointer-events-none" />
+          <Smartphone size={18} className="text-primary pointer-events-none" strokeWidth={2.5} />
         </motion.div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <p className="font-medium text-foreground text-sm truncate">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="font-semibold text-foreground text-[15px] truncate leading-tight">
               Swish
             </p>
-            <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium shrink-0">
+            <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">
               Betalning
             </span>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-            <span className="font-medium text-foreground/80 truncate">
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+            <span className="font-semibold text-foreground/70 truncate">
               {fromMember?.name || "Okänd"} → {toMember?.name || "Okänd"}
             </span>
-            <span>·</span>
+            <span className="opacity-50">•</span>
             <span className="shrink-0">
               {new Date(settlement.date).toLocaleDateString("sv-SE", {
                 day: "numeric",
@@ -76,15 +76,15 @@ export function SettlementItem({
             </span>
           </div>
         </div>
-        <div className="text-right flex items-center gap-2.5 shrink-0">
+        <div className="text-right flex items-center gap-3 shrink-0">
           <div className="text-right">
-            <span className="text-base sm:text-lg font-semibold text-primary tabular-nums block">
+            <span className="text-lg sm:text-xl font-bold text-primary tabular-nums block leading-tight">
               {Math.round(settlement.amount).toLocaleString("sv-SE")}
             </span>
-            <span className="text-xs text-muted-foreground">kr</span>
+            <span className="text-[11px] text-muted-foreground/70 font-medium">kr</span>
           </div>
           {canEdit && (
-            <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-xl transition-all duration-150">
+            <span className="text-muted-foreground/30 group-hover:text-muted-foreground/70 text-2xl transition-all duration-200 leading-none">
               ›
             </span>
           )}
