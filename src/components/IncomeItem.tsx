@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { motion, PanInfo } from "framer-motion";
-import { ArrowDownLeft, Repeat, ChevronRight } from "lucide-react";
+import { Repeat } from "lucide-react";
 import { Income } from "@/hooks/useIncomes";
 import { GroupMember } from "@/hooks/useGroups";
 import { getIncomeTypeLabel } from "@/lib/incomeUtils";
@@ -68,17 +68,12 @@ export const IncomeItem = memo(function IncomeItem({
         onClick={() => canModify && onEdit?.(income)}
         className={`
           w-full text-left appearance-none border-0
-          flex items-center gap-3 py-3 sm:py-3.5 px-0
+          flex items-center justify-between gap-4 py-3
           bg-transparent transition-colors duration-150
-          ${canModify && onEdit ? "cursor-pointer active:bg-muted/30 focus:outline-none focus-visible:bg-muted/30 -mx-2 px-2 rounded-lg" : ""}
+          ${canModify && onEdit ? "cursor-pointer active:bg-muted/30 focus:outline-none" : ""}
         `}
-        whileTap={canModify ? { scale: 0.995 } : undefined}
+        whileTap={canModify ? { scale: 0.98 } : undefined}
       >
-        {/* Icon */}
-        <div className="w-10 h-10 rounded-xl bg-income/10 flex items-center justify-center shrink-0">
-          <ArrowDownLeft size={18} className="text-income" strokeWidth={2} />
-        </div>
-
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -86,43 +81,30 @@ export const IncomeItem = memo(function IncomeItem({
               {getIncomeTypeLabel(income.type)}
             </p>
             {!income.included_in_split && (
-              <span className="text-[10px] px-1.5 py-0.5 bg-muted rounded-full text-muted-foreground font-medium shrink-0">
+              <span className="text-[11px] px-1.5 py-0.5 bg-muted rounded text-muted-foreground shrink-0">
                 Ej delad
               </span>
             )}
             {income.repeat && income.repeat !== "none" && (
-              <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-primary/10 rounded-full text-primary font-medium shrink-0">
-                <Repeat size={10} strokeWidth={2.5} />
-              </span>
+              <Repeat size={12} className="text-primary shrink-0" strokeWidth={2.5} />
             )}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-            <span className="font-medium">{recipient?.name || "Okänd"}</span>
+          <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground mt-0.5">
+            <span>{recipient?.name || "Okänd"}</span>
             <span className="opacity-40">•</span>
             <span>{formattedDate}</span>
           </div>
           {income.note && (
-            <p className="text-xs text-muted-foreground/70 mt-1 truncate">
+            <p className="text-[13px] text-muted-foreground/60 mt-0.5 truncate">
               {income.note}
             </p>
           )}
         </div>
 
         {/* Amount */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="text-right">
-            <span className="text-base font-semibold text-income tabular-nums">
-              +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 0 })}
-            </span>
-            <span className="text-xs text-muted-foreground ml-1">kr</span>
-          </div>
-          {canModify && (
-            <ChevronRight 
-              size={16} 
-              className="text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" 
-            />
-          )}
-        </div>
+        <span className="text-[15px] font-semibold text-income tabular-nums shrink-0">
+          +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 0 })} kr
+        </span>
       </motion.button>
     </div>
   );
