@@ -138,7 +138,7 @@ const Index = () => {
   }, [addExpenses]);
 
   // Handle settlement
-  const handleSettle = useCallback(async (fromUser: string, toUser: string, amount: number) => {
+  const handleSettle = useCallback(async (fromUser: string, toUser: string, amount: number, date?: string) => {
     if (!household?.id) return;
     setIsSettling(true);
     try {
@@ -147,6 +147,7 @@ const Index = () => {
         from_user: fromUser,
         to_user: toUser,
         amount,
+        date,
       });
     } finally {
       setIsSettling(false);

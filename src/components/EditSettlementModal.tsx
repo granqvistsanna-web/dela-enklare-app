@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,40 +11,50 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { GroupMember } from "@/hooks/useGroups";
-import { ArrowRightLeft, Loader2 } from "lucide-react";
+import { Settlement } from "@/hooks/useSettlements";
+import { ArrowRightLeft, Loader2, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-interface SwishModalProps {
+interface EditSettlementModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (fromUser: string, toUser: string, amount: number, date: string) => Promise<void>;
+  onSave: (settlement: Settlement) => Promise<void>;
+  onDelete: (settlementId: string) => Promise<void>;
+  settlement: Settlement | null;
   members: GroupMember[];
-  currentUserId: string;
 }
 
-export function SwishModal({
+export function EditSettlementModal({
   isOpen,
   onClose,
-  onSubmit,
+  onSave,
+  onDelete,
+  settlement,
   members,
-  currentUserId,
-}: SwishModalProps) {
-  const [fromUserId, setFromUserId] = useState(currentUserId);
+}: EditSettlementModalProps) {
+  const [fromUserId, setFromUserId] = useState("");
   const [toUserId, setToUserId] = useState("");
   const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [date, setDate] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (settlement) {
+      setFromUserId(settlement.from_user);
+      setToUserId(settlement.to_user);
+      setAmount(settlement.amount.toString());
+      setDate(settlement.date);
+    }
+  }, [settlement]);
 
   const availableRecipients = members.filter((m) => m.user_id !== fromUserId);
 
   const handleSubmit = async () => {
-    if (!fromUserId) {
-      toast.error("Välj avsändare");
-      return;
-    }
+    if (!settlement) return;
 
-    if (!toUserId) {
-      toast.error("Välj mottagare");
+    if (!fromUserId || !toUserId) {
+      toast.error("Välj avsändare och mottagare");
       return;
     }
 
@@ -66,26 +76,45 @@ export function SwishModal({
 
     setIsSubmitting(true);
     try {
-      await onSubmit(fromUserId, toUserId, numericAmount, date);
-      toast.success("Swish registrerad!");
+      await onSave({
+        ...settlement,
+        from_user: fromUserId,
+        to_user: toUserId,
+        amount: numericAmount,
+        date: date,
+      });
       handleClose();
     } catch (error) {
-      console.error("Error submitting Swish:", error);
-      toast.error("Kunde inte registrera Swish");
+      console.error("Error updating settlement:", error);
+      toast.error("Kunde inte uppdatera");
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleDelete = async () => {
+    if (!settlement) return;
+
+    setIsDeleting(true);
+    try {
+      await onDelete(settlement.id);
+      handleClose();
+    } catch (error) {
+      console.error("Error deleting settlement:", error);
+      toast.error("Kunde inte ta bort");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const handleClose = () => {
-    setFromUserId(currentUserId);
+    setFromUserId("");
     setToUserId("");
     setAmount("");
-    setDate(new Date().toISOString().split("T")[0]);
+    setDate("");
     onClose();
   };
 
-  // Reset toUserId if fromUserId changes and they match
   const handleFromUserChange = (userId: string) => {
     setFromUserId(userId);
     if (userId === toUserId) {
@@ -95,6 +124,8 @@ export function SwishModal({
 
   const fromMember = members.find((m) => m.user_id === fromUserId);
   const toMember = members.find((m) => m.user_id === toUserId);
+
+  if (!settlement) return null;
 
   return (
     <AnimatePresence>
@@ -124,7 +155,7 @@ export function SwishModal({
                     <ArrowRightLeft size={18} className="text-primary" />
                   </div>
                   <h2 className="text-lg font-medium text-foreground">
-                    Registrera Swish
+                    Redigera Swish
                   </h2>
                 </div>
                 <button
@@ -134,10 +165,6 @@ export function SwishModal({
                   ✕
                 </button>
               </div>
-
-              <p className="text-muted-foreground text-sm mb-6">
-                Registrera en Swish-betalning mellan medlemmar i hushållet.
-              </p>
 
               {/* Form */}
               <div className="space-y-4">
@@ -224,16 +251,29 @@ export function SwishModal({
               <div className="flex gap-3 mt-6">
                 <Button
                   variant="ghost"
+                  size="icon"
+                  onClick={handleDelete}
+                  disabled={isSubmitting || isDeleting}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  {isDeleting ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : (
+                    <Trash2 size={16} />
+                  )}
+                </Button>
+                <Button
+                  variant="ghost"
                   className="flex-1"
                   onClick={handleClose}
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isDeleting}
                 >
                   Avbryt
                 </Button>
                 <Button
                   className="flex-1 gap-2"
                   onClick={handleSubmit}
-                  disabled={isSubmitting || !fromUserId || !toUserId || !amount}
+                  disabled={isSubmitting || isDeleting || !fromUserId || !toUserId || !amount}
                 >
                   {isSubmitting ? (
                     <>
@@ -241,7 +281,7 @@ export function SwishModal({
                       Sparar...
                     </>
                   ) : (
-                    "Registrera"
+                    "Spara"
                   )}
                 </Button>
               </div>

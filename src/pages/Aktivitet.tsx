@@ -4,13 +4,17 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AddFab } from "@/components/AddFab";
 import { AddTransactionModal } from "@/components/AddTransactionModal";
+import { SwishModal } from "@/components/SwishModal";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes, Income, IncomeInput } from "@/hooks/useIncomes";
+import { useSettlements, Settlement } from "@/hooks/useSettlements";
 import { ExpenseItem } from "@/components/ExpenseItem";
 import { IncomeItem } from "@/components/IncomeItem";
+import { SettlementItem } from "@/components/SettlementItem";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { EditIncomeModal } from "@/components/EditIncomeModal";
+import { EditSettlementModal } from "@/components/EditSettlementModal";
 import { useAuth } from "@/hooks/useAuth";
 import { Search, ArrowUpDown, Plus, FileText } from "lucide-react";
 import {
@@ -34,23 +38,27 @@ export default function Aktivitet() {
   const { household, loading: householdLoading } = useGroups();
   const { expenses, loading: expensesLoading, updateExpense, deleteExpense, addExpense } = useExpenses(household?.id);
   const { incomes, loading: incomesLoading, updateIncome, deleteIncome, addIncome } = useIncomes(household?.id);
+  const { settlements, loading: settlementsLoading, addSettlement, updateSettlement, deleteSettlement } = useSettlements(household?.id);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSwishModalOpen, setIsSwishModalOpen] = useState(false);
   const [isEditExpenseModalOpen, setIsEditExpenseModalOpen] = useState(false);
   const [isEditIncomeModalOpen, setIsEditIncomeModalOpen] = useState(false);
+  const [isEditSettlementModalOpen, setIsEditSettlementModalOpen] = useState(false);
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editingIncome, setEditingIncome] = useState<Income | null>(null);
+  const [editingSettlement, setEditingSettlement] = useState<Settlement | null>(null);
 
-  const loading = householdLoading || expensesLoading || incomesLoading;
+  const loading = householdLoading || expensesLoading || incomesLoading || settlementsLoading;
 
-  // Combine expenses and incomes
+  // Combine expenses, incomes and settlements
   const combinedItems = useMemo(() => {
     const items: Array<{
-      type: 'expense' | 'income';
-      data: Expense | Income;
+      type: 'expense' | 'income' | 'settlement';
+      data: Expense | Income | Settlement;
       date: Date;
       amount: number;
       description: string;
@@ -78,8 +86,18 @@ export default function Aktivitet() {
       });
     });
 
+    settlements.forEach(settlement => {
+      items.push({
+        type: 'settlement',
+        data: settlement,
+        date: new Date(settlement.date),
+        amount: settlement.amount,
+        description: 'Swish',
+      });
+    });
+
     return items;
-  }, [expenses, incomes]);
+  }, [expenses, incomes, settlements]);
 
   // Filter by search query
   const filteredItems = useMemo(() => {
@@ -184,6 +202,39 @@ export default function Aktivitet() {
   const handleDeleteIncome = async (incomeId: string) => {
     await deleteIncome(incomeId);
   };
+
+  const handleEditSettlement = (settlement: Settlement) => {
+    setEditingSettlement(settlement);
+    setIsEditSettlementModalOpen(true);
+  };
+
+  const handleSaveSettlement = async (updatedSettlement: Settlement) => {
+    await updateSettlement(updatedSettlement.id, {
+      from_user: updatedSettlement.from_user,
+      to_user: updatedSettlement.to_user,
+      amount: updatedSettlement.amount,
+      date: updatedSettlement.date,
+    });
+    setIsEditSettlementModalOpen(false);
+    setEditingSettlement(null);
+  };
+
+  const handleDeleteSettlement = async (settlementId: string) => {
+    await deleteSettlement(settlementId);
+    setIsEditSettlementModalOpen(false);
+    setEditingSettlement(null);
+  };
+
+  const handleAddSwish = useCallback(async (fromUser: string, toUser: string, amount: number, date: string) => {
+    if (!household?.id) return;
+    await addSettlement({
+      group_id: household.id,
+      from_user: fromUser,
+      to_user: toUser,
+      amount,
+      date,
+    });
+  }, [household?.id, addSettlement]);
 
   const toggleSortDirection = () => {
     setSortDirection(prev => prev === "asc" ? "desc" : "asc");
@@ -335,7 +386,7 @@ export default function Aktivitet() {
                                 currentUserId={user?.id}
                               />
                             );
-                          } else {
+                          } else if (item.type === 'income') {
                             const income = item.data as Income;
                             return (
                               <IncomeItem
@@ -344,6 +395,18 @@ export default function Aktivitet() {
                                 members={household.members}
                                 onEdit={handleEditIncome}
                                 onDelete={handleDeleteIncome}
+                                currentUserId={user?.id}
+                              />
+                            );
+                          } else {
+                            const settlement = item.data as Settlement;
+                            return (
+                              <SettlementItem
+                                key={`settlement-${settlement.id}`}
+                                settlement={settlement}
+                                members={household.members}
+                                index={index}
+                                onEdit={handleEditSettlement}
                                 currentUserId={user?.id}
                               />
                             );
@@ -380,7 +443,10 @@ export default function Aktivitet() {
       </main>
 
       {/* Add FAB */}
-      <AddFab onClick={() => setIsAddModalOpen(true)} />
+      <AddFab 
+        onClick={() => setIsAddModalOpen(true)} 
+        onSwishClick={() => setIsSwishModalOpen(true)}
+      />
 
       {/* Modals */}
       <AddTransactionModal
@@ -391,6 +457,14 @@ export default function Aktivitet() {
         groupId={household.id}
         members={household.members}
         defaultType="expense"
+      />
+
+      <SwishModal
+        isOpen={isSwishModalOpen}
+        onClose={() => setIsSwishModalOpen(false)}
+        onSubmit={handleAddSwish}
+        members={household.members}
+        currentUserId={user?.id || ""}
       />
 
       <EditExpenseModal
@@ -414,6 +488,18 @@ export default function Aktivitet() {
         onSave={handleSaveIncome}
         onDelete={handleDeleteIncome}
         income={editingIncome}
+        members={household.members}
+      />
+
+      <EditSettlementModal
+        isOpen={isEditSettlementModalOpen}
+        onClose={() => {
+          setIsEditSettlementModalOpen(false);
+          setEditingSettlement(null);
+        }}
+        onSave={handleSaveSettlement}
+        onDelete={handleDeleteSettlement}
+        settlement={editingSettlement}
         members={household.members}
       />
     </div>
