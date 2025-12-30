@@ -1,14 +1,15 @@
 import { useState } from "react";
-import { Plus, Upload, X } from "lucide-react";
+import { Plus, Upload, X, Smartphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface AddFabProps {
   onClick: () => void;
   onImportClick?: () => void;
+  onSwishClick?: () => void;
 }
 
-export function AddFab({ onClick, onImportClick }: AddFabProps) {
+export function AddFab({ onClick, onImportClick, onSwishClick }: AddFabProps) {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleAddClick = () => {
@@ -19,6 +20,11 @@ export function AddFab({ onClick, onImportClick }: AddFabProps) {
   const handleImportClick = () => {
     setIsOpen(false);
     onImportClick?.();
+  };
+
+  const handleSwishClick = () => {
+    setIsOpen(false);
+    onSwishClick?.();
   };
 
   return (
@@ -45,7 +51,7 @@ export function AddFab({ onClick, onImportClick }: AddFabProps) {
                 initial={{ opacity: 0, scale: 0.8, y: 20 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.8, y: 20 }}
-                transition={{ duration: 0.15, delay: 0.05 }}
+                transition={{ duration: 0.15, delay: 0.1 }}
               >
                 <Button
                   onClick={handleImportClick}
@@ -55,6 +61,25 @@ export function AddFab({ onClick, onImportClick }: AddFabProps) {
                 >
                   <Upload size={16} />
                   <span>Importera</span>
+                </Button>
+              </motion.div>
+            )}
+
+            {onSwishClick && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.8, y: 20 }}
+                transition={{ duration: 0.15, delay: 0.05 }}
+              >
+                <Button
+                  onClick={handleSwishClick}
+                  variant="outline"
+                  size="sm"
+                  className="gap-2 shadow-notion-lg hover:shadow-xl bg-background border-border"
+                >
+                  <Smartphone size={16} className="text-[#0CA677]" />
+                  <span>Swish</span>
                 </Button>
               </motion.div>
             )}
