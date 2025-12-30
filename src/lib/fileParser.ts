@@ -247,9 +247,42 @@ function inferColumns(header: string[], dataRows: string[][]): {
     ["belopp", "amount"].some((k) => h.includes(k)) && !h.includes("saldo") && !h.includes("balance")
   );
 
-  const descColHeader = headerLower.findIndex((h) =>
-    ["beskrivning", "text", "mottagare", "description", "meddelande", "rubrik"].some((k) => h.includes(k))
-  );
+  // IMPROVED: Prioritize description columns in order of usefulness
+  // "rubrik" and "beskrivning" are better than "mottagare" or "avsändare"
+  const descriptionPriority = [
+    "rubrik",           // Best: transaction title/subject
+    "beskrivning",      // Good: description
+    "text",             // Generic text field
+    "meddelande",       // Message
+    "description",      // English variant
+  ];
+  
+  const senderKeywords = [
+    "mottagare",        // Recipient
+    "avsändare",        // Sender
+    "namn",             // Name
+  ];
+
+  // First, try to find a high-priority description column
+  let descColHeader = -1;
+  for (const keyword of descriptionPriority) {
+    const idx = headerLower.findIndex((h) => h.includes(keyword));
+    if (idx >= 0) {
+      descColHeader = idx;
+      break;
+    }
+  }
+
+  // If no description column found, try sender columns as fallback
+  if (descColHeader < 0) {
+    for (const keyword of senderKeywords) {
+      const idx = headerLower.findIndex((h) => h.includes(keyword));
+      if (idx >= 0) {
+        descColHeader = idx;
+        break;
+      }
+    }
+  }
 
   const sample = dataRows.slice(0, 25);
   const colCount = Math.max(...[header.length, ...sample.map((r) => r.length)]);
