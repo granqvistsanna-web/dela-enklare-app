@@ -28,7 +28,7 @@ import {
 const Settings = () => {
   const navigate = useNavigate();
   const { profile, signOut, updatePassword, updateProfile } = useAuth();
-  const { household, loading: householdLoading, updateHouseholdName, addMembers } = useGroups();
+  const { household, allGroups, loading: householdLoading, updateHouseholdName, addMembers, createGroup, deleteGroup, selectGroup } = useGroups();
   const { theme, setTheme } = useTheme();
   const { selectedYear, selectedMonth, goToCurrentMonth, isCurrentMonth } = useMonthSelection();
 
@@ -43,6 +43,8 @@ const Settings = () => {
   const [isEditingHouseholdName, setIsEditingHouseholdName] = useState(false);
   const [editingHouseholdName, setEditingHouseholdName] = useState("");
   const [isAddMembersModalOpen, setIsAddMembersModalOpen] = useState(false);
+  const [isCreatingGroup, setIsCreatingGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState("");
 
   const handleNameChange = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,6 +164,23 @@ const Settings = () => {
     setIsAddMembersModalOpen(false);
   };
 
+  const handleCreateGroup = async () => {
+    if (newGroupName.trim().length < 2) {
+      toast.error("Gruppnamn måste vara minst 2 tecken");
+      return;
+    }
+
+    const result = await createGroup(newGroupName.trim());
+    if (result) {
+      setNewGroupName("");
+      setIsCreatingGroup(false);
+    }
+  };
+
+  const handleDeleteGroup = async (groupId: string) => {
+    await deleteGroup(groupId);
+  };
+
   return (
     <div className="pt-14 lg:pt-0 lg:pl-64">
       <main className="container max-w-3xl py-8 sm:py-12 px-4 sm:px-6 pb-6 lg:pb-8 mx-auto">
@@ -170,14 +189,25 @@ const Settings = () => {
         </div>
 
         <div className="space-y-6">
-          {/* Household Card */}
+          {/* Groups Card */}
           <Card>
             <CardHeader>
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-muted-foreground" />
-                <CardTitle>Mitt hushåll</CardTitle>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Users className="h-5 w-5 text-muted-foreground" />
+                  <CardTitle>Mina grupper</CardTitle>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsCreatingGroup(true)}
+                  className="gap-2"
+                >
+                  <Plus size={14} />
+                  Ny grupp
+                </Button>
               </div>
-              <CardDescription>Hantera ditt hushåll och medlemmar</CardDescription>
+              <CardDescription>Hantera dina grupper och medlemmar</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               {householdLoading ? (
@@ -186,107 +216,231 @@ const Settings = () => {
                     <div key={i} className="h-16 rounded-lg bg-secondary/50 animate-pulse" />
                   ))}
                 </div>
-              ) : household ? (
+              ) : (
                 <>
-                  {/* Household Info */}
-                  <div className="flex items-center justify-between p-4 rounded-lg border border-border/50 hover:bg-secondary/30 transition-colors">
-                    <div className="flex-1 min-w-0">
-                      {isEditingHouseholdName ? (
-                        <div className="flex items-center gap-2">
-                          <Input
-                            value={editingHouseholdName}
-                            onChange={(e) => setEditingHouseholdName(e.target.value)}
-                            className="max-w-xs"
-                            autoFocus
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                handleSaveHouseholdName();
-                              } else if (e.key === "Escape") {
-                                handleCancelEditHouseholdName();
-                              }
-                            }}
-                          />
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleSaveHouseholdName}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Check size={14} className="text-green-600" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleCancelEditHouseholdName}
-                            className="h-8 w-8 p-0"
-                          >
-                            <X size={14} className="text-red-600" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div>
-                          <p className="font-medium text-foreground truncate">{household.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {household.members.length} {household.members.length === 1 ? "medlem" : "medlemmar"}
-                          </p>
-                        </div>
-                      )}
+                  {/* Create new group form */}
+                  {isCreatingGroup && (
+                    <div className="p-4 rounded-lg border border-primary/30 bg-primary/5 space-y-3">
+                      <Label htmlFor="newGroupName" className="text-sm font-medium">
+                        Namn på ny grupp
+                      </Label>
+                      <div className="flex items-center gap-2">
+                        <Input
+                          id="newGroupName"
+                          value={newGroupName}
+                          onChange={(e) => setNewGroupName(e.target.value)}
+                          placeholder="T.ex. Familjen, Kompisar..."
+                          className="flex-1"
+                          autoFocus
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") {
+                              handleCreateGroup();
+                            } else if (e.key === "Escape") {
+                              setIsCreatingGroup(false);
+                              setNewGroupName("");
+                            }
+                          }}
+                        />
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={handleCreateGroup}
+                          className="gap-1"
+                        >
+                          <Check size={14} />
+                          Skapa
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {
+                            setIsCreatingGroup(false);
+                            setNewGroupName("");
+                          }}
+                        >
+                          <X size={14} />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      {!isEditingHouseholdName && (
-                        <>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={handleEditHouseholdName}
-                            className="gap-2"
-                          >
-                            <Edit2 size={14} />
-                            <span className="hidden sm:inline">Ändra namn</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setIsAddMembersModalOpen(true)}
-                            className="gap-2"
-                          >
-                            <Plus size={14} />
-                            <span className="hidden sm:inline">Bjud in</span>
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                  )}
+
+                  {/* Groups list */}
+                  <div className="space-y-3">
+                    {allGroups.map((group) => (
+                      <div
+                        key={group.id}
+                        className={cn(
+                          "p-4 rounded-lg border transition-colors",
+                          group.id === household?.id
+                            ? "border-primary/50 bg-primary/5"
+                            : "border-border/50 hover:bg-secondary/30"
+                        )}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-3">
+                            <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
+                              {group.name?.charAt(0).toUpperCase() || "?"}
+                            </div>
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <p className="font-medium text-foreground">{group.name}</p>
+                                {group.id === household?.id && (
+                                  <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
+                                    Aktiv
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-sm text-muted-foreground">
+                                {group.members.length} {group.members.length === 1 ? "medlem" : "medlemmar"}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {group.id !== household?.id && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => selectGroup(group.id)}
+                              >
+                                Välj
+                              </Button>
+                            )}
+                            {group.created_by === profile?.user_id && (
+                              <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                                  >
+                                    <Trash2 size={14} />
+                                  </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                  <AlertDialogHeader>
+                                    <AlertDialogTitle>Ta bort grupp</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                      Är du säker på att du vill ta bort "{group.name}"? 
+                                      Alla utgifter, inkomster och avräkningar kopplade till denna grupp kommer att raderas permanent.
+                                    </AlertDialogDescription>
+                                  </AlertDialogHeader>
+                                  <AlertDialogFooter>
+                                    <AlertDialogCancel>Avbryt</AlertDialogCancel>
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteGroup(group.id)}
+                                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                    >
+                                      Ta bort
+                                    </AlertDialogAction>
+                                  </AlertDialogFooter>
+                                </AlertDialogContent>
+                              </AlertDialog>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Show members for active group */}
+                        {group.id === household?.id && (
+                          <div className="pt-3 border-t border-border/50 space-y-3">
+                            <div className="flex items-center justify-between">
+                              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                Medlemmar
+                              </p>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleEditHouseholdName}
+                                  className="h-7 text-xs gap-1"
+                                >
+                                  <Edit2 size={12} />
+                                  Ändra namn
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => setIsAddMembersModalOpen(true)}
+                                  className="h-7 text-xs gap-1"
+                                >
+                                  <Plus size={12} />
+                                  Bjud in
+                                </Button>
+                              </div>
+                            </div>
+
+                            {isEditingHouseholdName && (
+                              <div className="flex items-center gap-2 mb-2">
+                                <Input
+                                  value={editingHouseholdName}
+                                  onChange={(e) => setEditingHouseholdName(e.target.value)}
+                                  className="max-w-xs h-8 text-sm"
+                                  autoFocus
+                                  onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                      handleSaveHouseholdName();
+                                    } else if (e.key === "Escape") {
+                                      handleCancelEditHouseholdName();
+                                    }
+                                  }}
+                                />
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleSaveHouseholdName}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <Check size={14} className="text-green-600" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={handleCancelEditHouseholdName}
+                                  className="h-8 w-8 p-0"
+                                >
+                                  <X size={14} className="text-red-600" />
+                                </Button>
+                              </div>
+                            )}
+
+                            <div className="space-y-2">
+                              {group.members.map((member) => (
+                                <div
+                                  key={member.user_id}
+                                  className="flex items-center gap-3 p-2.5 rounded-lg bg-background border border-border/30"
+                                >
+                                  <div className="h-8 w-8 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
+                                    {member.name?.charAt(0).toUpperCase() || "?"}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-medium text-foreground truncate">{member.name}</p>
+                                    <p className="text-xs text-muted-foreground">
+                                      {member.user_id === profile?.user_id ? "Du" : "Medlem"}
+                                    </p>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
 
-                  {/* Members List */}
-                  <div className="space-y-3">
-                    <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                      Medlemmar ({household.members.length})
-                    </p>
-                    <div className="space-y-2">
-                      {household.members.map((member) => (
-                        <div
-                          key={member.user_id}
-                          className="flex items-center gap-3 p-3 rounded-lg border border-border/50 bg-background hover:bg-muted/20 transition-colors"
-                        >
-                          <div className="h-10 w-10 shrink-0 rounded-full bg-primary/10 flex items-center justify-center text-sm font-semibold text-primary">
-                            {member.name?.charAt(0).toUpperCase() || "?"}
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground truncate">{member.name}</p>
-                            <p className="text-xs text-muted-foreground">
-                              {member.user_id === profile?.user_id ? "Du" : "Medlem"}
-                            </p>
-                          </div>
-                        </div>
-                      ))}
+                  {allGroups.length === 0 && !isCreatingGroup && (
+                    <div className="text-center py-8">
+                      <p className="text-sm text-muted-foreground">Inga grupper ännu</p>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setIsCreatingGroup(true)}
+                        className="mt-3 gap-2"
+                      >
+                        <Plus size={14} />
+                        Skapa din första grupp
+                      </Button>
                     </div>
-                  </div>
+                  )}
                 </>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-sm text-muted-foreground">Laddar hushåll...</p>
-                </div>
               )}
             </CardContent>
           </Card>
