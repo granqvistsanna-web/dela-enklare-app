@@ -33,6 +33,11 @@ export function BalanceCard({
   const [isSettleModalOpen, setIsSettleModalOpen] = useState(false);
   const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(false);
 
+  // Create a memoized map for O(1) member lookups instead of O(n) finds
+  const memberMap = useMemo(() => {
+    return new Map(members.map((m) => [m.user_id, m]));
+  }, [members]);
+
   // Filter settlements for the selected month
   const monthlySettlements = useMemo(() => {
     return settlements.filter((s) => {
@@ -64,14 +69,14 @@ export function BalanceCard({
 
     return {
       positiveUser: posBalance
-        ? members.find((m) => m.user_id === posBalance.userId)
+        ? memberMap.get(posBalance.userId)
         : undefined,
       negativeUser: negBalance
-        ? members.find((m) => m.user_id === negBalance.userId)
+        ? memberMap.get(negBalance.userId)
         : undefined,
       oweAmount: posBalance ? Math.abs(posBalance.balance) : 0,
     };
-  }, [adjustedBalances, members]);
+  }, [adjustedBalances, memberMap]);
 
   const handleConfirmSettle = async () => {
     if (!negativeUser || !positiveUser) return;
@@ -123,8 +128,8 @@ export function BalanceCard({
                 </p>
                 <div className="space-y-1.5">
                   {monthlySettlements.map((s) => {
-                    const from = members.find((m) => m.user_id === s.from_user);
-                    const to = members.find((m) => m.user_id === s.to_user);
+                    const from = memberMap.get(s.from_user);
+                    const to = memberMap.get(s.to_user);
                     return (
                       <div
                         key={s.id}
@@ -234,7 +239,7 @@ export function BalanceCard({
               <p className="text-label-mono mb-2 sm:mb-3">Kvar att betala</p>
               <div className="space-y-2">
                 {adjustedBalances.map((balance) => {
-                  const member = members.find((m) => m.user_id === balance.userId);
+                  const member = memberMap.get(balance.userId);
                   const isPositive = balance.balance > 0;
                   const isNegative = balance.balance < 0;
 
@@ -277,8 +282,8 @@ export function BalanceCard({
                 </p>
                 <div className="space-y-1.5">
                   {monthlySettlements.map((s) => {
-                    const from = members.find((m) => m.user_id === s.from_user);
-                    const to = members.find((m) => m.user_id === s.to_user);
+                    const from = memberMap.get(s.from_user);
+                    const to = memberMap.get(s.to_user);
                     return (
                       <div
                         key={s.id}
