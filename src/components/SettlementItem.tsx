@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { Smartphone } from "lucide-react";
+import { ArrowRightLeft, ChevronRight } from "lucide-react";
 import { Settlement } from "@/hooks/useSettlements";
 import { GroupMember } from "@/hooks/useGroups";
 
@@ -14,7 +14,6 @@ interface SettlementItemProps {
 export function SettlementItem({
   settlement,
   members,
-  index = 0,
   onEdit,
   currentUserId,
 }: SettlementItemProps) {
@@ -22,16 +21,21 @@ export function SettlementItem({
   const toMember = members.find((m) => m.user_id === settlement.to_user);
   const canEdit = !!currentUserId;
 
+  const formattedDate = new Date(settlement.date).toLocaleDateString("sv-SE", {
+    day: "numeric",
+    month: "short",
+  });
+
   return (
-    <motion.div
-      whileHover={canEdit ? { x: 3, backgroundColor: "hsl(var(--secondary) / 0.4)" } : undefined}
-      whileTap={canEdit ? { scale: 0.985 } : undefined}
-      className={`py-4 px-0 min-h-[72px] bg-background transition-all duration-200 touch-pan-y rounded-md ${
-        canEdit
-          ? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
-          : "cursor-default"
-      }`}
-      style={{ animationDelay: `${index * 30}ms` }}
+    <motion.button
+      type="button"
+      whileTap={canEdit ? { scale: 0.995 } : undefined}
+      className={`
+        group w-full text-left appearance-none border-0
+        flex items-center gap-3 py-3.5 sm:py-4 px-1 sm:px-2
+        bg-transparent transition-colors duration-150 touch-pan-y
+        ${canEdit ? "cursor-pointer active:bg-muted/50 focus:outline-none focus-visible:bg-muted/50" : "cursor-default"}
+      `}
       onClick={() => canEdit && onEdit(settlement)}
       tabIndex={canEdit ? 0 : -1}
       onKeyDown={(e) => {
@@ -40,56 +44,46 @@ export function SettlementItem({
           onEdit(settlement);
         }
       }}
-      role={canEdit ? "button" : undefined}
-      aria-label={
-        canEdit
-          ? `Redigera Swish från ${fromMember?.name || "Okänd"} till ${toMember?.name || "Okänd"}`
-          : undefined
-      }
     >
-      <div className="flex items-center gap-3.5">
-        <motion.div
-          className="p-2 rounded-lg bg-primary/10 shrink-0 ring-1 ring-primary/10"
-          whileHover={canEdit ? { scale: 1.05 } : undefined}
-        >
-          <Smartphone size={18} className="text-primary pointer-events-none" strokeWidth={2.5} />
-        </motion.div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
-            <p className="font-semibold text-foreground text-[15px] truncate leading-tight">
-              Swish
-            </p>
-            <span className="text-[11px] px-2 py-0.5 rounded-full bg-primary/10 text-primary font-medium shrink-0">
-              Betalning
-            </span>
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
-            <span className="font-semibold text-foreground/70 truncate">
-              {fromMember?.name || "Okänd"} → {toMember?.name || "Okänd"}
-            </span>
-            <span className="opacity-50">•</span>
-            <span className="shrink-0">
-              {new Date(settlement.date).toLocaleDateString("sv-SE", {
-                day: "numeric",
-                month: "short",
-              })}
-            </span>
-          </div>
+      {/* Icon */}
+      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+        <ArrowRightLeft size={18} className="text-primary" strokeWidth={2} />
+      </div>
+
+      {/* Content */}
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="text-[15px] font-medium text-foreground truncate">
+            Swish
+          </p>
+          <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 rounded-full text-primary font-medium shrink-0">
+            Betalning
+          </span>
         </div>
-        <div className="text-right flex items-center gap-3 shrink-0">
-          <div className="text-right">
-            <span className="text-lg sm:text-xl font-bold text-primary tabular-nums block leading-tight">
-              {Math.round(settlement.amount).toLocaleString("sv-SE")}
-            </span>
-            <span className="text-[11px] text-muted-foreground/70 font-medium">kr</span>
-          </div>
-          {canEdit && (
-            <span className="text-muted-foreground/30 group-hover:text-muted-foreground/70 text-2xl transition-all duration-200 leading-none">
-              ›
-            </span>
-          )}
+        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
+          <span className="font-medium">{fromMember?.name || "Okänd"}</span>
+          <span className="opacity-60">→</span>
+          <span className="font-medium">{toMember?.name || "Okänd"}</span>
+          <span className="opacity-40">•</span>
+          <span>{formattedDate}</span>
         </div>
       </div>
-    </motion.div>
+
+      {/* Amount */}
+      <div className="flex items-center gap-2 shrink-0">
+        <div className="text-right">
+          <span className="text-base font-semibold text-primary tabular-nums">
+            {Math.round(settlement.amount).toLocaleString("sv-SE")}
+          </span>
+          <span className="text-xs text-muted-foreground ml-1">kr</span>
+        </div>
+        {canEdit && (
+          <ChevronRight 
+            size={16} 
+            className="text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" 
+          />
+        )}
+      </div>
+    </motion.button>
   );
 }
