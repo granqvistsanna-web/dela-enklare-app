@@ -16,6 +16,7 @@ export default {
     extend: {
       fontFamily: {
         sans: ["Geist Sans", "system-ui", "-apple-system", "BlinkMacSystemFont", "sans-serif"],
+        mono: ["Geist Mono", "ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "monospace"],
       },
       colors: {
         border: "hsl(var(--border))",

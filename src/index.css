@@ -382,18 +382,25 @@
     color: hsl(var(--muted-foreground));
   }
 
-  /* Tabular nums for monetary values - premium feel */
+  /* Tabular nums for monetary values - Geist Mono */
   .text-money {
-    @apply tabular-nums;
+    @apply tabular-nums font-mono;
     font-weight: 500;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.01em;
   }
 
   .text-money-lg {
-    @apply tabular-nums;
+    @apply tabular-nums font-mono;
     font-size: 1.5rem;
     font-weight: 600;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.02em;
+  }
+
+  /* Tabular data styling */
+  .text-tabular {
+    @apply tabular-nums font-mono;
+    font-weight: 400;
+    letter-spacing: 0em;
   }
 
   /* Loading shimmer animation */
