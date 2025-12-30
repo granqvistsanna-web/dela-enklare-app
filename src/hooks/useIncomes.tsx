@@ -31,6 +31,21 @@ export interface IncomeInput {
   included_in_split?: boolean;
 }
 
+// Database row type (before casting to our Income interface)
+interface IncomeRow {
+  id: string;
+  group_id: string;
+  amount: number;
+  recipient: string;
+  type: string;
+  note: string | null;
+  date: string;
+  repeat: string;
+  included_in_split: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export function useIncomes(groupId?: string) {
   const { user } = useAuth();
   const [incomes, setIncomes] = useState<Income[]>([]);
@@ -44,7 +59,8 @@ export function useIncomes(groupId?: string) {
     }
 
     try {
-      let query = supabase.from("incomes").select("*");
+      // Use type assertion since types may not be regenerated yet
+      let query = (supabase.from("incomes" as any) as any).select("*");
 
       if (groupId) {
         query = query.eq("group_id", groupId);
@@ -54,7 +70,14 @@ export function useIncomes(groupId?: string) {
 
       if (error) throw error;
 
-      setIncomes(data || []);
+      // Cast the database response to our Income type
+      const typedIncomes: Income[] = ((data as IncomeRow[]) || []).map((row) => ({
+        ...row,
+        type: row.type as IncomeType,
+        repeat: row.repeat as IncomeRepeat,
+      }));
+
+      setIncomes(typedIncomes);
     } catch (error) {
       console.error("Error fetching incomes:", error);
       // Don't show error toast for empty results - only log to console
@@ -68,15 +91,14 @@ export function useIncomes(groupId?: string) {
     fetchIncomes();
   }, [fetchIncomes]);
 
-  const addIncome = async (income: IncomeInput) => {
+  const addIncome = async (income: IncomeInput): Promise<Income | null> => {
     if (!user) {
       toast.error("Du måste vara inloggad");
       return null;
     }
 
     try {
-      const { data, error } = await supabase
-        .from("incomes")
+      const { data, error } = await (supabase.from("incomes" as any) as any)
         .insert({
           group_id: income.group_id,
           amount: income.amount,
@@ -102,7 +124,16 @@ export function useIncomes(groupId?: string) {
 
       await fetchIncomes();
       toast.success("Inkomst tillagd!");
-      return data;
+
+      // Cast to our typed Income interface
+      const row = data as IncomeRow;
+      const typedIncome: Income = {
+        ...row,
+        type: row.type as IncomeType,
+        repeat: row.repeat as IncomeRepeat,
+      };
+
+      return typedIncome;
     } catch (error) {
       console.error("Error adding income:", error);
       toast.error("Kunde inte lägga till inkomst");
@@ -115,8 +146,7 @@ export function useIncomes(groupId?: string) {
     updates: Partial<Omit<Income, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      const { error } = await supabase
-        .from("incomes")
+      const { error } = await (supabase.from("incomes" as any) as any)
         .update(updates)
         .eq("id", incomeId);
 
@@ -140,8 +170,7 @@ export function useIncomes(groupId?: string) {
       }
 
       // Delete from database
-      const { error } = await supabase
-        .from("incomes")
+      const { error } = await (supabase.from("incomes" as any) as any)
         .delete()
         .eq("id", incomeId);
 
@@ -157,8 +186,7 @@ export function useIncomes(groupId?: string) {
           onClick: async () => {
             try {
               // Restore the income
-              const { error: restoreError } = await supabase
-                .from("incomes")
+              const { error: restoreError } = await (supabase.from("incomes" as any) as any)
                 .insert({
                   id: incomeToDelete.id,
                   group_id: incomeToDelete.group_id,
