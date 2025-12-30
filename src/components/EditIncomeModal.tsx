@@ -103,7 +103,7 @@ export function EditIncomeModal({
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
           >
-            <div className="bg-white border border-border rounded-t-xl sm:rounded-xl w-full sm:max-w-md max-h-[90vh] sm:max-h-[calc(100vh-2rem)] flex flex-col overflow-x-hidden">
+            <div className="bg-card border border-border rounded-t-xl sm:rounded-xl w-full sm:max-w-md max-h-[90vh] sm:max-h-[calc(100vh-2rem)] flex flex-col overflow-x-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-4 shrink-0">
                 <h2 className="text-lg font-medium text-foreground">
@@ -237,7 +237,7 @@ export function EditIncomeModal({
               </div>
 
               {/* Sticky footer */}
-              <div className="shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-white safe-area-pb">
+              <div className="shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-card safe-area-pb">
                 <div className="flex gap-3">
                   <Button
                     type="button"
