@@ -86,7 +86,7 @@ serve(async (req) => {
       ? `\n\nExisting tag rules to follow:\n${(existingRules as TagRule[]).map((r) => `- "${r.pattern}" → ${r.category}`).join("\n")}`
       : "";
 
-    const prompt = `You are a Swedish expense categorizer. Categorize these bank transactions into one of these categories: ${categories.join(", ")}.
+    const prompt = `You are a Swedish expense categorizer for a household expense-sharing app. Categorize these bank transactions into one of these categories: ${categories.join(", ")}.
 
 Swedish category meanings:
 - mat: Food, groceries (ICA, Coop, Hemköp, Willys, Lidl, restaurants, food delivery)
@@ -96,6 +96,36 @@ Swedish category meanings:
 - ovrigt: Everything else
 
 ${rulesContext}
+
+IMPORTANT - Shared vs Private Classification Rules:
+
+SHARED expenses (isShared: true) - typical household expenses split 50/50:
+- Groceries and food shopping (ICA, Coop, Hemköp, Willys, Lidl, etc.)
+- Housing costs (rent, electricity, heating, water, home insurance, internet, TV licenses)
+- Shared household items (cleaning supplies, toilet paper, household goods)
+- Shared subscriptions (Netflix, Spotify Family, Disney+, HBO if shared)
+- Household maintenance and repairs
+- Shared transportation costs (family car expenses, gas for shared vehicle)
+
+PRIVATE expenses (isShared: false) - personal expenses not split:
+- Individual clothing and fashion (H&M, Zara, etc. unless clearly for household)
+- Personal care (haircuts, cosmetics, gym memberships, spa)
+- Individual hobbies and entertainment (personal games, golf, individual sports)
+- Personal dining out or fast food (unless clearly a couple/family meal)
+- Individual subscriptions (personal Spotify, individual streaming services)
+- Personal electronics and gadgets (unless clearly for household)
+- Individual medical expenses and pharmacy items
+- Personal shopping and non-essential items
+- Gifts and personal presents
+- Individual transportation (SL card for one person, personal Uber rides)
+- Alcohol and tobacco (typically personal unless for shared event)
+
+When in doubt:
+- Large food purchases from grocery stores → SHARED
+- Small convenience store purchases or snacks → PRIVATE
+- Restaurants: expensive or weekend meals → SHARED, quick lunch or coffee → PRIVATE
+- Utilities and housing → always SHARED
+- Entertainment: streaming services → SHARED, individual activities → PRIVATE
 
 For each transaction, return a JSON array with objects containing:
 - index: the transaction index
