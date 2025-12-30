@@ -245,114 +245,73 @@ const Index = () => {
         </div>
 
         {/* Month selector */}
-        <div className="mb-6 animate-fade-in" style={{ animationDelay: '50ms' }}>
+        <div className="mb-8 animate-fade-in" style={{ animationDelay: '50ms' }}>
           <MonthSelector />
         </div>
 
-        {/* Summary grid - 2 columns */}
-        <div className="grid gap-4 lg:grid-cols-2 mb-6">
-          {/* Left column: Summering */}
-          <div className="space-y-3 animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <h2 className="text-label-mono">
-              Översikt
-            </h2>
+        {/* Hero Summary Card */}
+        <Card className="mb-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <CardContent className="p-6 sm:p-8">
+            {/* Netto - Hero focus */}
+            <div className="text-center mb-6">
+              <p className="text-label-mono mb-2">Netto denna månad</p>
+              <p className={`text-4xl sm:text-5xl font-bold tracking-tight ${totals.netto >= 0 ? 'text-income' : 'text-expense'}`}>
+                {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
+              </p>
+            </div>
 
-            <Card className="h-full lg:min-h-[220px] flex flex-col">
-              <CardContent className="p-5 space-y-4 flex-1 flex flex-col justify-between">
-                <div className="space-y-4">
-                  {/* Total in */}
-                  <div className="space-y-1">
-                    <p className="text-subheading">Total in</p>
-                    <p className="text-money-xl font-semibold text-income">
-                      {totals.totalIncomes.toLocaleString("sv-SE")} kr
-                    </p>
-                  </div>
+            {/* Horizontal split bar */}
+            <div className="mb-6">
+              <div className="h-3 rounded-full overflow-hidden flex bg-muted">
+                {(totals.totalIncomes > 0 || totals.totalExpenses > 0) ? (
+                  <>
+                    <div
+                      className="h-full bg-income transition-all duration-500 ease-out"
+                      style={{ width: `${animatedIncomeWidth}%` }}
+                    />
+                    <div
+                      className="h-full bg-expense transition-all duration-500 ease-out"
+                      style={{ width: `${animatedExpenseWidth}%` }}
+                    />
+                  </>
+                ) : (
+                  <div className="h-full w-full bg-muted" />
+                )}
+              </div>
+            </div>
 
-                  {/* Total ut */}
-                  <div className="space-y-1">
-                    <p className="text-subheading">Total ut</p>
-                    <p className="text-money-xl font-semibold text-expense">
-                      {totals.totalExpenses.toLocaleString("sv-SE")} kr
-                    </p>
-                  </div>
+            {/* In/Out summary */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
+                  <div className="w-2.5 h-2.5 rounded-full bg-income" />
+                  <span className="text-caption">Inkomster</span>
                 </div>
-
-                <div className="pt-3 border-t border-border/60">
-                  {/* Netto */}
-                  <div className="space-y-1">
-                    <p className="text-subheading">Netto</p>
-                    <p className={`text-money-xl font-bold ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
-                      {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
-                    </p>
-                  </div>
+                <p className="text-xl sm:text-2xl font-semibold text-foreground">
+                  {totals.totalIncomes.toLocaleString("sv-SE")} kr
+                </p>
+                <p className="text-caption text-xs mt-0.5">
+                  {filteredIncomes.length} {filteredIncomes.length === 1 ? 'post' : 'poster'}
+                </p>
+              </div>
+              <div className="text-center sm:text-right">
+                <div className="flex items-center justify-center sm:justify-end gap-2 mb-1">
+                  <div className="w-2.5 h-2.5 rounded-full bg-expense" />
+                  <span className="text-caption">Utgifter</span>
                 </div>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Right column: Visual diagram */}
-          <div className="space-y-3 animate-fade-in" style={{ animationDelay: '150ms' }}>
-            <h2 className="text-label-mono">
-              Fördelning
-            </h2>
-
-            <Card className="h-full lg:min-h-[220px] flex flex-col">
-              <CardContent className="p-5 flex-1 flex flex-col justify-between">
-                {/* Bar chart */}
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-income font-medium">Inkomster</span>
-                      <span className="text-caption">
-                        {Math.round(animatedIncomeWidth)}%
-                      </span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-income rounded-full transition-all duration-300"
-                        style={{ width: `${animatedIncomeWidth}%` }}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-expense font-medium">Utgifter</span>
-                      <span className="text-caption">
-                        {Math.round(animatedExpenseWidth)}%
-                      </span>
-                    </div>
-                    <div className="h-2 bg-muted rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-expense rounded-full transition-all duration-300"
-                        style={{ width: `${animatedExpenseWidth}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stats */}
-                <div className="pt-3 border-t border-border/60 grid grid-cols-2 gap-4 text-center">
-                  <div>
-                    <p className="text-numeric text-xl font-bold text-foreground">
-                      {filteredExpenses.length}
-                    </p>
-                    <p className="text-caption">Utgifter</p>
-                  </div>
-                  <div>
-                    <p className="text-numeric text-xl font-bold text-foreground">
-                      {filteredIncomes.length}
-                    </p>
-                    <p className="text-caption">Inkomster</p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
+                <p className="text-xl sm:text-2xl font-semibold text-foreground">
+                  {totals.totalExpenses.toLocaleString("sv-SE")} kr
+                </p>
+                <p className="text-caption text-xs mt-0.5">
+                  {filteredExpenses.length} {filteredExpenses.length === 1 ? 'post' : 'poster'}
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Member summary */}
-        <div className="mb-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
+        <div className="mb-6 animate-fade-in" style={{ animationDelay: '150ms' }}>
           <MemberSummaryCard
             expenses={filteredExpenses}
             incomes={filteredIncomes}
@@ -361,7 +320,7 @@ const Index = () => {
         </div>
 
         {/* Balance section */}
-        <div className="mb-6 animate-fade-in" style={{ animationDelay: '250ms' }}>
+        <div className="mb-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
           <BalanceCard
             expenses={filteredExpenses}
             incomes={filteredIncomes}
@@ -375,14 +334,14 @@ const Index = () => {
         </div>
 
         {/* Latest activities */}
-        <div className="mb-6 animate-fade-in" style={{ animationDelay: '300ms' }}>
+        <div className="mb-6 animate-fade-in" style={{ animationDelay: '250ms' }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-label-mono">
               Senaste aktiviteter
             </h2>
             <button
               onClick={() => navigate("/aktivitet")}
-              className="text-sm text-foreground hover:opacity-70 flex items-center gap-1 transition-opacity"
+              className="text-sm text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
             >
               Se alla
               <ArrowRight size={14} />
