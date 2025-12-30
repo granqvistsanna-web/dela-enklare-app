@@ -12,6 +12,9 @@ interface AddFabProps {
 export function AddFab({ onClick, onImportClick, onSwishClick }: AddFabProps) {
   const [isOpen, setIsOpen] = useState(false);
 
+  // Check if there are multiple options
+  const hasMultipleOptions = !!(onImportClick || onSwishClick);
+
   const handleAddClick = () => {
     setIsOpen(false);
     onClick();
@@ -25,6 +28,14 @@ export function AddFab({ onClick, onImportClick, onSwishClick }: AddFabProps) {
   const handleSwishClick = () => {
     setIsOpen(false);
     onSwishClick?.();
+  };
+
+  const handleFabClick = () => {
+    if (hasMultipleOptions) {
+      setIsOpen(!isOpen);
+    } else {
+      onClick();
+    }
   };
 
   return (
@@ -109,7 +120,7 @@ export function AddFab({ onClick, onImportClick, onSwishClick }: AddFabProps) {
 
       {/* Main FAB - positioned with safe area consideration */}
       <Button
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={handleFabClick}
         size="lg"
         className="fixed bottom-6 right-4 lg:bottom-8 lg:right-8 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105 active:scale-95 z-40"
         style={{ marginBottom: 'env(safe-area-inset-bottom, 0px)' }}
