@@ -21,7 +21,8 @@ export const IncomeItem = memo(function IncomeItem({
   currentUserId,
 }: IncomeItemProps) {
   const recipient = members.find((u) => u.user_id === income.recipient);
-  const canModify = currentUserId === income.recipient;
+  // Allow all group members to modify incomes (since user is already in the group)
+  const canModify = !!currentUserId;
   const [dragX, setDragX] = useState(0);
 
   // Safe date parsing with fallback
