@@ -117,11 +117,11 @@ export function BalanceCard({
     return (
       <div className="space-y-3">
         <h2 className="text-subheading">Balans</h2>
-        <Card className="border-green-500/20 bg-green-500/5">
+        <Card className="border-income/20 bg-income-bg">
           <CardContent className="p-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-green-500/10">
-                <Check size={20} className="text-green-600 dark:text-green-400" />
+              <div className="p-2 rounded-full bg-income-bg">
+                <Check size={20} className="text-income" />
               </div>
               <div>
                 <p className="font-medium text-foreground">Ni är jämna!</p>
@@ -173,8 +173,8 @@ export function BalanceCard({
             {/* Who owes whom */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-orange-500/10">
-                  <ArrowUpRight size={18} className="text-orange-600 dark:text-orange-400" />
+                <div className="p-2 rounded-lg bg-icon-purple-bg">
+                  <ArrowUpRight size={18} className="text-icon-purple" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Att betala</p>
@@ -203,7 +203,7 @@ export function BalanceCard({
                       className="flex items-center justify-between"
                     >
                       <div className="flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
+                        <div className="h-7 w-7 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue">
                           {(member?.name || "?").charAt(0).toUpperCase()}
                         </div>
                         <span className="text-sm text-foreground">
@@ -213,9 +213,9 @@ export function BalanceCard({
                       <span
                         className={`text-sm font-medium tabular-nums ${
                           isPositive
-                            ? "text-green-600 dark:text-green-400"
+                            ? "text-income"
                             : isNegative
-                            ? "text-red-600 dark:text-red-400"
+                            ? "text-expense"
                             : "text-muted-foreground"
                         }`}
                       >

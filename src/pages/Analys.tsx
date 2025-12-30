@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useIncomes } from "@/hooks/useIncomes";
-import { BarChart3, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { BarChart3, ArrowDownLeft, ArrowUpRight, DollarSign } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -201,8 +201,8 @@ export default function Analys() {
           <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '100ms' }}>
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-green-500/10">
-                  <TrendingUp size={18} className="text-green-600 dark:text-green-400" />
+                <div className="p-2 rounded-lg bg-income-bg">
+                  <ArrowDownLeft size={18} className="text-income" />
                 </div>
                 <div className="space-y-1">
                   <p className="text-subheading">
@@ -220,8 +220,8 @@ export default function Analys() {
           <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '150ms' }}>
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-red-500/10">
-                  <TrendingDown size={18} className="text-red-600 dark:text-red-400" />
+                <div className="p-2 rounded-lg bg-expense-bg">
+                  <ArrowUpRight size={18} className="text-expense" />
                 </div>
                 <div className="space-y-1">
                   <p className="text-subheading">
@@ -239,14 +239,14 @@ export default function Analys() {
           <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '200ms' }}>
             <CardContent className="p-5">
               <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${totals.netto >= 0 ? 'bg-green-500/10' : 'bg-orange-500/10'}`}>
-                  <DollarSign size={18} className={totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'} />
+                <div className={`p-2 rounded-lg ${totals.netto >= 0 ? 'bg-income-bg' : 'bg-icon-pink-bg'}`}>
+                  <DollarSign size={18} className={totals.netto >= 0 ? 'text-income' : 'text-icon-pink'} />
                 </div>
                 <div className="space-y-1">
                   <p className="text-subheading">
                     Netto
                   </p>
-                  <p className={`text-2xl font-semibold tabular-nums ${totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                  <p className={`text-2xl font-semibold tabular-nums ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
                     {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
                   </p>
                 </div>
@@ -280,10 +280,10 @@ export default function Analys() {
                           {MONTHS[parseInt(item.month.split('-')[1]) - 1]} {item.month.split('-')[0]}
                         </span>
                         <div className="flex gap-4 text-xs tabular-nums">
-                          <span className="text-green-600 dark:text-green-400">
+                          <span className="text-income">
                             +{item.incomes.toLocaleString("sv-SE")}
                           </span>
-                          <span className="text-red-600 dark:text-red-400">
+                          <span className="text-expense">
                             -{item.expenses.toLocaleString("sv-SE")}
                           </span>
                         </div>
@@ -291,13 +291,13 @@ export default function Analys() {
                       <div className="flex gap-2 h-2.5">
                         <div className="flex-1 bg-muted rounded-sm overflow-hidden">
                           <div
-                            className="h-full bg-green-500 rounded-sm transition-all duration-500"
+                            className="h-full bg-income rounded-sm transition-all duration-500"
                             style={{ width: `${incomeHeight}%` }}
                           />
                         </div>
                         <div className="flex-1 bg-muted rounded-sm overflow-hidden">
                           <div
-                            className="h-full bg-red-400 rounded-sm transition-all duration-500"
+                            className="h-full bg-expense rounded-sm transition-all duration-500"
                             style={{ width: `${expenseHeight}%` }}
                           />
                         </div>
@@ -309,11 +309,11 @@ export default function Analys() {
                 {/* Legend */}
                 <div className="flex items-center justify-center gap-6 pt-3 border-t border-border/60">
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-sm bg-green-500" />
+                    <div className="w-3 h-3 rounded-sm bg-income" />
                     <span className="text-caption">Inkomster</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <div className="w-3 h-3 rounded-sm bg-red-400" />
+                    <div className="w-3 h-3 rounded-sm bg-expense" />
                     <span className="text-caption">Utgifter</span>
                   </div>
                 </div>
@@ -372,7 +372,7 @@ export default function Analys() {
             ) : (
               <div className="flex flex-col items-center justify-center py-12">
                 <div className="rounded-full bg-muted p-3 mb-3">
-                  <TrendingDown size={20} className="text-muted-foreground" />
+                  <ArrowUpRight size={20} className="text-muted-foreground" />
                 </div>
                 <p className="text-caption">Inga utgifter för vald period</p>
               </div>

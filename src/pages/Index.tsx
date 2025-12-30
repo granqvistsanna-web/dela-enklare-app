@@ -233,8 +233,8 @@ const Index = () => {
                 {/* Total in */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-md bg-green-500/10">
-                      <ArrowDownLeft size={18} className="text-green-600 dark:text-green-400" />
+                    <div className="p-1.5 rounded-md bg-income-bg">
+                      <ArrowDownLeft size={18} className="text-income" />
                     </div>
                     <span className="text-caption font-medium">Total in</span>
                   </div>
@@ -246,8 +246,8 @@ const Index = () => {
                 {/* Total ut */}
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-md bg-red-500/10">
-                      <ArrowUpRight size={18} className="text-red-600 dark:text-red-400" />
+                    <div className="p-1.5 rounded-md bg-expense-bg">
+                      <ArrowUpRight size={18} className="text-expense" />
                     </div>
                     <span className="text-caption font-medium">Total ut</span>
                   </div>
@@ -260,12 +260,12 @@ const Index = () => {
                   {/* Netto */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-1.5 rounded-md ${totals.netto >= 0 ? 'bg-green-500/10' : 'bg-orange-500/10'}`}>
-                        <DollarSign size={18} className={totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'} />
+                      <div className={`p-1.5 rounded-md ${totals.netto >= 0 ? 'bg-income-bg' : 'bg-icon-pink-bg'}`}>
+                        <DollarSign size={18} className={totals.netto >= 0 ? 'text-income' : 'text-icon-pink'} />
                       </div>
                       <span className="text-caption font-medium">Netto</span>
                     </div>
-                    <span className={`text-xl font-bold tabular-nums ${totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                    <span className={`text-xl font-bold tabular-nums ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
                       {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
                     </span>
                   </div>
@@ -288,14 +288,14 @@ const Index = () => {
                   <div className="space-y-3">
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-green-600 dark:text-green-400 font-medium">Inkomster</span>
+                        <span className="text-income font-medium">Inkomster</span>
                         <span className="text-caption">
                           {visualPercentages.incomeWidth.toFixed(0)}%
                         </span>
                       </div>
                       <div className="h-7 bg-muted rounded-md overflow-hidden">
                         <div
-                          className="h-full bg-green-500 transition-all duration-500"
+                          className="h-full bg-income transition-all duration-500"
                           style={{ width: `${visualPercentages.incomeWidth}%` }}
                         />
                       </div>
@@ -303,14 +303,14 @@ const Index = () => {
 
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-red-600 dark:text-red-400 font-medium">Utgifter</span>
+                        <span className="text-expense font-medium">Utgifter</span>
                         <span className="text-caption">
                           {visualPercentages.expenseWidth.toFixed(0)}%
                         </span>
                       </div>
                       <div className="h-7 bg-muted rounded-md overflow-hidden">
                         <div
-                          className="h-full bg-red-500 transition-all duration-500"
+                          className="h-full bg-expense transition-all duration-500"
                           style={{ width: `${visualPercentages.expenseWidth}%` }}
                         />
                       </div>
@@ -390,8 +390,8 @@ const Index = () => {
                             }}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="p-1.5 rounded-md bg-red-500/10 shrink-0">
-                                <ArrowUpRight size={16} className="text-red-600 dark:text-red-400" />
+                              <div className="p-1.5 rounded-md bg-expense-bg shrink-0">
+                                <ArrowUpRight size={16} className="text-expense" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-foreground text-sm">{expense.description || expense.category}</p>
@@ -401,7 +401,7 @@ const Index = () => {
                                 </p>
                               </div>
                               <div className="text-right flex items-center gap-2">
-                                <p className="font-semibold text-red-600 dark:text-red-400 tabular-nums text-sm">
+                                <p className="font-semibold text-expense tabular-nums text-sm">
                                   -{expense.amount.toLocaleString('sv-SE')} kr
                                 </p>
                                 {canEdit && <span className="text-muted-foreground text-lg transition-transform group-hover:translate-x-0.5">›</span>}
@@ -428,8 +428,8 @@ const Index = () => {
                             }}
                           >
                             <div className="flex items-center gap-3">
-                              <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
-                                <ArrowDownLeft size={16} className="text-green-600 dark:text-green-400" />
+                              <div className="p-1.5 rounded-md bg-income-bg shrink-0">
+                                <ArrowDownLeft size={16} className="text-income" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-foreground text-sm">{income.note || 'Inkomst'}</p>
@@ -439,7 +439,7 @@ const Index = () => {
                                 </p>
                               </div>
                               <div className="text-right flex items-center gap-2">
-                                <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums text-sm">
+                                <p className="font-semibold text-income tabular-nums text-sm">
                                   +{(income.amount / 100).toLocaleString('sv-SE')} kr
                                 </p>
                                 {canEdit && <span className="text-muted-foreground text-lg transition-transform group-hover:translate-x-0.5">›</span>}
