@@ -67,20 +67,20 @@ export const MemberSummaryCard = ({
                 <div className="grid grid-cols-2 gap-4">
                   {/* Income */}
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                    <p className="text-label-mono">
                       Inkomst
                     </p>
-                    <p className="text-money-lg font-semibold text-income">
+                    <p className="text-number-lg text-income">
                       {member.totalIncomes.toLocaleString("sv-SE")} kr
                     </p>
                   </div>
 
                   {/* Expense */}
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground uppercase tracking-wide">
+                    <p className="text-label-mono">
                       Utgift
                     </p>
-                    <p className="text-money-lg font-semibold text-expense">
+                    <p className="text-number-lg text-expense">
                       {member.totalExpenses.toLocaleString("sv-SE")} kr
                     </p>
                   </div>

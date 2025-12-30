@@ -382,46 +382,102 @@
     color: hsl(var(--muted-foreground));
   }
 
-  /* Tabular nums for monetary values - Geist Mono */
-  .text-money {
-    @apply tabular-nums font-mono;
-    font-weight: 500;
-    letter-spacing: -0.01em;
+  /* ==============================================
+     PREMIUM NUMBER TYPOGRAPHY
+     - Sans-serif for all numbers (elegant, not technical)
+     - Tabular-nums for alignment
+     ============================================== */
+
+  /* Large display amounts - hero numbers */
+  .text-number-display {
+    @apply tabular-nums font-sans;
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
   }
 
-  .text-money-sm {
-    @apply tabular-nums font-mono;
-    font-size: 0.875rem;
-    font-weight: 500;
-    letter-spacing: -0.008em;
-  }
-
-  .text-money-lg {
-    @apply tabular-nums font-mono;
-    font-size: 1.5rem;
+  /* Medium numbers - card headers, summaries */
+  .text-number-lg {
+    @apply tabular-nums font-sans;
+    font-size: 1.25rem;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
 
-  .text-money-xl {
-    @apply tabular-nums font-mono;
-    font-size: 1.875rem;
-    font-weight: 700;
-    letter-spacing: -0.025em;
+  /* Standard inline amounts - lists, rows */
+  .text-number {
+    @apply tabular-nums font-sans;
+    font-weight: 500;
+    letter-spacing: -0.01em;
   }
 
-  /* Tabular data styling */
-  .text-tabular {
+  /* Small amounts - detail rows, breakdowns */
+  .text-number-sm {
+    @apply tabular-nums font-sans;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    letter-spacing: 0em;
+  }
+
+  /* Backwards compat aliases */
+  .text-money {
+    @apply text-number;
+  }
+
+  .text-money-lg {
+    @apply text-number-lg;
+  }
+
+  .text-money-sm {
+    @apply text-number-sm;
+  }
+
+  /* ==============================================
+     MONO TYPOGRAPHY - Reserved uses only
+     Small caps, labels, badges, timestamps
+     ============================================== */
+
+  /* Mono section labels - small caps headers */
+  .text-label-mono {
+    @apply font-mono;
+    font-size: 0.625rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Mono badge text - tags, status */
+  .text-badge-mono {
+    @apply font-mono;
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+  }
+
+  /* Timestamps - dates, times */
+  .text-timestamp {
     @apply tabular-nums font-mono;
+    font-size: 0.75rem;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Code/technical - IDs, codes */
+  .text-code {
+    @apply font-mono;
+    font-size: 0.8125rem;
     font-weight: 400;
     letter-spacing: 0em;
   }
 
-  /* Numeric values - for counts, percentages, etc. */
-  .text-numeric {
+  /* Tabular data - strict grid alignment */
+  .text-tabular {
     @apply tabular-nums font-mono;
-    font-weight: 500;
-    letter-spacing: -0.005em;
+    font-weight: 400;
+    letter-spacing: 0em;
   }
 
   /* Loading shimmer animation */

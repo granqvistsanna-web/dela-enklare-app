@@ -116,7 +116,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
         </div>
 
         <div className="flex items-center gap-2 sm:gap-3 shrink-0 pointer-events-none">
-          <span className="text-money-sm font-semibold text-foreground">
+          <span className="text-number text-foreground">
             {safeAmount.toLocaleString("sv-SE")} kr
           </span>
           {canModify && (
