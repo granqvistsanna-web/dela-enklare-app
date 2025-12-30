@@ -95,10 +95,9 @@ export function AddMembersModal({ isOpen, onClose, onSubmit, currentMembers }: A
                       ) : (
                         <div className="divide-y divide-border">
                           {availableUsers.map((u) => (
-                            <div
+                            <label
                               key={u.user_id}
                               className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer"
-                              onClick={() => toggleUser(u.user_id)}
                             >
                               <Checkbox
                                 checked={selectedUserIds.includes(u.user_id)}
@@ -110,7 +109,7 @@ export function AddMembersModal({ isOpen, onClose, onSubmit, currentMembers }: A
                                 </div>
                                 <span className="text-sm text-foreground">{u.name || 'Okänd'}</span>
                               </div>
-                            </div>
+                            </label>
                           ))}
                         </div>
                       )}
