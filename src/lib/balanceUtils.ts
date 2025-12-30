@@ -1,5 +1,6 @@
 import { GroupMember } from "@/hooks/useGroups";
 import { Expense } from "@/hooks/useExpenses";
+import { Settlement } from "@/hooks/useSettlements";
 
 export interface Balance {
   userId: string;
@@ -8,7 +9,8 @@ export interface Balance {
 
 export function calculateBalance(
   expenses: Expense[],
-  members: GroupMember[]
+  members: GroupMember[],
+  settlements: Settlement[] = []
 ): Balance[] {
   const balances: Record<string, number> = {};
 
@@ -49,6 +51,25 @@ export function calculateBalance(
       members.forEach((member) => {
         balances[member.user_id] -= perPerson;
       });
+    }
+  });
+
+  // Process settlements (Swish payments)
+  settlements.forEach((settlement) => {
+    // Validate settlement amount
+    if (!settlement.amount || settlement.amount <= 0 || !Number.isFinite(settlement.amount)) {
+      console.warn(`Invalid settlement amount: ${settlement.amount}, skipping settlement ${settlement.id}`);
+      return;
+    }
+
+    // The person who sent money (from_user) gets credited (they paid their debt)
+    if (balances[settlement.from_user] !== undefined) {
+      balances[settlement.from_user] += settlement.amount;
+    }
+
+    // The person who received money (to_user) gets debited (they received payment)
+    if (balances[settlement.to_user] !== undefined) {
+      balances[settlement.to_user] -= settlement.amount;
     }
   });
 

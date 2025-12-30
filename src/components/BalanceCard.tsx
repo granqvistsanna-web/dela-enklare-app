@@ -40,38 +40,11 @@ export function BalanceCard({
     });
   }, [settlements, selectedYear, selectedMonth]);
 
-  // Calculate balances from expenses
-  const rawBalances = useMemo(
-    () => calculateBalance(expenses, members),
-    [expenses, members]
+  // Calculate balances from expenses and settlements
+  const adjustedBalances = useMemo(
+    () => calculateBalance(expenses, members, monthlySettlements),
+    [expenses, members, monthlySettlements]
   );
-
-  // Adjust balances based on settlements for this month
-  const adjustedBalances = useMemo(() => {
-    const balanceMap: Record<string, number> = {};
-
-    // Initialize with raw balances
-    rawBalances.forEach((b) => {
-      balanceMap[b.userId] = b.balance;
-    });
-
-    // Apply settlements (reduce the debt/credit)
-    monthlySettlements.forEach((s) => {
-      // from_user paid to_user, so from_user's debt decreases (balance increases)
-      // and to_user's credit decreases (balance decreases)
-      if (balanceMap[s.from_user] !== undefined) {
-        balanceMap[s.from_user] += s.amount;
-      }
-      if (balanceMap[s.to_user] !== undefined) {
-        balanceMap[s.to_user] -= s.amount;
-      }
-    });
-
-    return members.map((m) => ({
-      userId: m.user_id,
-      balance: balanceMap[m.user_id] || 0,
-    }));
-  }, [rawBalances, monthlySettlements, members]);
 
   // Find who owes whom
   const { positiveUser, negativeUser, oweAmount } = useMemo(() => {
