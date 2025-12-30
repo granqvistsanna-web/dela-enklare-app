@@ -3,6 +3,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AddFab } from "@/components/AddFab";
+import { PullToRefresh } from "@/components/PullToRefresh";
 import { HeaderMenu } from "@/components/HeaderMenu";
 import { AddTransactionModal } from "@/components/AddTransactionModal";
 import { SwishModal } from "@/components/SwishModal";
@@ -38,9 +39,9 @@ const MONTHS = [
 export default function Aktivitet() {
   const { user } = useAuth();
   const { household, loading: householdLoading } = useGroups();
-  const { expenses, loading: expensesLoading, updateExpense, deleteExpense, addExpense, addExpenses } = useExpenses(household?.id);
-  const { incomes, loading: incomesLoading, updateIncome, deleteIncome, addIncome } = useIncomes(household?.id);
-  const { settlements, loading: settlementsLoading, addSettlement, updateSettlement, deleteSettlement } = useSettlements(household?.id);
+  const { expenses, loading: expensesLoading, updateExpense, deleteExpense, addExpense, addExpenses, refetch: refetchExpenses } = useExpenses(household?.id);
+  const { incomes, loading: incomesLoading, updateIncome, deleteIncome, addIncome, refetch: refetchIncomes } = useIncomes(household?.id);
+  const { settlements, loading: settlementsLoading, addSettlement, updateSettlement, deleteSettlement, refetch: refetchSettlements } = useSettlements(household?.id);
 
   const [searchQuery, setSearchQuery] = useState("");
   const [sortBy, setSortBy] = useState<SortOption>("date");
@@ -269,6 +270,10 @@ export default function Aktivitet() {
     await addExpenses(newExpenses);
   }, [addExpenses]);
 
+  const handleRefresh = useCallback(async () => {
+    await Promise.all([refetchExpenses(), refetchIncomes(), refetchSettlements()]);
+  }, [refetchExpenses, refetchIncomes, refetchSettlements]);
+
   if (loading) {
     return (
       <div className="pt-14 lg:pt-0 lg:pl-64">
@@ -357,8 +362,9 @@ export default function Aktivitet() {
         </div>
 
         {/* Activity list grouped by month */}
-        {groupedByMonth.length > 0 ? (
-          <div className="space-y-6">
+        <PullToRefresh onRefresh={handleRefresh}>
+          {groupedByMonth.length > 0 ? (
+            <div className="space-y-6">
             {groupedByMonth.map(({ monthKey, items }, groupIdx) => {
               const [year, month] = monthKey.split('-');
               const monthName = MONTHS[parseInt(month) - 1];
@@ -453,6 +459,7 @@ export default function Aktivitet() {
             )}
           </div>
         )}
+        </PullToRefresh>
       </main>
 
       {/* Add FAB */}
