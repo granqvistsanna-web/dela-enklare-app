@@ -24,6 +24,7 @@ export type Database = {
           group_id: string
           id: string
           paid_by: string
+          splits: Json | null
         }
         Insert: {
           amount: number
@@ -34,6 +35,7 @@ export type Database = {
           group_id: string
           id?: string
           paid_by: string
+          splits?: Json | null
         }
         Update: {
           amount?: number
@@ -44,6 +46,7 @@ export type Database = {
           group_id?: string
           id?: string
           paid_by?: string
+          splits?: Json | null
         }
         Relationships: [
           {
