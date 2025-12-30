@@ -35,6 +35,7 @@ const Index = () => {
     addExpense,
     addExpenses,
     updateExpense,
+    deleteExpense,
   } = useExpenses(household?.id);
 
   const {
@@ -42,6 +43,7 @@ const Index = () => {
     loading: incomesLoading,
     addIncome,
     updateIncome,
+    deleteIncome,
   } = useIncomes(household?.id);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -455,6 +457,11 @@ const Index = () => {
           setIsEditExpenseModalOpen(false);
           setEditingExpense(null);
         }}
+        onDelete={async (expenseId) => {
+          await deleteExpense(expenseId);
+          setIsEditExpenseModalOpen(false);
+          setEditingExpense(null);
+        }}
         expense={editingExpense}
         members={household.members}
       />
@@ -474,6 +481,11 @@ const Index = () => {
             repeat: updatedIncome.repeat,
             included_in_split: updatedIncome.included_in_split,
           });
+          setIsEditIncomeModalOpen(false);
+          setEditingIncome(null);
+        }}
+        onDelete={async (incomeId) => {
+          await deleteIncome(incomeId);
           setIsEditIncomeModalOpen(false);
           setEditingIncome(null);
         }}

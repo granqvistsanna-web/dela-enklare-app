@@ -13,6 +13,7 @@ interface EditIncomeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (income: Income) => void;
+  onDelete?: (incomeId: string) => void;
   income: Income | null;
   members: GroupMember[];
 }
@@ -23,6 +24,7 @@ export function EditIncomeModal({
   isOpen,
   onClose,
   onSave,
+  onDelete,
   income,
   members,
 }: EditIncomeModalProps) {
@@ -231,9 +233,26 @@ export function EditIncomeModal({
                   </Label>
                 </div>
 
-                <Button type="submit" className="w-full">
-                  Spara ändringar
-                </Button>
+                <div className="flex gap-3">
+                  {onDelete && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => {
+                        if (income) {
+                          onDelete(income.id);
+                          onClose();
+                        }
+                      }}
+                    >
+                      Ta bort
+                    </Button>
+                  )}
+                  <Button type="submit" className={onDelete ? "flex-1" : "w-full"}>
+                    Spara
+                  </Button>
+                </div>
               </form>
             </div>
           </motion.div>
