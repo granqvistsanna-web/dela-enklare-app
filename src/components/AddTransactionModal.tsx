@@ -56,7 +56,8 @@ export function AddTransactionModal({
   // Expense-specific fields
   const [category, setCategory] = useState(DEFAULT_CATEGORIES[0].id);
   const [description, setDescription] = useState("");
-  const [useCustomSplit, setUseCustomSplit] = useState(false);
+  const [distributionMode, setDistributionMode] = useState<"equal" | "self" | "select" | "custom">("equal");
+  const [selectedParticipants, setSelectedParticipants] = useState<Set<string>>(new Set());
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
 
   // Income-specific fields
@@ -64,18 +65,38 @@ export function AddTransactionModal({
   const [note, setNote] = useState("");
   const [includedInSplit, setIncludedInSplit] = useState(true);
 
-  // Initialize custom splits for expenses
+  // Initialize splits based on distribution mode
   useEffect(() => {
-    if (useCustomSplit && amount && members.length > 0 && transactionType === "expense") {
-      const totalAmount = parseFloat(amount) || 0;
+    if (!amount || members.length === 0 || transactionType !== "expense") return;
+
+    const totalAmount = parseFloat(amount) || 0;
+    const splits: Record<string, string> = {};
+
+    if (distributionMode === "custom") {
+      // Equal split as starting point for custom mode
       const perPerson = totalAmount / members.length;
-      const splits: Record<string, string> = {};
       members.forEach((member) => {
         splits[member.user_id] = perPerson.toFixed(2);
       });
       setCustomSplits(splits);
+    } else if (distributionMode === "self") {
+      // Only the current user (payer) gets 100%
+      members.forEach((member) => {
+        splits[member.user_id] = member.user_id === user?.id ? totalAmount.toFixed(2) : "0.00";
+      });
+      setCustomSplits(splits);
+    } else if (distributionMode === "select") {
+      // Split among selected participants
+      const selected = selectedParticipants.size > 0
+        ? Array.from(selectedParticipants)
+        : members.map(m => m.user_id);
+      const perPerson = totalAmount / selected.length;
+      members.forEach((member) => {
+        splits[member.user_id] = selected.includes(member.user_id) ? perPerson.toFixed(2) : "0.00";
+      });
+      setCustomSplits(splits);
     }
-  }, [useCustomSplit, members, amount, transactionType]);
+  }, [distributionMode, members, amount, transactionType, user?.id, selectedParticipants]);
 
 
   const handleSplitChange = (userId: string, value: string) => {
@@ -83,6 +104,30 @@ export function AddTransactionModal({
       ...prev,
       [userId]: value,
     }));
+  };
+
+  const handleToggleParticipant = (userId: string) => {
+    setSelectedParticipants((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
+      }
+      // Ensure at least one participant is selected
+      if (newSet.size === 0) {
+        return prev;
+      }
+      return newSet;
+    });
+  };
+
+  const handleModeChange = (mode: "equal" | "self" | "select" | "custom") => {
+    setDistributionMode(mode);
+    // Initialize selected participants to all members when switching to select mode
+    if (mode === "select" && selectedParticipants.size === 0) {
+      setSelectedParticipants(new Set(members.map(m => m.user_id)));
+    }
   };
 
   const calculateSplitSum = () => {
@@ -98,7 +143,8 @@ export function AddTransactionModal({
     setRepeat("none");
     setCategory(DEFAULT_CATEGORIES[0].id);
     setDescription("");
-    setUseCustomSplit(false);
+    setDistributionMode("equal");
+    setSelectedParticipants(new Set());
     setCustomSplits({});
     setIncomeType("salary");
     setNote("");
@@ -143,8 +189,10 @@ export function AddTransactionModal({
       return false;
     }
 
-    // Validate custom splits if enabled
-    if (useCustomSplit) {
+    // Validate and build splits based on distribution mode
+    let splits: ExpenseSplit | null = null;
+
+    if (distributionMode !== "equal") {
       const splitSum = calculateSplitSum();
 
       // Validate all split values are valid numbers
@@ -162,11 +210,8 @@ export function AddTransactionModal({
         toast.error(`Summan av fördelningen (${splitSum.toFixed(2)} kr) måste vara lika med totala beloppet (${totalAmount.toFixed(2)} kr)`);
         return false;
       }
-    }
 
-    // Build splits object
-    let splits: ExpenseSplit | null = null;
-    if (useCustomSplit) {
+      // Build splits object
       splits = {};
       Object.entries(customSplits).forEach(([userId, value]) => {
         splits![userId] = parseFloat(value) || 0;
@@ -403,20 +448,124 @@ export function AddTransactionModal({
                         onChange={setRepeat}
                       />
 
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <Label className="text-sm text-muted-foreground">Fördelning</Label>
+                      <div className="space-y-3">
+                        <Label className="text-sm text-muted-foreground">Fördelning</Label>
+
+                        {/* Distribution mode chips */}
+                        <div className="flex gap-2 flex-wrap">
                           <button
                             type="button"
-                            onClick={() => setUseCustomSplit(!useCustomSplit)}
-                            className="text-sm text-primary hover:underline"
+                            onClick={() => handleModeChange("equal")}
+                            className={`px-3 py-2 sm:py-1.5 rounded-md border text-sm transition-colors active:scale-95 ${
+                              distributionMode === "equal"
+                                ? "border-foreground bg-secondary text-foreground"
+                                : "border-border hover:border-muted-foreground text-muted-foreground"
+                            }`}
                           >
-                            {useCustomSplit ? "Jämn delning" : "Anpassad delning"}
+                            Alla jämnt
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleModeChange("self")}
+                            className={`px-3 py-2 sm:py-1.5 rounded-md border text-sm transition-colors active:scale-95 ${
+                              distributionMode === "self"
+                                ? "border-foreground bg-secondary text-foreground"
+                                : "border-border hover:border-muted-foreground text-muted-foreground"
+                            }`}
+                          >
+                            Bara jag
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleModeChange("select")}
+                            className={`px-3 py-2 sm:py-1.5 rounded-md border text-sm transition-colors active:scale-95 ${
+                              distributionMode === "select"
+                                ? "border-foreground bg-secondary text-foreground"
+                                : "border-border hover:border-muted-foreground text-muted-foreground"
+                            }`}
+                          >
+                            Välj personer
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleModeChange("custom")}
+                            className={`px-3 py-2 sm:py-1.5 rounded-md border text-sm transition-colors active:scale-95 ${
+                              distributionMode === "custom"
+                                ? "border-foreground bg-secondary text-foreground"
+                                : "border-border hover:border-muted-foreground text-muted-foreground"
+                            }`}
+                          >
+                            Anpassad
                           </button>
                         </div>
 
-                        {useCustomSplit && amount && (
-                          <div className="space-y-3 p-3 sm:p-3 border border-border rounded-md bg-secondary/20">
+                        {/* Equal mode info */}
+                        {distributionMode === "equal" && (
+                          <p className="text-xs text-muted-foreground">
+                            Delas lika mellan alla gruppmedlemmar
+                          </p>
+                        )}
+
+                        {/* Self mode - preview */}
+                        {distributionMode === "self" && amount && (
+                          <div className="p-3 border border-border rounded-md bg-secondary/20">
+                            <p className="text-xs text-muted-foreground mb-2">
+                              Endast du betalar denna utgift
+                            </p>
+                            {members.map((member) => {
+                              const memberAmount = parseFloat(customSplits[member.user_id] || "0");
+                              const percentage = amount ? (memberAmount / parseFloat(amount)) * 100 : 0;
+                              return (
+                                <div key={member.user_id} className="flex items-center justify-between text-sm py-1">
+                                  <span className={member.user_id === user?.id ? "font-medium text-foreground" : "text-muted-foreground"}>
+                                    {member.name}
+                                  </span>
+                                  <span className={member.user_id === user?.id ? "font-medium text-foreground" : "text-muted-foreground"}>
+                                    {memberAmount.toFixed(2)} kr ({percentage.toFixed(0)}%)
+                                  </span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Select participants mode */}
+                        {distributionMode === "select" && amount && (
+                          <div className="space-y-3 p-3 border border-border rounded-md bg-secondary/20">
+                            <p className="text-xs text-muted-foreground mb-2">
+                              Välj vilka som ska dela på {parseFloat(amount).toFixed(2)} kr:
+                            </p>
+                            {members.map((member) => {
+                              const isSelected = selectedParticipants.has(member.user_id) || selectedParticipants.size === 0;
+                              const memberAmount = parseFloat(customSplits[member.user_id] || "0");
+                              const percentage = amount ? (memberAmount / parseFloat(amount)) * 100 : 0;
+                              return (
+                                <div key={member.user_id} className="flex items-center gap-3">
+                                  <Checkbox
+                                    id={`participant-${member.user_id}`}
+                                    checked={isSelected}
+                                    onCheckedChange={() => handleToggleParticipant(member.user_id)}
+                                  />
+                                  <Label
+                                    htmlFor={`participant-${member.user_id}`}
+                                    className="flex-1 text-sm cursor-pointer flex items-center justify-between"
+                                  >
+                                    <span className={isSelected ? "text-foreground" : "text-muted-foreground"}>
+                                      {member.name}
+                                    </span>
+                                    <span className={isSelected ? "text-foreground font-medium" : "text-muted-foreground"}>
+                                      {memberAmount.toFixed(2)} kr ({percentage.toFixed(0)}%)
+                                    </span>
+                                  </Label>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Custom mode - manual amounts */}
+                        {distributionMode === "custom" && amount && (
+                          <div className="space-y-3 p-3 border border-border rounded-md bg-secondary/20">
                             <p className="text-xs text-muted-foreground mb-2">
                               Fördela {parseFloat(amount).toFixed(2)} kr mellan gruppmedlemmar:
                             </p>
@@ -451,12 +600,6 @@ export function AddTransactionModal({
                               </div>
                             </div>
                           </div>
-                        )}
-
-                        {!useCustomSplit && (
-                          <p className="text-xs text-muted-foreground">
-                            Delas lika mellan alla gruppmedlemmar
-                          </p>
                         )}
                       </div>
                     </>
