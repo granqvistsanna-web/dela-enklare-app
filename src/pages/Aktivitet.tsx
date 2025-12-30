@@ -443,10 +443,7 @@ export default function Aktivitet() {
       </main>
 
       {/* Add FAB */}
-      <AddFab 
-        onClick={() => setIsAddModalOpen(true)} 
-        onSwishClick={() => setIsSwishModalOpen(true)}
-      />
+      <AddFab onClick={() => setIsAddModalOpen(true)} />
 
       {/* Modals */}
       <AddTransactionModal
