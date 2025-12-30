@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useIncomes } from "@/hooks/useIncomes";
-import { BarChart3, ArrowDownLeft, ArrowUpRight, DollarSign } from "lucide-react";
+import { BarChart3, ArrowUpRight } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -209,18 +209,13 @@ export default function Analys() {
           {/* Income */}
           <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '100ms' }}>
             <CardContent className="p-5">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-income-bg">
-                  <ArrowDownLeft size={18} className="text-income" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-subheading">
-                    Inkomster
-                  </p>
-                  <p className="text-2xl font-semibold text-foreground tabular-nums">
-                    {totals.totalIncomes.toLocaleString("sv-SE")} kr
-                  </p>
-                </div>
+              <div className="space-y-1">
+                <p className="text-subheading">
+                  Inkomster
+                </p>
+                <p className="text-2xl font-semibold text-foreground tabular-nums">
+                  {totals.totalIncomes.toLocaleString("sv-SE")} kr
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -228,18 +223,13 @@ export default function Analys() {
           {/* Expenses */}
           <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '150ms' }}>
             <CardContent className="p-5">
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-expense-bg">
-                  <ArrowUpRight size={18} className="text-expense" />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-subheading">
-                    Utgifter
-                  </p>
-                  <p className="text-2xl font-semibold text-foreground tabular-nums">
-                    {totals.totalExpenses.toLocaleString("sv-SE")} kr
-                  </p>
-                </div>
+              <div className="space-y-1">
+                <p className="text-subheading">
+                  Utgifter
+                </p>
+                <p className="text-2xl font-semibold text-foreground tabular-nums">
+                  {totals.totalExpenses.toLocaleString("sv-SE")} kr
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -247,18 +237,13 @@ export default function Analys() {
           {/* Balance */}
           <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '200ms' }}>
             <CardContent className="p-5">
-              <div className="flex items-start gap-3">
-                <div className={`p-2 rounded-lg ${totals.netto >= 0 ? 'bg-income-bg' : 'bg-icon-pink-bg'}`}>
-                  <DollarSign size={18} className={totals.netto >= 0 ? 'text-income' : 'text-icon-pink'} />
-                </div>
-                <div className="space-y-1">
-                  <p className="text-subheading">
-                    Netto
-                  </p>
-                  <p className={`text-2xl font-semibold tabular-nums ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
-                    {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
-                  </p>
-                </div>
+              <div className="space-y-1">
+                <p className="text-subheading">
+                  Netto
+                </p>
+                <p className={`text-2xl font-semibold tabular-nums ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
+                  {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
+                </p>
               </div>
             </CardContent>
           </Card>
