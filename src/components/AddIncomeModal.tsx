@@ -181,7 +181,7 @@ export function AddIncomeModal({
               transition={{ duration: 0.15 }}
               className="fixed inset-0 z-50 flex items-center justify-center p-4"
             >
-              <div className="bg-background border border-border rounded-md w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6">
+              <div className="bg-white border border-border rounded-md w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto overflow-x-hidden p-4 sm:p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-lg font-medium text-foreground">
                     Ny inkomst
