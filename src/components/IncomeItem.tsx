@@ -76,8 +76,14 @@ export const IncomeItem = memo(function IncomeItem({
         className={`w-full text-left appearance-none border-0 flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? 'cursor-pointer active:bg-secondary/50' : ''}`}
       >
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
-          <div className="p-1.5 rounded-md bg-income-bg shrink-0">
-            <ArrowDownLeft size={16} className="text-income" />
+          <div className="relative shrink-0">
+            <div className="p-1.5 rounded-md bg-income-bg">
+              <ArrowDownLeft size={16} className="text-income" />
+            </div>
+            {/* User avatar initials */}
+            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[9px] font-medium flex items-center justify-center ring-2 ring-background">
+              {recipient?.name?.charAt(0).toUpperCase() || "?"}
+            </div>
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
@@ -96,7 +102,9 @@ export const IncomeItem = memo(function IncomeItem({
               )}
             </div>
             <p className="text-xs text-muted-foreground mt-0.5">
-              {recipient?.name || "Okänd"} · {formattedDate}
+              <span className="font-medium text-foreground/80">{recipient?.name || "Okänd"}</span>
+              <span className="mx-1">·</span>
+              {formattedDate}
             </p>
             {income.note && (
               <p className="text-xs text-muted-foreground mt-1 truncate">
