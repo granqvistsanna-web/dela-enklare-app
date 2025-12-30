@@ -257,8 +257,8 @@ export default function Aktivitet() {
 
   if (loading) {
     return (
-      <div className="lg:pl-64">
-        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+      <div className="pt-14 lg:pt-0 lg:pl-64">
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
           <div className="h-8 w-32 rounded-md skeleton-shimmer mb-6" />
           <div className="h-24 rounded-lg skeleton-shimmer mb-6" />
           <div className="space-y-4">
@@ -276,8 +276,8 @@ export default function Aktivitet() {
 
   if (!household) {
     return (
-      <div className="lg:pl-64">
-        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+      <div className="pt-14 lg:pt-0 lg:pl-64">
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
             <div className="rounded-full bg-muted p-4 mb-4">
               <FileText size={28} className="text-muted-foreground" />
@@ -290,8 +290,8 @@ export default function Aktivitet() {
   }
 
   return (
-    <div className="lg:pl-64">
-      <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+    <div className="pt-14 lg:pt-0 lg:pl-64">
+      <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
         <h1 className="text-heading text-2xl mb-6 animate-fade-in">Aktivitet</h1>
 
         {/* Search and filters */}

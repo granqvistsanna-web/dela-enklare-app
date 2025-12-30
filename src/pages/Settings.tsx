@@ -163,8 +163,8 @@ const Settings = () => {
   };
 
   return (
-    <div className="lg:pl-64">
-      <main className="container max-w-3xl py-8 sm:py-12 px-4 sm:px-6 pb-24 lg:pb-8 mx-auto">
+    <div className="pt-14 lg:pt-0 lg:pl-64">
+      <main className="container max-w-3xl py-8 sm:py-12 px-4 sm:px-6 pb-6 lg:pb-8 mx-auto">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-foreground">Inställningar</h1>
         </div>
