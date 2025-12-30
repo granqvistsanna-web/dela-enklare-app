@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useIncomes } from "@/hooks/useIncomes";
-import { BarChart3, ArrowUpRight } from "lucide-react";
+import { BarChart3, ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -25,6 +25,7 @@ export default function Analys() {
   const currentDate = new Date();
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth() + 1);
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(new Set());
 
   const loading = householdLoading || expensesLoading || incomesLoading;
 
@@ -53,15 +54,22 @@ export default function Analys() {
 
   // Group expenses by category
   const expensesByCategory = useMemo(() => {
-    const categoryMap = new Map<string, number>();
+    const categoryMap = new Map<string, { amount: number; expenses: typeof filteredData.filteredExpenses }>();
 
     filteredData.filteredExpenses.forEach(expense => {
-      const current = categoryMap.get(expense.category) || 0;
-      categoryMap.set(expense.category, current + expense.amount);
+      const current = categoryMap.get(expense.category) || { amount: 0, expenses: [] };
+      categoryMap.set(expense.category, {
+        amount: current.amount + expense.amount,
+        expenses: [...current.expenses, expense]
+      });
     });
 
     return Array.from(categoryMap.entries())
-      .map(([category, amount]) => ({ category, amount }))
+      .map(([category, data]) => ({
+        category,
+        amount: data.amount,
+        expenses: data.expenses.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      }))
       .sort((a, b) => b.amount - a.amount);
   }, [filteredData.filteredExpenses]);
 
@@ -105,6 +113,18 @@ export default function Analys() {
   }, [expenses, incomes, selectedYear, selectedMonth]);
 
   const yearOptions = Array.from({ length: 3 }, (_, i) => currentDate.getFullYear() - i);
+
+  const toggleCategory = (category: string) => {
+    setExpandedCategories(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(category)) {
+        newSet.delete(category);
+      } else {
+        newSet.add(category);
+      }
+      return newSet;
+    });
+  };
 
   if (loading) {
     return (
@@ -339,17 +359,28 @@ export default function Analys() {
                   const percentage = total > 0
                     ? (item.amount / total) * 100
                     : 0;
+                  const isExpanded = expandedCategories.has(item.category);
 
                   return (
-                    <div 
-                      key={item.category} 
+                    <div
+                      key={item.category}
                       className="space-y-2 animate-fade-in"
                       style={{ animationDelay: `${350 + idx * 30}ms` }}
                     >
-                      <div className="flex items-baseline justify-between">
-                        <span className="text-sm font-medium text-foreground">
-                          {item.category}
-                        </span>
+                      <div
+                        className="flex items-baseline justify-between cursor-pointer hover:opacity-80 transition-opacity"
+                        onClick={() => toggleCategory(item.category)}
+                      >
+                        <div className="flex items-center gap-2">
+                          {isExpanded ? (
+                            <ChevronDown size={16} className="text-muted-foreground" />
+                          ) : (
+                            <ChevronRight size={16} className="text-muted-foreground" />
+                          )}
+                          <span className="text-sm font-medium text-foreground">
+                            {item.category}
+                          </span>
+                        </div>
                         <span className="text-caption text-numeric">
                           {item.amount.toLocaleString("sv-SE")} kr · {percentage.toFixed(0)}%
                         </span>
@@ -360,6 +391,33 @@ export default function Analys() {
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
+
+                      {isExpanded && (
+                        <div className="mt-3 ml-6 space-y-2 border-l-2 border-border/40 pl-3">
+                          {item.expenses.map((expense) => (
+                            <div
+                              key={expense.id}
+                              className="flex items-start justify-between py-2 text-sm"
+                            >
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-foreground truncate">
+                                  {expense.description}
+                                </p>
+                                <p className="text-caption text-xs">
+                                  {new Date(expense.date).toLocaleDateString("sv-SE", {
+                                    year: "numeric",
+                                    month: "short",
+                                    day: "numeric"
+                                  })}
+                                </p>
+                              </div>
+                              <span className="text-numeric font-medium ml-3 flex-shrink-0">
+                                {expense.amount.toLocaleString("sv-SE")} kr
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   );
                 })}
