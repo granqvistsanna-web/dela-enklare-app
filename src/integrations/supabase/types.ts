@@ -111,6 +111,56 @@ export type Database = {
         }
         Relationships: []
       }
+      incomes: {
+        Row: {
+          amount: number
+          created_at: string
+          date: string
+          group_id: string
+          id: string
+          included_in_split: boolean
+          note: string | null
+          recipient: string
+          repeat: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          date?: string
+          group_id: string
+          id?: string
+          included_in_split?: boolean
+          note?: string | null
+          recipient: string
+          repeat?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          date?: string
+          group_id?: string
+          id?: string
+          included_in_split?: boolean
+          note?: string | null
+          recipient?: string
+          repeat?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incomes_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "groups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           created_at: string

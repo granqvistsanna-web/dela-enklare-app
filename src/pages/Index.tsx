@@ -305,49 +305,55 @@ const Index = () => {
             <Card>
               <CardContent className="p-0">
                 <div className="divide-y divide-border/40">
-                  {latestActivities.map((item) => (
-                    item.type === 'expense' ? (
-                      <div key={`expense-${item.data.id}`} className="p-3.5 notion-hover cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <div className="p-1.5 rounded-md bg-red-500/10 shrink-0">
-                            <TrendingDown size={16} className="text-red-600 dark:text-red-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground text-sm">{item.data.description || item.data.category}</p>
-                            <p className="text-caption">
-                              {household.members.find(m => m.user_id === item.data.paid_by)?.name} •{' '}
-                              {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold text-red-600 dark:text-red-400 tabular-nums text-sm">
-                              -{item.data.amount.toLocaleString('sv-SE')} kr
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    ) : (
-                      <div key={`income-${item.data.id}`} className="p-3.5 notion-hover cursor-pointer">
-                        <div className="flex items-center gap-3">
-                          <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
-                            <DollarSign size={16} className="text-green-600 dark:text-green-400" />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="font-medium text-foreground text-sm">{item.data.note || 'Inkomst'}</p>
-                            <p className="text-caption">
-                              {household.members.find(m => m.user_id === item.data.recipient)?.name} •{' '}
-                              {new Date(item.data.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums text-sm">
-                              +{(item.data.amount / 100).toLocaleString('sv-SE')} kr
-                            </p>
+                  {latestActivities.map((item) => {
+                    if (item.type === 'expense') {
+                      const expense = item.data as Expense;
+                      return (
+                        <div key={`expense-${expense.id}`} className="p-3.5 notion-hover cursor-pointer">
+                          <div className="flex items-center gap-3">
+                            <div className="p-1.5 rounded-md bg-red-500/10 shrink-0">
+                              <TrendingDown size={16} className="text-red-600 dark:text-red-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground text-sm">{expense.description || expense.category}</p>
+                              <p className="text-caption">
+                                {household.members.find(m => m.user_id === expense.paid_by)?.name} •{' '}
+                                {new Date(expense.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold text-red-600 dark:text-red-400 tabular-nums text-sm">
+                                -{expense.amount.toLocaleString('sv-SE')} kr
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    )
-                  ))}
+                      );
+                    } else {
+                      const income = item.data as Income;
+                      return (
+                        <div key={`income-${income.id}`} className="p-3.5 notion-hover cursor-pointer">
+                          <div className="flex items-center gap-3">
+                            <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
+                              <DollarSign size={16} className="text-green-600 dark:text-green-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium text-foreground text-sm">{income.note || 'Inkomst'}</p>
+                              <p className="text-caption">
+                                {household.members.find(m => m.user_id === income.recipient)?.name} •{' '}
+                                {new Date(income.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums text-sm">
+                                +{(income.amount / 100).toLocaleString('sv-SE')} kr
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+                  })}
                 </div>
               </CardContent>
             </Card>
