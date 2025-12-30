@@ -438,7 +438,7 @@ export function AddTransactionModal({
                           value={date}
                           onChange={(e) => setDate(e.target.value)}
                           required
-                          className="h-12 sm:h-11 text-base sm:text-sm max-w-full min-w-0"
+                          className="h-12 sm:h-11 text-base sm:text-sm !w-auto !max-w-full min-w-0"
                         />
                       </div>
 
@@ -641,7 +641,7 @@ export function AddTransactionModal({
                           value={date}
                           onChange={(e) => setDate(e.target.value)}
                           required
-                          className="h-12 sm:h-11 text-base sm:text-sm max-w-full min-w-0"
+                          className="h-12 sm:h-11 text-base sm:text-sm !w-auto !max-w-full min-w-0"
                         />
                       </div>
 
