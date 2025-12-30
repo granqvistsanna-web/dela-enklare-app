@@ -48,7 +48,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
   };
 
   return (
-    <div className="group relative overflow-hidden rounded-lg">
+    <div className="group relative overflow-hidden rounded-lg touch-pan-y">
       {/* Delete background - shown when swiping */}
       {canModify && onDelete && (
         <div
@@ -72,7 +72,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
         onClick={() => canModify && onEdit?.(expense)}
         className={`
           w-full text-left appearance-none border-0 rounded-lg
-          flex items-center justify-between py-4 px-4 sm:px-6
+          flex items-center justify-between py-5 px-4 sm:px-6 min-h-[72px]
           bg-background transition-all duration-150
           ${canModify && onEdit
             ? "cursor-pointer hover:bg-secondary/40 active:bg-secondary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"

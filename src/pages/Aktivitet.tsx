@@ -444,21 +444,22 @@ export default function Aktivitet() {
           </div>
         ) : (
           <Card className="border-dashed border-2 bg-muted/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="rounded-full bg-muted p-4 mb-4">
-                <Plus size={24} className="text-muted-foreground" />
+            <CardContent className="flex flex-col items-center justify-center py-16 px-6">
+              <div className="rounded-full bg-muted p-5 mb-5">
+                <Plus size={28} className="text-muted-foreground" />
               </div>
-              <p className="font-medium text-foreground mb-1">Inga aktiviteter</p>
-              <p className="text-caption text-center mb-4">
-                {searchQuery ? 'Inga resultat matchade din sökning' : 'Börja genom att lägga till en utgift eller inkomst'}
+              <p className="font-medium text-foreground text-lg mb-2">Inga aktiviteter</p>
+              <p className="text-caption text-center mb-6 max-w-xs">
+                {searchQuery ? 'Inga resultat matchade din sökning' : 'Börja genom att lägga till din första utgift eller inkomst'}
               </p>
               {!searchQuery && (
-                <button
+                <Button
                   onClick={() => setIsAddModalOpen(true)}
-                  className="text-sm font-medium text-primary hover:opacity-70 transition-opacity"
+                  className="gap-2"
                 >
-                  Lägg till transaktion →
-                </button>
+                  <Plus size={18} />
+                  Lägg till transaktion
+                </Button>
               )}
             </CardContent>
           </Card>
