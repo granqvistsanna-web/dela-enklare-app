@@ -83,7 +83,7 @@ export function BalanceCard({
   if (members.length < 2) {
     return (
       <div className="space-y-2 sm:space-y-3">
-        <h2 className="text-subheading">Balans</h2>
+        <h2 className="text-label-mono">Balans</h2>
         <Card>
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center gap-3 text-muted-foreground">
@@ -100,7 +100,7 @@ export function BalanceCard({
   if (oweAmount < 1) {
     return (
       <div className="space-y-2 sm:space-y-3">
-        <h2 className="text-subheading">Balans</h2>
+        <h2 className="text-label-mono">Balans</h2>
         <Card className="border-income/20 bg-income-bg">
           <CardContent className="p-4 sm:p-5">
             <div className="flex items-center gap-3">
@@ -118,7 +118,7 @@ export function BalanceCard({
 
             {monthlySettlements.length > 0 && (
               <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-border/60">
-                <p className="text-xs text-muted-foreground mb-2">
+                <p className="text-label-mono mb-2">
                   Avräkningar denna månad
                 </p>
                 <div className="space-y-1.5">
@@ -150,7 +150,7 @@ export function BalanceCard({
 
   return (
     <div className="space-y-2 sm:space-y-3">
-      <h2 className="text-subheading">Balans</h2>
+      <h2 className="text-label-mono">Balans</h2>
       <Card>
         <CardContent className="p-4 sm:p-5">
           {/* Balance overview */}
@@ -231,7 +231,7 @@ export function BalanceCard({
 
             {/* Individual balances - simplified */}
             <div className="pt-3 sm:pt-4 border-t border-border/60">
-              <p className="text-xs text-muted-foreground mb-2 sm:mb-3">Kvar att betala</p>
+              <p className="text-label-mono mb-2 sm:mb-3">Kvar att betala</p>
               <div className="space-y-2">
                 {adjustedBalances.map((balance) => {
                   const member = members.find((m) => m.user_id === balance.userId);
@@ -272,7 +272,7 @@ export function BalanceCard({
             {/* Settlement history for this month */}
             {monthlySettlements.length > 0 && (
               <div className="pt-3 sm:pt-4 border-t border-border/60">
-                <p className="text-xs text-muted-foreground mb-2">
+                <p className="text-label-mono mb-2">
                   Avräkningar denna månad
                 </p>
                 <div className="space-y-1.5">

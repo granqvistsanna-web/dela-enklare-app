@@ -43,7 +43,7 @@ export const MemberSummaryCard = ({
 
   return (
     <div className="space-y-3">
-      <h2 className="text-subheading">Per medlem</h2>
+      <h2 className="text-label-mono">Per medlem</h2>
       <Card className="shadow-notion">
         <CardContent className="p-0">
           <div className="divide-y divide-border/40">
