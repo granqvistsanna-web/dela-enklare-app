@@ -145,10 +145,34 @@ export function useIncomes(groupId?: string) {
     incomeId: string,
     updates: Partial<Omit<Income, "id" | "created_at" | "updated_at">>
   ) => {
+    if (!user) {
+      toast.error("Du måste vara inloggad");
+      return;
+    }
+
     try {
+      // First, verify the user owns this income
+      const income = incomes.find(i => i.id === incomeId);
+      if (!income) {
+        toast.error("Inkomsten hittades inte");
+        return;
+      }
+
+      if (income.recipient !== user.id) {
+        toast.error("Du kan bara redigera inkomster som tillhör dig");
+        return;
+      }
+
+      // Prevent changing the recipient
+      if (updates.recipient && updates.recipient !== user.id) {
+        toast.error("Du kan inte ändra mottagaren för en inkomst");
+        return;
+      }
+
       const { error } = await (supabase.from("incomes" as any) as any)
         .update(updates)
-        .eq("id", incomeId);
+        .eq("id", incomeId)
+        .eq("recipient", user.id); // Additional safety check at DB level
 
       if (error) throw error;
 
