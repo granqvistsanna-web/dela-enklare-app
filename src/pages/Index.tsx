@@ -539,6 +539,7 @@ const Index = () => {
             date: updatedIncome.date,
             repeat: updatedIncome.repeat,
             included_in_split: updatedIncome.included_in_split,
+            recipient: updatedIncome.recipient,
           });
           setIsEditIncomeModalOpen(false);
           setEditingIncome(null);
@@ -549,6 +550,7 @@ const Index = () => {
           setEditingIncome(null);
         }}
         income={editingIncome}
+        members={household.members}
       />
     </div>
   );
