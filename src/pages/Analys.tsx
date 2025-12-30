@@ -161,7 +161,7 @@ export default function Analys() {
           <CardContent className="p-5">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-subheading">
+                <label className="text-label-mono">
                   Månad
                 </label>
                 <Select
@@ -181,7 +181,7 @@ export default function Analys() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-subheading">
+                <label className="text-label-mono">
                   År
                 </label>
                 <Select
@@ -210,7 +210,7 @@ export default function Analys() {
           <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '100ms' }}>
             <CardContent className="p-5">
               <div className="space-y-1">
-                <p className="text-subheading">
+                <p className="text-label-mono">
                   Inkomster
                 </p>
                 <p className="text-money-xl font-semibold text-foreground">
@@ -224,7 +224,7 @@ export default function Analys() {
           <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '150ms' }}>
             <CardContent className="p-5">
               <div className="space-y-1">
-                <p className="text-subheading">
+                <p className="text-label-mono">
                   Utgifter
                 </p>
                 <p className="text-money-xl font-semibold text-foreground">
@@ -238,7 +238,7 @@ export default function Analys() {
           <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '200ms' }}>
             <CardContent className="p-5">
               <div className="space-y-1">
-                <p className="text-subheading">
+                <p className="text-label-mono">
                   Netto
                 </p>
                 <p className={`text-money-xl font-semibold ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>

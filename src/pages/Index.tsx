@@ -250,7 +250,7 @@ const Index = () => {
         <div className="grid gap-4 lg:grid-cols-2 mb-6">
           {/* Left column: Summering */}
           <div className="space-y-3 animate-fade-in" style={{ animationDelay: '100ms' }}>
-            <h2 className="text-subheading">
+            <h2 className="text-label-mono">
               Översikt
             </h2>
 
@@ -302,7 +302,7 @@ const Index = () => {
 
           {/* Right column: Visual diagram */}
           <div className="space-y-3 animate-fade-in" style={{ animationDelay: '150ms' }}>
-            <h2 className="text-subheading">
+            <h2 className="text-label-mono">
               Fördelning
             </h2>
 
@@ -390,7 +390,7 @@ const Index = () => {
         {/* Latest activities */}
         <div className="mb-6 animate-fade-in" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-subheading">
+            <h2 className="text-label-mono">
               Senaste aktiviteter
             </h2>
             <button
