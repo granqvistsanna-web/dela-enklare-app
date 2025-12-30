@@ -24,11 +24,11 @@ export function SettlementItem({
 
   return (
     <motion.div
-      whileHover={canEdit ? { backgroundColor: "hsl(var(--secondary) / 0.5)" } : undefined}
-      whileTap={canEdit ? { scale: 0.995 } : undefined}
-      className={`py-4 px-3 sm:px-4 min-h-[64px] rounded-lg bg-card transition-colors touch-pan-y ${
+      whileHover={canEdit ? { x: 2, backgroundColor: "hsl(var(--secondary) / 0.3)" } : undefined}
+      whileTap={canEdit ? { scale: 0.99 } : undefined}
+      className={`py-3.5 px-0 min-h-[68px] bg-background transition-all duration-150 touch-pan-y ${
         canEdit
-          ? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          ? "cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
           : "cursor-default"
       }`}
       style={{ animationDelay: `${index * 30}ms` }}
@@ -63,25 +63,30 @@ export function SettlementItem({
               Betalning
             </span>
           </div>
-          <p className="text-caption truncate">
-            {fromMember?.name || "Okänd"} → {toMember?.name || "Okänd"} •{" "}
-            {new Date(settlement.date).toLocaleDateString("sv-SE", {
-              day: "numeric",
-              month: "short",
-            })}
-          </p>
+          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <span className="font-medium text-foreground/80 truncate">
+              {fromMember?.name || "Okänd"} → {toMember?.name || "Okänd"}
+            </span>
+            <span>·</span>
+            <span className="shrink-0">
+              {new Date(settlement.date).toLocaleDateString("sv-SE", {
+                day: "numeric",
+                month: "short",
+              })}
+            </span>
+          </div>
         </div>
-        <div className="text-right flex items-center gap-2 shrink-0">
-          <p className="text-number text-primary">
-            {Math.round(settlement.amount).toLocaleString("sv-SE")} kr
-          </p>
+        <div className="text-right flex items-center gap-2.5 shrink-0">
+          <div className="text-right">
+            <span className="text-base sm:text-lg font-semibold text-primary tabular-nums block">
+              {Math.round(settlement.amount).toLocaleString("sv-SE")}
+            </span>
+            <span className="text-xs text-muted-foreground">kr</span>
+          </div>
           {canEdit && (
-            <motion.span
-              className="text-muted-foreground text-lg"
-              whileHover={{ x: 2 }}
-            >
+            <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-xl transition-all duration-150">
               ›
-            </motion.span>
+            </span>
           )}
         </div>
       </div>
