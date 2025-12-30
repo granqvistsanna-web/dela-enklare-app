@@ -21,6 +21,8 @@ import {
   Calendar,
   TrendingUp,
   ArrowRight,
+  Home,
+  Plus,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -165,12 +167,20 @@ const Index = () => {
   if (loading) {
     return (
       <div className="lg:pl-64">
-        <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
-          <div className="h-6 w-48 rounded bg-secondary animate-pulse mb-4" />
-          <div className="h-8 w-64 rounded bg-secondary animate-pulse mb-8" />
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+          <div className="mb-6">
+            <div className="h-8 w-32 rounded-md skeleton-shimmer mb-2" />
+            <div className="h-4 w-48 rounded-md skeleton-shimmer" />
+          </div>
+          <div className="h-12 w-full rounded-md skeleton-shimmer mb-6" />
+          <div className="grid gap-4 lg:grid-cols-2 mb-6">
+            <div className="h-40 rounded-lg skeleton-shimmer" />
+            <div className="h-40 rounded-lg skeleton-shimmer" />
+          </div>
+          <div className="h-32 rounded-lg skeleton-shimmer mb-6" />
           <div className="space-y-2">
             {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 rounded bg-secondary animate-pulse" />
+              <div key={i} className="h-16 rounded-md skeleton-shimmer" style={{ animationDelay: `${i * 100}ms` }} />
             ))}
           </div>
         </main>
@@ -182,10 +192,13 @@ const Index = () => {
   if (!household) {
     return (
       <div className="lg:pl-64">
-        <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
-          <div className="text-center py-20">
-            <h1 className="text-2xl font-semibold text-foreground mb-4">Välkommen!</h1>
-            <p className="text-muted-foreground mb-8">
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+            <div className="rounded-full bg-muted p-4 mb-4">
+              <Home size={28} className="text-muted-foreground animate-pulse-soft" />
+            </div>
+            <h1 className="text-2xl font-semibold text-foreground mb-2">Välkommen!</h1>
+            <p className="text-caption text-center max-w-sm">
               Ditt hushåll skapas automatiskt. Vänta ett ögonblick...
             </p>
           </div>
@@ -198,25 +211,25 @@ const Index = () => {
     <div className="lg:pl-64">
       <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
         {/* Header */}
-        <div className="mb-6">
+        <div className="mb-6 animate-fade-in">
           <h1 className="text-heading text-2xl mb-1">Hem</h1>
           <p className="text-caption">{household.name}</p>
         </div>
 
         {/* Month selector */}
-        <div className="mb-6">
+        <div className="mb-6 animate-fade-in" style={{ animationDelay: '50ms' }}>
           <MonthSelector />
         </div>
 
         {/* Summary grid - 2 columns */}
         <div className="grid gap-4 lg:grid-cols-2 mb-6">
           {/* Left column: Summering */}
-          <div className="space-y-3">
+          <div className="space-y-3 animate-fade-in" style={{ animationDelay: '100ms' }}>
             <h2 className="text-subheading">
               Översikt
             </h2>
 
-            <Card>
+            <Card className="shadow-notion hover-lift">
               <CardContent className="p-5 space-y-3">
                 {/* Total in */}
                 <div className="flex items-center justify-between">
@@ -263,12 +276,12 @@ const Index = () => {
           </div>
 
           {/* Right column: Visual diagram */}
-          <div className="space-y-3">
+          <div className="space-y-3 animate-fade-in" style={{ animationDelay: '150ms' }}>
             <h2 className="text-subheading">
               Fördelning
             </h2>
 
-            <Card>
+            <Card className="shadow-notion hover-lift">
               <CardContent className="p-5">
                 {/* Circular/bar visualization */}
                 <div className="space-y-5">
@@ -327,7 +340,7 @@ const Index = () => {
         </div>
 
         {/* Balance section */}
-        <div className="mb-6">
+        <div className="mb-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
           <BalanceCard
             expenses={filteredExpenses}
             members={household.members}
@@ -340,7 +353,7 @@ const Index = () => {
         </div>
 
         {/* Latest activities */}
-        <div className="mb-6">
+        <div className="mb-6 animate-fade-in" style={{ animationDelay: '250ms' }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-subheading">
               Senaste aktiviteter
@@ -355,10 +368,10 @@ const Index = () => {
           </div>
 
           {latestActivities.length > 0 ? (
-            <Card>
+            <Card className="shadow-notion">
               <CardContent className="p-0">
                 <div className="divide-y divide-border/40">
-                    {latestActivities.map((item) => {
+                    {latestActivities.map((item, idx) => {
                       if (item.type === 'expense') {
                         const expense = item.data as Expense;
                         const canEdit = !!user?.id && expense.paid_by === user.id;
@@ -366,7 +379,8 @@ const Index = () => {
                         return (
                           <div
                             key={`expense-${expense.id}`}
-                            className={`p-3.5 notion-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
+                            className={`p-3.5 list-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
+                            style={{ animationDelay: `${idx * 50}ms` }}
                             onClick={() => {
                               if (!canEdit) {
                                 toast.error("Du kan bara redigera utgifter du själv betalat");
@@ -391,7 +405,7 @@ const Index = () => {
                                 <p className="font-semibold text-red-600 dark:text-red-400 tabular-nums text-sm">
                                   -{expense.amount.toLocaleString('sv-SE')} kr
                                 </p>
-                                {canEdit && <span className="text-muted-foreground text-lg">›</span>}
+                                {canEdit && <span className="text-muted-foreground text-lg transition-transform group-hover:translate-x-0.5">›</span>}
                               </div>
                             </div>
                           </div>
@@ -403,7 +417,8 @@ const Index = () => {
                         return (
                           <div
                             key={`income-${income.id}`}
-                            className={`p-3.5 notion-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
+                            className={`p-3.5 list-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
+                            style={{ animationDelay: `${idx * 50}ms` }}
                             onClick={() => {
                               if (!canEdit) {
                                 toast.error("Du kan bara redigera inkomster som tillhör dig");
@@ -428,7 +443,7 @@ const Index = () => {
                                 <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums text-sm">
                                   +{(income.amount / 100).toLocaleString('sv-SE')} kr
                                 </p>
-                                {canEdit && <span className="text-muted-foreground text-lg">›</span>}
+                                {canEdit && <span className="text-muted-foreground text-lg transition-transform group-hover:translate-x-0.5">›</span>}
                               </div>
                             </div>
                           </div>
@@ -439,12 +454,19 @@ const Index = () => {
               </CardContent>
             </Card>
           ) : (
-            <Card className="border-dashed">
-              <CardContent className="flex flex-col items-center justify-center py-10">
-                <div className="rounded-full bg-muted p-3 mb-3">
-                  <Calendar size={20} className="text-muted-foreground" />
+            <Card className="border-dashed border-2 bg-muted/20">
+              <CardContent className="flex flex-col items-center justify-center py-12">
+                <div className="rounded-full bg-muted p-4 mb-4">
+                  <Plus size={24} className="text-muted-foreground" />
                 </div>
-                <p className="text-caption">Inga aktiviteter denna månad</p>
+                <p className="font-medium text-foreground mb-1">Inga aktiviteter ännu</p>
+                <p className="text-caption text-center mb-4">Lägg till din första utgift eller inkomst</p>
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="text-sm font-medium text-primary hover:opacity-70 transition-opacity"
+                >
+                  Lägg till transaktion →
+                </button>
               </CardContent>
             </Card>
           )}

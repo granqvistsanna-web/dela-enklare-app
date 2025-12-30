@@ -26,7 +26,7 @@ export function SideNav() {
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-2 py-4 space-y-0.5">
+          <nav className="flex-1 px-2 py-4 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.to;
@@ -36,13 +36,23 @@ export function SideNav() {
                   key={item.to}
                   to={item.to}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-all",
+                    "group flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-md transition-all relative",
                     isActive
                       ? "bg-sidebar-accent text-sidebar-primary"
                       : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-primary"
                   )}
                 >
-                  <Icon size={18} className="shrink-0" />
+                  {/* Active indicator bar */}
+                  {isActive && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-foreground rounded-full" />
+                  )}
+                  <Icon 
+                    size={18} 
+                    className={cn(
+                      "shrink-0 transition-transform",
+                      !isActive && "group-hover:translate-x-0.5"
+                    )} 
+                  />
                   <span>{item.label}</span>
                 </Link>
               );
@@ -52,7 +62,7 @@ export function SideNav() {
       </aside>
 
       {/* Mobile bottom navigation - Notion-inspired */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 border-t border-border bg-background/98 backdrop-blur-md shadow-notion-lg">
+      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 border-t border-border bg-background/98 backdrop-blur-md shadow-notion-lg safe-area-pb">
         <div className="grid grid-cols-4 h-16">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -66,13 +76,24 @@ export function SideNav() {
                   "flex flex-col items-center justify-center gap-1 transition-all relative",
                   isActive
                     ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground active:text-foreground"
                 )}
               >
-                <Icon size={20} />
-                <span className="text-xs font-medium">{item.label}</span>
+                <Icon 
+                  size={20} 
+                  className={cn(
+                    "transition-transform",
+                    isActive && "scale-110"
+                  )}
+                />
+                <span className={cn(
+                  "text-xs font-medium transition-all",
+                  isActive && "font-semibold"
+                )}>
+                  {item.label}
+                </span>
                 {isActive && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full" />
+                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full animate-scale-in" />
                 )}
               </Link>
             );
