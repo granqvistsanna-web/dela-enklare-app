@@ -137,12 +137,23 @@ export function EditIncomeModal({
                 </div>
 
                 <div className="space-y-2">
-                  <Label className="text-sm text-muted-foreground">
+                  <Label htmlFor="edit-recipient" className="text-sm text-muted-foreground">
                     Mottagare
                   </Label>
-                  <div className="rounded-md border border-border bg-secondary/50 py-2 px-3 text-foreground">
-                    {recipientMember?.name || "Okänd"}
-                  </div>
+                  <select
+                    id="edit-recipient"
+                    value={recipient}
+                    onChange={(e) => setRecipient(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none cursor-pointer"
+                    style={{ fontSize: '16px' }}
+                    required
+                  >
+                    {members.map((member) => (
+                      <option key={member.user_id} value={member.user_id}>
+                        {member.name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">
@@ -195,7 +206,8 @@ export function EditIncomeModal({
                     id="edit-repeat"
                     value={repeat}
                     onChange={(e) => setRepeat(e.target.value as IncomeRepeat)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none cursor-pointer"
+                    style={{ fontSize: '16px' }}
                   >
                     <option value="none">Ingen</option>
                     <option value="monthly">Månadsvis</option>

@@ -160,7 +160,8 @@ export function AddIncomeModal({
                     id="recipient"
                     value={recipient}
                     onChange={(e) => setRecipient(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none cursor-pointer"
+                    style={{ fontSize: '16px' }}
                     required
                   >
                     {members.map((member) => (
@@ -215,7 +216,8 @@ export function AddIncomeModal({
                     id="repeat"
                     value={repeat}
                     onChange={(e) => setRepeat(e.target.value as IncomeRepeat)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none cursor-pointer"
+                    style={{ fontSize: '16px' }}
                   >
                     <option value="none">Ingen</option>
                     <option value="monthly">Månadsvis</option>
