@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AddTransactionModal } from "@/components/AddTransactionModal";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
+import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { ImportModal } from "@/components/ImportModal";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
@@ -20,6 +21,7 @@ import {
   ArrowRight,
   Upload,
 } from "lucide-react";
+import { toast } from "sonner";
 
 const Index = () => {
   const navigate = useNavigate();
@@ -32,12 +34,23 @@ const Index = () => {
     loading: expensesLoading,
     addExpense,
     addExpenses,
+    updateExpense,
   } = useExpenses(household?.id);
 
-  const { incomes, loading: incomesLoading, addIncome } = useIncomes(household?.id);
+  const {
+    incomes,
+    loading: incomesLoading,
+    addIncome,
+    updateIncome,
+  } = useIncomes(household?.id);
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  const [isEditExpenseModalOpen, setIsEditExpenseModalOpen] = useState(false);
+  const [isEditIncomeModalOpen, setIsEditIncomeModalOpen] = useState(false);
+  const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
+  const [editingIncome, setEditingIncome] = useState<Income | null>(null);
 
   const loading = householdLoading || expensesLoading || incomesLoading;
 
@@ -305,55 +318,83 @@ const Index = () => {
             <Card>
               <CardContent className="p-0">
                 <div className="divide-y divide-border/40">
-                  {latestActivities.map((item) => {
-                    if (item.type === 'expense') {
-                      const expense = item.data as Expense;
-                      return (
-                        <div key={`expense-${expense.id}`} className="p-3.5 notion-hover cursor-pointer">
-                          <div className="flex items-center gap-3">
-                            <div className="p-1.5 rounded-md bg-red-500/10 shrink-0">
-                              <TrendingDown size={16} className="text-red-600 dark:text-red-400" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-foreground text-sm">{expense.description || expense.category}</p>
-                              <p className="text-caption">
-                                {household.members.find(m => m.user_id === expense.paid_by)?.name} •{' '}
-                                {new Date(expense.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold text-red-600 dark:text-red-400 tabular-nums text-sm">
-                                -{expense.amount.toLocaleString('sv-SE')} kr
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    } else {
-                      const income = item.data as Income;
-                      return (
-                        <div key={`income-${income.id}`} className="p-3.5 notion-hover cursor-pointer">
-                          <div className="flex items-center gap-3">
-                            <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
-                              <DollarSign size={16} className="text-green-600 dark:text-green-400" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium text-foreground text-sm">{income.note || 'Inkomst'}</p>
-                              <p className="text-caption">
-                                {household.members.find(m => m.user_id === income.recipient)?.name} •{' '}
-                                {new Date(income.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums text-sm">
-                                +{(income.amount / 100).toLocaleString('sv-SE')} kr
-                              </p>
+                    {latestActivities.map((item) => {
+                      if (item.type === 'expense') {
+                        const expense = item.data as Expense;
+                        const canEdit = !!user?.id && expense.paid_by === user.id;
+
+                        return (
+                          <div
+                            key={`expense-${expense.id}`}
+                            className={`p-3.5 notion-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
+                            onClick={() => {
+                              if (!canEdit) {
+                                toast.error("Du kan bara redigera utgifter du själv betalat");
+                                return;
+                              }
+                              setEditingExpense(expense);
+                              setIsEditExpenseModalOpen(true);
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-1.5 rounded-md bg-red-500/10 shrink-0">
+                                <TrendingDown size={16} className="text-red-600 dark:text-red-400" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-foreground text-sm">{expense.description || expense.category}</p>
+                                <p className="text-caption">
+                                  {household.members.find(m => m.user_id === expense.paid_by)?.name} •{' '}
+                                  {new Date(expense.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
+                                </p>
+                              </div>
+                              <div className="text-right flex items-center gap-2">
+                                <p className="font-semibold text-red-600 dark:text-red-400 tabular-nums text-sm">
+                                  -{expense.amount.toLocaleString('sv-SE')} kr
+                                </p>
+                                {canEdit && <span className="text-muted-foreground text-lg">›</span>}
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      );
-                    }
-                  })}
+                        );
+                      } else {
+                        const income = item.data as Income;
+                        const canEdit = !!user?.id && income.recipient === user.id;
+
+                        return (
+                          <div
+                            key={`income-${income.id}`}
+                            className={`p-3.5 notion-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
+                            onClick={() => {
+                              if (!canEdit) {
+                                toast.error("Du kan bara redigera inkomster som tillhör dig");
+                                return;
+                              }
+                              setEditingIncome(income);
+                              setIsEditIncomeModalOpen(true);
+                            }}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
+                                <DollarSign size={16} className="text-green-600 dark:text-green-400" />
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="font-medium text-foreground text-sm">{income.note || 'Inkomst'}</p>
+                                <p className="text-caption">
+                                  {household.members.find(m => m.user_id === income.recipient)?.name} •{' '}
+                                  {new Date(income.date).toLocaleDateString('sv-SE', { day: 'numeric', month: 'short' })}
+                                </p>
+                              </div>
+                              <div className="text-right flex items-center gap-2">
+                                <p className="font-semibold text-green-600 dark:text-green-400 tabular-nums text-sm">
+                                  +{(income.amount / 100).toLocaleString('sv-SE')} kr
+                                </p>
+                                {canEdit && <span className="text-muted-foreground text-lg">›</span>}
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      }
+                    })}
                 </div>
               </CardContent>
             </Card>
@@ -394,6 +435,50 @@ const Index = () => {
         onImport={handleImportExpenses}
         groupId={household.id}
         currentUserId={user?.id || ""}
+      />
+
+      {/* Edit modals */}
+      <EditExpenseModal
+        isOpen={isEditExpenseModalOpen}
+        onClose={() => {
+          setIsEditExpenseModalOpen(false);
+          setEditingExpense(null);
+        }}
+        onSave={async (updatedExpense) => {
+          await updateExpense(updatedExpense.id, {
+            amount: updatedExpense.amount,
+            category: updatedExpense.category,
+            description: updatedExpense.description,
+            date: updatedExpense.date,
+            splits: updatedExpense.splits ?? null,
+          });
+          setIsEditExpenseModalOpen(false);
+          setEditingExpense(null);
+        }}
+        expense={editingExpense}
+        members={household.members}
+      />
+
+      <EditIncomeModal
+        isOpen={isEditIncomeModalOpen}
+        onClose={() => {
+          setIsEditIncomeModalOpen(false);
+          setEditingIncome(null);
+        }}
+        onSave={async (updatedIncome) => {
+          await updateIncome(updatedIncome.id, {
+            amount: updatedIncome.amount,
+            type: updatedIncome.type,
+            note: updatedIncome.note,
+            date: updatedIncome.date,
+            repeat: updatedIncome.repeat,
+            included_in_split: updatedIncome.included_in_split,
+          });
+          setIsEditIncomeModalOpen(false);
+          setEditingIncome(null);
+        }}
+        income={editingIncome}
+        members={household.members}
       />
     </div>
   );
