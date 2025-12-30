@@ -1,5 +1,5 @@
-import { memo, useState } from "react";
-import { motion, PanInfo } from "framer-motion";
+import { memo } from "react";
+import { motion } from "framer-motion";
 import { Repeat } from "lucide-react";
 import { Income } from "@/hooks/useIncomes";
 import { GroupMember } from "@/hooks/useGroups";
@@ -17,12 +17,10 @@ export const IncomeItem = memo(function IncomeItem({
   income,
   members,
   onEdit,
-  onDelete,
   currentUserId,
 }: IncomeItemProps) {
   const recipient = members.find((u) => u.user_id === income.recipient);
   const canModify = !!currentUserId;
-  const [dragX, setDragX] = useState(0);
 
   let formattedDate = "Ogiltigt datum";
   try {
@@ -40,31 +38,10 @@ export const IncomeItem = memo(function IncomeItem({
   const safeAmount = Number.isFinite(income.amount) && income.amount >= 0 ? income.amount : 0;
   const amountKr = safeAmount / 100;
 
-  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (info.offset.x < -100 && canModify && onDelete) {
-      onDelete(income.id);
-    }
-  };
-
   return (
-    <div className="group relative overflow-hidden touch-pan-y">
-      {/* Delete background */}
-      {canModify && onDelete && (
-        <div
-          className="absolute inset-0 bg-destructive flex items-center justify-end px-6 pointer-events-none"
-          style={{ opacity: Math.min(Math.abs(dragX) / 100, 1) }}
-        >
-          <span className="text-destructive-foreground font-medium text-sm">Ta bort</span>
-        </div>
-      )}
-
+    <div className="group relative touch-pan-y">
       <motion.button
         type="button"
-        drag={canModify && onDelete ? "x" : false}
-        dragConstraints={{ left: -120, right: 0 }}
-        dragElastic={0.1}
-        onDrag={(_, info) => setDragX(info.offset.x)}
-        onDragEnd={handleDragEnd}
         onClick={() => canModify && onEdit?.(income)}
         className={`
           w-full text-left appearance-none border-0
