@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses } from "@/hooks/useExpenses";
 import { useIncomes } from "@/hooks/useIncomes";
+import { BarChart3, TrendingUp, TrendingDown, DollarSign } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -99,13 +100,19 @@ export default function Analys() {
   if (loading) {
     return (
       <div className="lg:pl-64">
-        <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
-          <div className="h-8 w-48 rounded bg-gray-100 animate-pulse mb-8" />
-          <div className="space-y-4">
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+          <div className="mb-6">
+            <div className="h-8 w-32 rounded-md skeleton-shimmer mb-2" />
+            <div className="h-4 w-56 rounded-md skeleton-shimmer" />
+          </div>
+          <div className="h-20 rounded-lg skeleton-shimmer mb-6" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-32 rounded bg-gray-100 animate-pulse" />
+              <div key={i} className="h-24 rounded-lg skeleton-shimmer" style={{ animationDelay: `${i * 50}ms` }} />
             ))}
           </div>
+          <div className="h-64 rounded-lg skeleton-shimmer mb-6" />
+          <div className="h-48 rounded-lg skeleton-shimmer" />
         </main>
       </div>
     );
@@ -114,8 +121,13 @@ export default function Analys() {
   if (!household) {
     return (
       <div className="lg:pl-64">
-        <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
-          <p className="text-muted-foreground">Inget hushåll hittades.</p>
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+            <div className="rounded-full bg-muted p-4 mb-4">
+              <BarChart3 size={28} className="text-muted-foreground" />
+            </div>
+            <p className="text-caption">Inget hushåll hittades.</p>
+          </div>
         </main>
       </div>
     );
@@ -128,19 +140,19 @@ export default function Analys() {
 
   return (
     <div className="lg:pl-64">
-      <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
+      <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground">Analys</h1>
-          <p className="text-sm text-muted-foreground mt-1">Ekonomisk översikt och utveckling</p>
+        <div className="mb-6 animate-fade-in">
+          <h1 className="text-heading text-2xl mb-1">Analys</h1>
+          <p className="text-caption">Ekonomisk översikt och utveckling</p>
         </div>
 
         {/* Time Filter - Persistent Month Selection */}
-        <Card className="mb-6">
+        <Card className="mb-6 shadow-notion animate-fade-in" style={{ animationDelay: '50ms' }}>
           <CardContent className="p-5">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <label className="text-subheading">
                   Månad
                 </label>
                 <Select
@@ -160,7 +172,7 @@ export default function Analys() {
                 </Select>
               </div>
               <div className="space-y-2">
-                <label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                <label className="text-subheading">
                   År
                 </label>
                 <Select
@@ -186,87 +198,106 @@ export default function Analys() {
         {/* Summary Metrics - Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Income */}
-          <Card>
+          <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '100ms' }}>
             <CardContent className="p-5">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Inkomster
-                </p>
-                <p className="text-2xl font-semibold text-foreground tabular-nums">
-                  {totals.totalIncomes.toLocaleString("sv-SE")} kr
-                </p>
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-green-500/10">
+                  <TrendingUp size={18} className="text-green-600 dark:text-green-400" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-subheading">
+                    Inkomster
+                  </p>
+                  <p className="text-2xl font-semibold text-foreground tabular-nums">
+                    {totals.totalIncomes.toLocaleString("sv-SE")} kr
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Expenses */}
-          <Card>
+          <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '150ms' }}>
             <CardContent className="p-5">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Utgifter
-                </p>
-                <p className="text-2xl font-semibold text-foreground tabular-nums">
-                  {totals.totalExpenses.toLocaleString("sv-SE")} kr
-                </p>
+              <div className="flex items-start gap-3">
+                <div className="p-2 rounded-lg bg-red-500/10">
+                  <TrendingDown size={18} className="text-red-600 dark:text-red-400" />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-subheading">
+                    Utgifter
+                  </p>
+                  <p className="text-2xl font-semibold text-foreground tabular-nums">
+                    {totals.totalExpenses.toLocaleString("sv-SE")} kr
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Balance */}
-          <Card>
+          <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '200ms' }}>
             <CardContent className="p-5">
-              <div className="space-y-1">
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                  Netto
-                </p>
-                <p className="text-2xl font-semibold text-foreground tabular-nums">
-                  {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
-                </p>
+              <div className="flex items-start gap-3">
+                <div className={`p-2 rounded-lg ${totals.netto >= 0 ? 'bg-green-500/10' : 'bg-orange-500/10'}`}>
+                  <DollarSign size={18} className={totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'} />
+                </div>
+                <div className="space-y-1">
+                  <p className="text-subheading">
+                    Netto
+                  </p>
+                  <p className={`text-2xl font-semibold tabular-nums ${totals.netto >= 0 ? 'text-green-600 dark:text-green-400' : 'text-orange-600 dark:text-orange-400'}`}>
+                    {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
         </div>
 
         {/* Trend Visualization - 6 Month View */}
-        <Card className="mb-6">
+        <Card className="mb-6 shadow-notion animate-fade-in" style={{ animationDelay: '250ms' }}>
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-semibold">Utveckling</CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">Senaste 6 månaderna</p>
+            <p className="text-caption mt-1">Senaste 6 månaderna</p>
           </CardHeader>
           <CardContent className="p-5 pt-0">
             {monthlyTrend.some(m => m.expenses > 0 || m.incomes > 0) ? (
-              <div className="space-y-6">
-                {monthlyTrend.map((item) => {
+              <div className="space-y-5">
+                {monthlyTrend.map((item, idx) => {
                   const expenseHeight = maxTrendValue > 0 ? (item.expenses / maxTrendValue) * 100 : 0;
                   const incomeHeight = maxTrendValue > 0 ? (item.incomes / maxTrendValue) * 100 : 0;
                   const isCurrentMonth = item.month === `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
 
                   return (
-                    <div key={item.month} className="space-y-2">
+                    <div 
+                      key={item.month} 
+                      className="space-y-2 animate-fade-in"
+                      style={{ animationDelay: `${300 + idx * 50}ms` }}
+                    >
                       <div className="flex items-baseline justify-between">
-                        <span className={`text-xs font-medium ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}`}>
+                        <span className={`text-sm font-medium ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}`}>
                           {MONTHS[parseInt(item.month.split('-')[1]) - 1]} {item.month.split('-')[0]}
                         </span>
                         <div className="flex gap-4 text-xs tabular-nums">
-                          <span className="text-muted-foreground">
-                            In: {item.incomes.toLocaleString("sv-SE")}
+                          <span className="text-green-600 dark:text-green-400">
+                            +{item.incomes.toLocaleString("sv-SE")}
                           </span>
-                          <span className="text-muted-foreground">
-                            Ut: {item.expenses.toLocaleString("sv-SE")}
+                          <span className="text-red-600 dark:text-red-400">
+                            -{item.expenses.toLocaleString("sv-SE")}
                           </span>
                         </div>
                       </div>
-                      <div className="flex gap-2 h-2">
-                        <div className="flex-1 bg-gray-100 rounded-sm overflow-hidden">
+                      <div className="flex gap-2 h-2.5">
+                        <div className="flex-1 bg-muted rounded-sm overflow-hidden">
                           <div
-                            className="h-full bg-gray-600 transition-all duration-300"
+                            className="h-full bg-green-500 rounded-sm transition-all duration-500"
                             style={{ width: `${incomeHeight}%` }}
                           />
                         </div>
-                        <div className="flex-1 bg-gray-100 rounded-sm overflow-hidden">
+                        <div className="flex-1 bg-muted rounded-sm overflow-hidden">
                           <div
-                            className="h-full bg-gray-400 transition-all duration-300"
+                            className="h-full bg-red-400 rounded-sm transition-all duration-500"
                             style={{ width: `${expenseHeight}%` }}
                           />
                         </div>
@@ -274,44 +305,63 @@ export default function Analys() {
                     </div>
                   );
                 })}
+                
+                {/* Legend */}
+                <div className="flex items-center justify-center gap-6 pt-3 border-t border-border/60">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-sm bg-green-500" />
+                    <span className="text-caption">Inkomster</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 rounded-sm bg-red-400" />
+                    <span className="text-caption">Utgifter</span>
+                  </div>
+                </div>
               </div>
             ) : (
-              <div className="flex items-center justify-center py-12">
-                <p className="text-sm text-muted-foreground">Ingen data tillgänglig</p>
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="rounded-full bg-muted p-3 mb-3">
+                  <BarChart3 size={20} className="text-muted-foreground" />
+                </div>
+                <p className="text-caption">Ingen data tillgänglig</p>
               </div>
             )}
           </CardContent>
         </Card>
 
         {/* Category Breakdown */}
-        <Card>
+        <Card className="shadow-notion animate-fade-in" style={{ animationDelay: '300ms' }}>
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-semibold">Utgifter per kategori</CardTitle>
-            <p className="text-xs text-muted-foreground mt-1">
+            <p className="text-caption mt-1">
               {MONTHS[selectedMonth - 1]} {selectedYear}
             </p>
           </CardHeader>
           <CardContent className="p-5 pt-0">
             {expensesByCategory.length > 0 ? (
               <div className="space-y-4">
-                {expensesByCategory.map((item) => {
+                {expensesByCategory.map((item, idx) => {
                   const percentage = totals.totalExpenses > 0
                     ? (item.amount / totals.totalExpenses) * 100
                     : 0;
 
                   return (
-                    <div key={item.category} className="space-y-2">
+                    <div 
+                      key={item.category} 
+                      className="space-y-2 animate-fade-in"
+                      style={{ animationDelay: `${350 + idx * 30}ms` }}
+                    >
                       <div className="flex items-baseline justify-between">
                         <span className="text-sm font-medium text-foreground">
                           {item.category}
                         </span>
-                        <span className="text-xs text-muted-foreground tabular-nums">
+                        <span className="text-caption tabular-nums">
                           {item.amount.toLocaleString("sv-SE")} kr · {percentage.toFixed(0)}%
                         </span>
                       </div>
-                      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-gray-700 rounded-full transition-all duration-300"
+                          className="h-full bg-foreground/80 rounded-full transition-all duration-500"
                           style={{ width: `${percentage}%` }}
                         />
                       </div>
@@ -320,8 +370,11 @@ export default function Analys() {
                 })}
               </div>
             ) : (
-              <div className="flex items-center justify-center py-12">
-                <p className="text-sm text-muted-foreground">Inga utgifter för vald period</p>
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="rounded-full bg-muted p-3 mb-3">
+                  <TrendingDown size={20} className="text-muted-foreground" />
+                </div>
+                <p className="text-caption">Inga utgifter för vald period</p>
               </div>
             )}
           </CardContent>
