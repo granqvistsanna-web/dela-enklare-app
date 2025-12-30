@@ -1,4 +1,4 @@
-import { type FormEvent, type MouseEvent, useState } from "react";
+import { type FormEvent, type MouseEvent, useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -27,16 +27,23 @@ export function AddIncomeModal({
   members,
 }: AddIncomeModalProps) {
   const [amount, setAmount] = useState("");
-  const [recipient, setRecipient] = useState(members[0]?.user_id || "");
+  const [recipient, setRecipient] = useState("");
   const [type, setType] = useState<IncomeType>("salary");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [repeat, setRepeat] = useState<IncomeRepeat>("none");
   const [includedInSplit, setIncludedInSplit] = useState(true);
 
+  // Set default recipient when members load or modal opens
+  useEffect(() => {
+    if (isOpen && members.length > 0 && !recipient) {
+      setRecipient(members[0].user_id);
+    }
+  }, [isOpen, members, recipient]);
+
   const resetForm = () => {
     setAmount("");
-    setRecipient(members[0]?.user_id || "");
+    setRecipient(""); // Will be set by useEffect when modal reopens
     setType("salary");
     setNote("");
     setDate(new Date().toISOString().split("T")[0]);
