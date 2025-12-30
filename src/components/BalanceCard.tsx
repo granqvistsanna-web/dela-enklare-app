@@ -98,10 +98,10 @@ export function BalanceCard({
   // No balance section if only one member
   if (members.length < 2) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         <h2 className="text-subheading">Balans</h2>
         <Card>
-          <CardContent className="p-5">
+          <CardContent className="p-4 sm:p-5">
             <div className="flex items-center gap-3 text-muted-foreground">
               <Users size={18} />
               <p className="text-sm">Lägg till fler medlemmar för att se balansen.</p>
@@ -115,40 +115,41 @@ export function BalanceCard({
   // All settled
   if (oweAmount < 1) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-2 sm:space-y-3">
         <h2 className="text-subheading">Balans</h2>
         <Card className="border-income/20 bg-income-bg">
-          <CardContent className="p-5">
+          <CardContent className="p-4 sm:p-5">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-income-bg">
-                <Check size={20} className="text-income" />
+                <Check size={18} className="text-income sm:hidden" />
+                <Check size={20} className="text-income hidden sm:block" />
               </div>
-              <div>
-                <p className="font-medium text-foreground">Ni är jämna!</p>
-                <p className="text-sm text-muted-foreground">
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-foreground text-sm sm:text-base">Ni är jämna!</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">
                   Inga utestående skulder denna månad.
                 </p>
               </div>
             </div>
 
             {monthlySettlements.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-border/60">
+              <div className="mt-3 sm:mt-4 pt-3 sm:pt-4 border-t border-border/60">
                 <p className="text-xs text-muted-foreground mb-2">
                   Avräkningar denna månad
                 </p>
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   {monthlySettlements.map((s) => {
                     const from = members.find((m) => m.user_id === s.from_user);
                     const to = members.find((m) => m.user_id === s.to_user);
                     return (
                       <div
                         key={s.id}
-                        className="flex items-center justify-between text-sm"
+                        className="flex items-center justify-between text-xs sm:text-sm gap-2"
                       >
-                        <span className="text-muted-foreground">
+                        <span className="text-muted-foreground truncate">
                           {from?.name} → {to?.name}
                         </span>
-                        <span className="font-medium text-foreground tabular-nums">
+                        <span className="font-medium text-foreground tabular-nums shrink-0">
                           {s.amount.toLocaleString("sv-SE")} kr
                         </span>
                       </div>
@@ -164,33 +165,34 @@ export function BalanceCard({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-2 sm:space-y-3">
       <h2 className="text-subheading">Balans</h2>
       <Card>
-        <CardContent className="p-5">
+        <CardContent className="p-4 sm:p-5">
           {/* Balance overview */}
-          <div className="space-y-4">
-            {/* Who owes whom */}
-            <div className="flex items-center justify-between">
+          <div className="space-y-3 sm:space-y-4">
+            {/* Who owes whom - stacked on mobile */}
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-icon-purple-bg">
-                  <ArrowUpRight size={18} className="text-icon-purple" />
+                <div className="p-1.5 sm:p-2 rounded-lg bg-icon-purple-bg shrink-0">
+                  <ArrowUpRight size={16} className="text-icon-purple sm:hidden" />
+                  <ArrowUpRight size={18} className="text-icon-purple hidden sm:block" />
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Att betala</p>
-                  <p className="text-base font-medium text-foreground">
+                <div className="min-w-0">
+                  <p className="text-xs sm:text-sm text-muted-foreground">Att betala</p>
+                  <p className="text-sm sm:text-base font-medium text-foreground truncate">
                     {negativeUser?.name} → {positiveUser?.name}
                   </p>
                 </div>
               </div>
-              <p className="text-xl font-bold text-foreground tabular-nums">
+              <p className="text-lg sm:text-xl font-bold text-foreground tabular-nums pl-9 sm:pl-0">
                 {Math.round(oweAmount).toLocaleString("sv-SE")} kr
               </p>
             </div>
 
             {/* Individual balances */}
-            <div className="pt-4 border-t border-border/60">
-              <p className="text-xs text-muted-foreground mb-3">Individuella balanser</p>
+            <div className="pt-3 sm:pt-4 border-t border-border/60">
+              <p className="text-xs text-muted-foreground mb-2 sm:mb-3">Individuella balanser</p>
               <div className="space-y-2">
                 {adjustedBalances.map((balance) => {
                   const member = members.find((m) => m.user_id === balance.userId);
@@ -200,18 +202,18 @@ export function BalanceCard({
                   return (
                     <div
                       key={balance.userId}
-                      className="flex items-center justify-between"
+                      className="flex items-center justify-between gap-2"
                     >
-                      <div className="flex items-center gap-2">
-                        <div className="h-7 w-7 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue shrink-0">
                           {(member?.name || "?").charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-sm text-foreground">
+                        <span className="text-sm text-foreground truncate">
                           {member?.name || "Okänd"}
                         </span>
                       </div>
                       <span
-                        className={`text-sm font-medium tabular-nums ${
+                        className={`text-sm font-medium tabular-nums shrink-0 ${
                           isPositive
                             ? "text-income"
                             : isNegative
@@ -230,23 +232,23 @@ export function BalanceCard({
 
             {/* Settlement history for this month */}
             {monthlySettlements.length > 0 && (
-              <div className="pt-4 border-t border-border/60">
+              <div className="pt-3 sm:pt-4 border-t border-border/60">
                 <p className="text-xs text-muted-foreground mb-2">
                   Avräkningar denna månad
                 </p>
-                <div className="space-y-1">
+                <div className="space-y-1.5">
                   {monthlySettlements.map((s) => {
                     const from = members.find((m) => m.user_id === s.from_user);
                     const to = members.find((m) => m.user_id === s.to_user);
                     return (
                       <div
                         key={s.id}
-                        className="flex items-center justify-between text-sm"
+                        className="flex items-center justify-between text-xs sm:text-sm gap-2"
                       >
-                        <span className="text-muted-foreground">
+                        <span className="text-muted-foreground truncate">
                           {from?.name} → {to?.name}
                         </span>
-                        <span className="font-medium text-foreground tabular-nums">
+                        <span className="font-medium text-foreground tabular-nums shrink-0">
                           {s.amount.toLocaleString("sv-SE")} kr
                         </span>
                       </div>
@@ -258,7 +260,7 @@ export function BalanceCard({
 
             {/* Quick settle button */}
             <Button
-              className="w-full mt-2"
+              className="w-full mt-1 sm:mt-2"
               onClick={() => setIsSettleModalOpen(true)}
               disabled={isSettling}
             >
