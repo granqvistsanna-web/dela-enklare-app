@@ -5,7 +5,7 @@ import { GroupMember } from "@/hooks/useGroups";
 import { Expense } from "@/hooks/useExpenses";
 import { Income } from "@/hooks/useIncomes";
 import { Settlement } from "@/hooks/useSettlements";
-import { calculateBalance } from "@/lib/balanceUtils";
+import { calculateBalance, getBalanceBreakdown } from "@/lib/balanceUtils";
 import { SettlementModal } from "@/components/SettlementModal";
 import { Check, Users, Loader2 } from "lucide-react";
 
@@ -49,7 +49,14 @@ export function BalanceCard({
     [expenses, members, monthlySettlements, incomes]
   );
 
-  // Find who owes whom
+  // Get detailed breakdown for display
+  const breakdown = useMemo(
+    () => getBalanceBreakdown(expenses, members, monthlySettlements, incomes),
+    [expenses, members, monthlySettlements, incomes]
+  );
+
+  // Find who owes whom based on final balance
+  // Positive balance = should receive money, Negative balance = should pay
   const { positiveUser, negativeUser, oweAmount } = useMemo(() => {
     const posBalance = adjustedBalances.find((b) => b.balance > 0.5);
     const negBalance = adjustedBalances.find((b) => b.balance < -0.5);
@@ -61,7 +68,7 @@ export function BalanceCard({
       negativeUser: negBalance
         ? members.find((m) => m.user_id === negBalance.userId)
         : undefined,
-      oweAmount: negBalance ? Math.abs(negBalance.balance) : 0,
+      oweAmount: posBalance ? Math.abs(posBalance.balance) : 0,
     };
   }, [adjustedBalances, members]);
 
@@ -160,9 +167,47 @@ export function BalanceCard({
               </p>
             </div>
 
-            {/* Individual balances */}
+            {/* Breakdown explanation */}
             <div className="pt-3 sm:pt-4 border-t border-border/60">
-              <p className="text-xs text-muted-foreground mb-2 sm:mb-3">Individuella balanser</p>
+              <p className="text-xs text-muted-foreground mb-2 sm:mb-3">Så här räknas det ut</p>
+              <div className="space-y-3">
+                {breakdown.map((b) => (
+                  <div key={b.userId} className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <div className="h-5 w-5 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue shrink-0">
+                        {b.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span className="text-sm font-medium text-foreground">{b.name}</span>
+                    </div>
+                    <div className="ml-7 grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
+                      <span className="text-muted-foreground">Inkomst:</span>
+                      <span className="text-right tabular-nums text-income">
+                        +{Math.round(b.incomeReceived).toLocaleString("sv-SE")} kr
+                      </span>
+                      <span className="text-muted-foreground">Utgifter:</span>
+                      <span className="text-right tabular-nums text-expense">
+                        −{Math.round(b.expensesPaid).toLocaleString("sv-SE")} kr
+                      </span>
+                      <span className="text-muted-foreground">Netto:</span>
+                      <span className={`text-right tabular-nums font-medium ${b.netResult >= 0 ? 'text-income' : 'text-expense'}`}>
+                        {b.netResult >= 0 ? '+' : ''}{Math.round(b.netResult).toLocaleString("sv-SE")} kr
+                      </span>
+                    </div>
+                  </div>
+                ))}
+                
+                {/* Target explanation */}
+                <div className="pt-2 border-t border-border/40">
+                  <p className="text-xs text-muted-foreground">
+                    Mål: Båda ska ha samma nettoresultat ({Math.round(breakdown[0]?.targetNet || 0).toLocaleString("sv-SE")} kr)
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Individual balances - simplified */}
+            <div className="pt-3 sm:pt-4 border-t border-border/60">
+              <p className="text-xs text-muted-foreground mb-2 sm:mb-3">Kvar att betala</p>
               <div className="space-y-2">
                 {adjustedBalances.map((balance) => {
                   const member = members.find((m) => m.user_id === balance.userId);
@@ -191,8 +236,8 @@ export function BalanceCard({
                             : "text-muted-foreground"
                         }`}
                       >
-                        {isPositive ? "+" : ""}
-                        {Math.round(balance.balance).toLocaleString("sv-SE")} kr
+                        {isPositive ? "Får " : isNegative ? "Ska betala " : ""}
+                        {Math.abs(Math.round(balance.balance)).toLocaleString("sv-SE")} kr
                       </span>
                     </div>
                   );
