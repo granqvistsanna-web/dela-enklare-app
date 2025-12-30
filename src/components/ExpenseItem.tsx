@@ -77,7 +77,10 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
         onDragEnd={handleDragEnd}
         className="group flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background"
       >
-      <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+      <div
+        className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 cursor-pointer"
+        onClick={() => canModify && onEdit?.(expense)}
+      >
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-foreground truncate">{expense.description || "Utgift"}</p>
           <p className="text-xs text-muted-foreground mt-0.5">

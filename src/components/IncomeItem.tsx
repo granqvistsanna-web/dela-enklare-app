@@ -79,7 +79,10 @@ export const IncomeItem = memo(function IncomeItem({
         onDragEnd={handleDragEnd}
         className="group flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background"
       >
-      <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+      <div
+        className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 cursor-pointer"
+        onClick={() => canModify && onEdit?.(income)}
+      >
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <p className="text-sm font-medium text-foreground truncate">
