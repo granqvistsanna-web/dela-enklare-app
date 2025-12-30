@@ -11,6 +11,7 @@ import { ImportModal } from "@/components/ImportModal";
 import { SwishModal } from "@/components/SwishModal";
 import { BalanceCard } from "@/components/BalanceCard";
 import { useGroups } from "@/hooks/useGroups";
+import { GroupSelector } from "@/components/GroupSelector";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes, Income, IncomeInput } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
@@ -29,7 +30,7 @@ import { toast } from "sonner";
 const Index = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { household, loading: householdLoading } = useGroups();
+  const { household, allGroups, loading: householdLoading, selectGroup } = useGroups();
   const { selectedYear, selectedMonth } = useMonthSelection();
 
   const {
@@ -214,8 +215,17 @@ const Index = () => {
       <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
         {/* Header */}
         <div className="mb-6 animate-fade-in">
-          <h1 className="text-heading text-2xl mb-1">Hem</h1>
-          <p className="text-caption">{household.name}</p>
+          <div className="flex items-center justify-between flex-wrap gap-3">
+            <div>
+              <h1 className="text-heading text-2xl mb-1">Hem</h1>
+              <p className="text-caption">{household.name}</p>
+            </div>
+            <GroupSelector
+              groups={allGroups}
+              selectedGroupId={household.id}
+              onSelectGroup={selectGroup}
+            />
+          </div>
         </div>
 
         {/* Month selector */}
