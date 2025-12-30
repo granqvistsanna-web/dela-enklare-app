@@ -12,7 +12,7 @@ import { IncomeItem } from "@/components/IncomeItem";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { useAuth } from "@/hooks/useAuth";
-import { Search, ArrowUpDown, Calendar, List, Plus } from "lucide-react";
+import { Search, ArrowUpDown, Plus, FileText } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -226,7 +226,7 @@ export default function Aktivitet() {
         <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
             <div className="rounded-full bg-muted p-4 mb-4">
-              <List size={28} className="text-muted-foreground" />
+              <FileText size={28} className="text-muted-foreground" />
             </div>
             <p className="text-caption">Inget hushåll hittades.</p>
           </div>

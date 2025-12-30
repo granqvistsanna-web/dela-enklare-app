@@ -6,7 +6,7 @@ import { Expense } from "@/hooks/useExpenses";
 import { Settlement } from "@/hooks/useSettlements";
 import { calculateBalance } from "@/lib/balanceUtils";
 import { SettlementModal } from "@/components/SettlementModal";
-import { ArrowRight, Check, Users, Loader2 } from "lucide-react";
+import { ArrowUpRight, Check, Users, Loader2 } from "lucide-react";
 
 interface BalanceCardProps {
   expenses: Expense[];
@@ -174,7 +174,7 @@ export function BalanceCard({
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-orange-500/10">
-                  <ArrowRight size={18} className="text-orange-600 dark:text-orange-400" />
+                  <ArrowUpRight size={18} className="text-orange-600 dark:text-orange-400" />
                 </div>
                 <div>
                   <p className="text-sm text-muted-foreground">Att betala</p>

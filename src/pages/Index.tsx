@@ -16,10 +16,9 @@ import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { useMonthSelection } from "@/hooks/useMonthSelection";
 import {
-  TrendingDown,
+  ArrowDownLeft,
+  ArrowUpRight,
   DollarSign,
-  Calendar,
-  TrendingUp,
   ArrowRight,
   Home,
   Plus,
@@ -235,7 +234,7 @@ const Index = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-1.5 rounded-md bg-green-500/10">
-                      <TrendingUp size={18} className="text-green-600 dark:text-green-400" />
+                      <ArrowDownLeft size={18} className="text-green-600 dark:text-green-400" />
                     </div>
                     <span className="text-caption font-medium">Total in</span>
                   </div>
@@ -248,7 +247,7 @@ const Index = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="p-1.5 rounded-md bg-red-500/10">
-                      <TrendingDown size={18} className="text-red-600 dark:text-red-400" />
+                      <ArrowUpRight size={18} className="text-red-600 dark:text-red-400" />
                     </div>
                     <span className="text-caption font-medium">Total ut</span>
                   </div>
@@ -392,7 +391,7 @@ const Index = () => {
                           >
                             <div className="flex items-center gap-3">
                               <div className="p-1.5 rounded-md bg-red-500/10 shrink-0">
-                                <TrendingDown size={16} className="text-red-600 dark:text-red-400" />
+                                <ArrowUpRight size={16} className="text-red-600 dark:text-red-400" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-foreground text-sm">{expense.description || expense.category}</p>
@@ -430,7 +429,7 @@ const Index = () => {
                           >
                             <div className="flex items-center gap-3">
                               <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
-                                <DollarSign size={16} className="text-green-600 dark:text-green-400" />
+                                <ArrowDownLeft size={16} className="text-green-600 dark:text-green-400" />
                               </div>
                               <div className="flex-1 min-w-0">
                                 <p className="font-medium text-foreground text-sm">{income.note || 'Inkomst'}</p>

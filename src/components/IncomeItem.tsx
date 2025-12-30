@@ -1,5 +1,6 @@
 import { memo, useState } from "react";
 import { motion, PanInfo } from "framer-motion";
+import { ArrowDownLeft } from "lucide-react";
 import { Income } from "@/hooks/useIncomes";
 import { GroupMember } from "@/hooks/useGroups";
 import { getIncomeTypeLabel } from "@/lib/incomeUtils";
@@ -75,6 +76,9 @@ export const IncomeItem = memo(function IncomeItem({
         className={`w-full text-left appearance-none border-0 flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? 'cursor-pointer active:bg-secondary/50' : ''}`}
       >
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+          <div className="p-1.5 rounded-md bg-green-500/10 shrink-0">
+            <ArrowDownLeft size={16} className="text-green-600 dark:text-green-400" />
+          </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
               <p className="text-sm font-medium text-foreground truncate">
