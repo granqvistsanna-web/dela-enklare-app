@@ -55,14 +55,16 @@ export function useSettlements(groupId?: string) {
     from_user: string;
     to_user: string;
     amount: number;
+    date?: string;
   }) => {
     if (!user) {
       toast.error("Du måste vara inloggad");
       return null;
     }
 
-    const now = new Date();
-    const month = now.toLocaleDateString("sv-SE", {
+    const settlementDate = settlement.date || new Date().toISOString().split("T")[0];
+    const dateObj = new Date(settlementDate);
+    const month = dateObj.toLocaleDateString("sv-SE", {
       month: "long",
       year: "numeric",
     });
@@ -71,8 +73,11 @@ export function useSettlements(groupId?: string) {
       const { data, error } = await supabase
         .from("settlements")
         .insert({
-          ...settlement,
-          date: now.toISOString().split("T")[0],
+          group_id: settlement.group_id,
+          from_user: settlement.from_user,
+          to_user: settlement.to_user,
+          amount: settlement.amount,
+          date: settlementDate,
           month: month.charAt(0).toUpperCase() + month.slice(1),
         })
         .select()
@@ -81,7 +86,6 @@ export function useSettlements(groupId?: string) {
       if (error) throw error;
 
       await fetchSettlements();
-      toast.success("Avräkning registrerad!");
       return data;
     } catch (error) {
       console.error("Error adding settlement:", error);
@@ -90,10 +94,84 @@ export function useSettlements(groupId?: string) {
     }
   };
 
+  const updateSettlement = async (
+    settlementId: string,
+    updates: {
+      from_user?: string;
+      to_user?: string;
+      amount?: number;
+      date?: string;
+    }
+  ) => {
+    if (!user) {
+      toast.error("Du måste vara inloggad");
+      return null;
+    }
+
+    try {
+      // Recalculate month if date is updated
+      let month: string | undefined;
+      if (updates.date) {
+        const dateObj = new Date(updates.date);
+        const monthStr = dateObj.toLocaleDateString("sv-SE", {
+          month: "long",
+          year: "numeric",
+        });
+        month = monthStr.charAt(0).toUpperCase() + monthStr.slice(1);
+      }
+
+      const { data, error } = await supabase
+        .from("settlements")
+        .update({
+          ...updates,
+          ...(month ? { month } : {}),
+        })
+        .eq("id", settlementId)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      await fetchSettlements();
+      toast.success("Avräkning uppdaterad");
+      return data;
+    } catch (error) {
+      console.error("Error updating settlement:", error);
+      toast.error("Kunde inte uppdatera avräkning");
+      return null;
+    }
+  };
+
+  const deleteSettlement = async (settlementId: string) => {
+    if (!user) {
+      toast.error("Du måste vara inloggad");
+      return false;
+    }
+
+    try {
+      const { error } = await supabase
+        .from("settlements")
+        .delete()
+        .eq("id", settlementId);
+
+      if (error) throw error;
+
+      await fetchSettlements();
+      toast.success("Avräkning borttagen");
+      return true;
+    } catch (error) {
+      console.error("Error deleting settlement:", error);
+      toast.error("Kunde inte ta bort avräkning");
+      return false;
+    }
+  };
+
   return {
     settlements,
     loading,
     addSettlement,
+    updateSettlement,
+    deleteSettlement,
     refetch: fetchSettlements,
   };
 }

@@ -366,11 +366,11 @@ export function ImportModal({
                     <div className="bg-muted/50 rounded-lg p-3 sm:p-4 text-sm text-muted-foreground">
                       <p className="font-medium text-foreground mb-2 text-base">Granska och importera</p>
                       <p className="text-sm leading-relaxed">
-                        Importen hämtar delade transaktioner till hushållsgruppen. Privata transaktioner lämnas utanför.
+                        Delade transaktioner importeras till hushållsgruppen. Privata transaktioner lämnas utanför automatiskt.
                       </p>
                       <ul className="space-y-1 text-xs mt-2">
                         <li>• Klicka på pilen för att byta mellan utgift/inkomst</li>
-                        <li>• "Delad" = ingår i 50/50-delningen mellan hushållet</li>
+                        <li>• Klicka på "Delad/Privat" för att ändra delningsstatus</li>
                       </ul>
                     </div>
 
