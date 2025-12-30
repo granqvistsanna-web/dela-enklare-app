@@ -300,7 +300,7 @@ export function ImportModal({
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4 overflow-hidden"
           >
-            <div className="bg-white border border-border rounded-t-xl sm:rounded-xl w-full sm:max-w-2xl max-h-[90vh] sm:max-h-[calc(100vh-2rem)] overflow-hidden overflow-x-hidden flex flex-col">
+            <div className="bg-card border border-border rounded-t-xl sm:rounded-xl w-full sm:max-w-2xl max-h-[90vh] sm:max-h-[calc(100vh-2rem)] overflow-hidden overflow-x-hidden flex flex-col">
               {/* Header */}
               <div className="flex items-center justify-between p-4 sm:p-6 pb-3 sm:pb-4 shrink-0 border-b border-border/50">
                 <h2 className="text-base sm:text-lg font-medium text-foreground">Importera transaktioner</h2>

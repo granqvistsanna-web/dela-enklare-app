@@ -73,7 +73,7 @@ export function AddMembersModal({ isOpen, onClose, onSubmit, currentMembers }: A
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-center justify-center p-4"
           >
-            <div className="bg-white border border-border rounded-md w-full max-w-md p-6 overflow-x-hidden">
+            <div className="bg-card border border-border rounded-md w-full max-w-md p-6 overflow-x-hidden">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-lg font-medium text-foreground">Lägg till medlemmar</h2>
                 <button onClick={handleClose} className="text-muted-foreground hover:text-foreground">
