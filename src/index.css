@@ -170,18 +170,18 @@
   }
 
   html {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Geist Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "ss01", "ss02", "cv01";
   }
 
   body {
     @apply bg-background text-foreground;
     font-weight: 400;
     font-size: 14px;
-    line-height: 1.5;
-    letter-spacing: -0.011em;
+    line-height: 1.6;
+    letter-spacing: -0.006em;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
   }
@@ -192,47 +192,65 @@
     padding-right: max(1rem, env(safe-area-inset-right));
   }
 
-  /* Typography - Notion-inspired hierarchy */
+  /* Typography - Premium hierarchy with refined tracking */
   h1, h2, h3, h4, h5, h6 {
     font-weight: 600;
-    letter-spacing: -0.02em;
-    line-height: 1.25;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
     color: hsl(var(--foreground));
   }
 
   h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    letter-spacing: -0.022em;
+    font-size: 1.875rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
   }
 
   h2 {
-    font-size: 1.5rem;
+    font-size: 1.375rem;
     font-weight: 600;
+    letter-spacing: -0.025em;
   }
 
   h3 {
-    font-size: 1.125rem;
+    font-size: 1.0625rem;
     font-weight: 600;
+    letter-spacing: -0.02em;
   }
 
   h4 {
-    font-size: 1rem;
+    font-size: 0.9375rem;
     font-weight: 600;
+    letter-spacing: -0.015em;
   }
 
-  /* Notion-style link hover */
+  /* Subtle paragraph spacing */
+  p {
+    letter-spacing: -0.006em;
+  }
+
+  /* Premium link hover with smooth transition */
   a {
-    transition: opacity 0.15s ease;
+    transition: color 0.15s ease, opacity 0.15s ease;
   }
 
   a:hover {
-    opacity: 0.7;
+    opacity: 0.75;
   }
 
   /* Global focus-visible for accessibility */
   *:focus-visible {
     @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+  }
+
+  /* Button and interactive text - slightly tighter */
+  button, [role="button"] {
+    letter-spacing: -0.01em;
+  }
+
+  /* Labels - refined weight and spacing */
+  label {
+    letter-spacing: -0.003em;
   }
 }
 
@@ -306,36 +324,76 @@
       0 16px 32px 0 rgba(0, 0, 0, 0.08);
   }
 
-  /* Text styles */
+  /* Text styles - refined hierarchy */
+  .text-display {
+    font-size: 2.25rem;
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 1.1;
+    color: hsl(var(--foreground));
+  }
+
   .text-heading {
+    font-weight: 600;
+    letter-spacing: -0.025em;
+    color: hsl(var(--foreground));
+  }
+
+  .text-heading-sm {
+    font-size: 0.9375rem;
     font-weight: 600;
     letter-spacing: -0.02em;
     color: hsl(var(--foreground));
   }
 
   .text-subheading {
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.6875rem;
+    font-weight: 500;
     color: hsl(var(--muted-foreground));
     text-transform: uppercase;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
   }
 
   .text-body {
     font-size: 14px;
+    line-height: 1.6;
+    letter-spacing: -0.006em;
+    color: hsl(var(--foreground));
+  }
+
+  .text-body-sm {
+    font-size: 13px;
     line-height: 1.5;
+    letter-spacing: -0.003em;
     color: hsl(var(--foreground));
   }
 
   .text-caption {
     font-size: 0.8125rem;
     line-height: 1.4;
+    letter-spacing: 0em;
     color: hsl(var(--muted-foreground));
   }
 
-  /* Tabular nums for monetary values */
+  .text-label {
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0em;
+    color: hsl(var(--muted-foreground));
+  }
+
+  /* Tabular nums for monetary values - premium feel */
   .text-money {
-    @apply tabular-nums font-semibold;
+    @apply tabular-nums;
+    font-weight: 500;
+    letter-spacing: -0.02em;
+  }
+
+  .text-money-lg {
+    @apply tabular-nums;
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.03em;
   }
 
   /* Loading shimmer animation */
