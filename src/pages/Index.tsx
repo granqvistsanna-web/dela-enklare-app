@@ -18,6 +18,7 @@ import { useIncomes, Income, IncomeInput } from "@/hooks/useIncomes";
 import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { useMonthSelection } from "@/hooks/useMonthSelection";
+import { useCountAnimation } from "@/hooks/useCountAnimation";
 import {
   ArrowDownLeft,
   ArrowUpRight,
@@ -96,6 +97,28 @@ const Index = () => {
     return { totalExpenses, totalIncomes, netto };
   }, [filteredExpenses, filteredIncomes]);
 
+  // Animated counts for visual appeal
+  const animatedIncome = useCountAnimation(totals.totalIncomes, { duration: 1200, delay: 100 });
+  const animatedExpense = useCountAnimation(totals.totalExpenses, { duration: 1200, delay: 150 });
+  const animatedNetto = useCountAnimation(totals.netto, { duration: 1200, delay: 200 });
+  const animatedExpenseCount = useCountAnimation(filteredExpenses.length, { duration: 800, delay: 150 });
+  const animatedIncomeCount = useCountAnimation(filteredIncomes.length, { duration: 800, delay: 200 });
+
+  // Calculate percentages for visual bar
+  const visualPercentages = useMemo(() => {
+    const total = totals.totalIncomes + totals.totalExpenses;
+    if (total === 0) return { incomeWidth: 50, expenseWidth: 50 };
+
+    const incomeWidth = (totals.totalIncomes / total) * 100;
+    const expenseWidth = (totals.totalExpenses / total) * 100;
+
+    return { incomeWidth, expenseWidth };
+  }, [totals]);
+
+  // Animated percentages for bars
+  const animatedIncomeWidth = useCountAnimation(visualPercentages.incomeWidth, { duration: 1200, delay: 150 });
+  const animatedExpenseWidth = useCountAnimation(visualPercentages.expenseWidth, { duration: 1200, delay: 200 });
+
   // Combine and sort latest activities
   const latestActivities = useMemo(() => {
     const items: Array<{ type: 'expense' | 'income'; data: Expense | Income; date: string }> = [];
@@ -155,17 +178,6 @@ const Index = () => {
       setIsSettling(false);
     }
   }, [household?.id, addSettlement]);
-
-  // Calculate percentages for visual bar
-  const visualPercentages = useMemo(() => {
-    const total = totals.totalIncomes + totals.totalExpenses;
-    if (total === 0) return { incomeWidth: 50, expenseWidth: 50 };
-
-    const incomeWidth = (totals.totalIncomes / total) * 100;
-    const expenseWidth = (totals.totalExpenses / total) * 100;
-
-    return { incomeWidth, expenseWidth };
-  }, [totals]);
 
   // Loading state
   if (loading) {
@@ -274,8 +286,8 @@ const Index = () => {
                   {/* Netto */}
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className={`p-1.5 rounded-md ${totals.netto >= 0 ? 'bg-income-bg' : 'bg-icon-pink-bg'}`}>
-                        <DollarSign size={18} className={totals.netto >= 0 ? 'text-income' : 'text-icon-pink'} />
+                      <div className={`p-1.5 rounded-md ${animatedNetto >= 0 ? 'bg-income-bg' : 'bg-icon-pink-bg'}`}>
+                        <DollarSign size={18} className={animatedNetto >= 0 ? 'text-income' : 'text-icon-pink'} />
                       </div>
                       <span className="text-caption font-medium">Netto</span>
                     </div>
@@ -304,13 +316,13 @@ const Index = () => {
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-income font-medium">Inkomster</span>
                         <span className="text-caption">
-                          {visualPercentages.incomeWidth.toFixed(0)}%
+                          {Math.round(animatedIncomeWidth)}%
                         </span>
                       </div>
                       <div className="h-7 bg-muted rounded-md overflow-hidden">
                         <div
-                          className="h-full bg-income transition-all duration-500"
-                          style={{ width: `${visualPercentages.incomeWidth}%` }}
+                          className="h-full bg-income transition-all duration-300"
+                          style={{ width: `${animatedIncomeWidth}%` }}
                         />
                       </div>
                     </div>
@@ -319,13 +331,13 @@ const Index = () => {
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-expense font-medium">Utgifter</span>
                         <span className="text-caption">
-                          {visualPercentages.expenseWidth.toFixed(0)}%
+                          {Math.round(animatedExpenseWidth)}%
                         </span>
                       </div>
                       <div className="h-7 bg-muted rounded-md overflow-hidden">
                         <div
-                          className="h-full bg-expense transition-all duration-500"
-                          style={{ width: `${visualPercentages.expenseWidth}%` }}
+                          className="h-full bg-expense transition-all duration-300"
+                          style={{ width: `${animatedExpenseWidth}%` }}
                         />
                       </div>
                     </div>
