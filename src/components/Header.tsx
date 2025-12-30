@@ -15,7 +15,7 @@ export function Header() {
     <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm shadow-sm">
       <div className="container flex h-16 items-center justify-between max-w-4xl mx-auto px-4">
         <Link to="/dashboard" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-          <img src={logo} alt="Päronsplit" className="h-20 sm:h-24 w-auto" />
+          <img src={logo} alt="Päronsplit" className="h-24 sm:h-28 w-auto" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -68,13 +68,13 @@ export function Header() {
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden h-10 w-10 hover:bg-secondary/50 transition-colors"
+          className="md:hidden h-12 w-12 hover:bg-secondary/50 transition-colors"
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         >
           {isMobileMenuOpen ? (
-            <X className="h-5 w-5" />
+            <X className="h-6 w-6" />
           ) : (
-            <Menu className="h-5 w-5" />
+            <Menu className="h-6 w-6" />
           )}
           <span className="sr-only">Meny</span>
         </Button>
