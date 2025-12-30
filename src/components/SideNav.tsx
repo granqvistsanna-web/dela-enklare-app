@@ -1,7 +1,11 @@
+import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, BarChart3, List, Settings } from "lucide-react";
+import { Home, BarChart3, List, Settings, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 import logo from "@/assets/logo.png";
+import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
   { to: "/dashboard", label: "Hem", icon: Home },
@@ -12,10 +16,105 @@ const navItems = [
 
 export function SideNav() {
   const location = useLocation();
+  const { profile } = useAuth();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <>
-      {/* Desktop sidebar - Notion-inspired */}
+      {/* Mobile header with logo and hamburger */}
+      <header className="lg:hidden fixed top-0 inset-x-0 z-50 border-b border-border bg-background/98 backdrop-blur-md h-14">
+        <div className="flex items-center justify-between h-full px-4">
+          {/* Logo */}
+          <Link to="/dashboard" className="flex items-center hover:opacity-70 transition-opacity">
+            <img src={logo} alt="Päronsplit" className="h-10 w-auto" />
+          </Link>
+
+          {/* Hamburger button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-10 w-10"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            <span className="sr-only">Meny</span>
+          </Button>
+        </div>
+      </header>
+
+      {/* Mobile menu overlay */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="lg:hidden fixed inset-0 z-40 bg-foreground/10 backdrop-blur-sm"
+              style={{ top: "3.5rem" }}
+              onClick={() => setIsMobileMenuOpen(false)}
+            />
+
+            {/* Menu panel */}
+            <motion.nav
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.15 }}
+              className="lg:hidden fixed top-14 inset-x-0 z-50 bg-background border-b border-border shadow-notion-lg"
+            >
+              <div className="px-4 py-4 space-y-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = location.pathname === item.to;
+
+                  return (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 px-4 py-3 text-base font-medium rounded-lg transition-all relative active:scale-[0.98]",
+                        isActive
+                          ? "bg-secondary text-foreground"
+                          : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
+                      )}
+                    >
+                      {isActive && (
+                        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
+                      )}
+                      <Icon size={20} className="shrink-0" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+
+                {/* User info */}
+                {profile && (
+                  <div className="pt-4 mt-2 border-t border-border">
+                    <Link
+                      to="/installningar"
+                      onClick={() => setIsMobileMenuOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors"
+                    >
+                      <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-base font-semibold text-primary shrink-0">
+                        {profile.name?.charAt(0).toUpperCase() || "?"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-xs text-muted-foreground">Inloggad som</p>
+                        <p className="text-sm font-medium text-foreground truncate">{profile.name}</p>
+                      </div>
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </motion.nav>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Desktop sidebar */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:flex lg:w-64 lg:flex-col border-r border-sidebar-border bg-sidebar">
         <div className="flex flex-col flex-1 min-h-0">
           {/* Logo */}
@@ -42,7 +141,6 @@ export function SideNav() {
                       : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-primary"
                   )}
                 >
-                  {/* Active indicator bar */}
                   {isActive && (
                     <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-foreground rounded-full" />
                   )}
@@ -60,46 +158,6 @@ export function SideNav() {
           </nav>
         </div>
       </aside>
-
-      {/* Mobile bottom navigation - Notion-inspired */}
-      <nav className="lg:hidden fixed bottom-0 inset-x-0 z-50 border-t border-border bg-background/98 backdrop-blur-md shadow-notion-lg safe-area-pb">
-        <div className="grid grid-cols-4 h-16">
-          {navItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.to;
-
-            return (
-              <Link
-                key={item.to}
-                to={item.to}
-                className={cn(
-                  "flex flex-col items-center justify-center gap-1 transition-all relative",
-                  isActive
-                    ? "text-primary"
-                    : "text-muted-foreground active:text-foreground"
-                )}
-              >
-                <Icon 
-                  size={20} 
-                  className={cn(
-                    "transition-transform",
-                    isActive && "scale-110"
-                  )}
-                />
-                <span className={cn(
-                  "text-xs font-medium transition-all",
-                  isActive && "font-semibold"
-                )}>
-                  {item.label}
-                </span>
-                {isActive && (
-                  <span className="absolute bottom-0.5 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-primary rounded-full animate-scale-in" />
-                )}
-              </Link>
-            );
-          })}
-        </div>
-      </nav>
     </>
   );
 }

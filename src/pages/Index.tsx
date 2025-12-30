@@ -168,8 +168,8 @@ const Index = () => {
   // Loading state
   if (loading) {
     return (
-      <div className="lg:pl-64">
-        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+      <div className="pt-14 lg:pt-0 lg:pl-64">
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
           <div className="mb-6">
             <div className="h-8 w-32 rounded-md skeleton-shimmer mb-2" />
             <div className="h-4 w-48 rounded-md skeleton-shimmer" />
@@ -193,8 +193,8 @@ const Index = () => {
   // No household state
   if (!household) {
     return (
-      <div className="lg:pl-64">
-        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+      <div className="pt-14 lg:pt-0 lg:pl-64">
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
           <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
             <div className="rounded-full bg-muted p-4 mb-4">
               <Home size={28} className="text-muted-foreground animate-pulse-soft" />
@@ -210,8 +210,8 @@ const Index = () => {
   }
 
   return (
-    <div className="lg:pl-64">
-      <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+    <div className="pt-14 lg:pt-0 lg:pl-64">
+      <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
         {/* Header */}
         <div className="mb-6 animate-fade-in">
           <h1 className="text-heading text-2xl mb-1">Hem</h1>
