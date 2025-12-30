@@ -79,7 +79,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
       >
       <div
         className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 cursor-pointer"
-        onClick={() => canModify && onEdit?.(expense)}
+        onClick={() => onEdit?.(expense)}
       >
         <div className="min-w-0 flex-1">
           <p className="text-sm font-medium text-foreground truncate">{expense.description || "Utgift"}</p>
@@ -108,7 +108,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
           {safeAmount.toLocaleString("sv-SE")} kr
         </span>
 
-        {canModify && (onEdit || onDelete) && (
+        {(onEdit || onDelete) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -125,7 +125,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
                   Redigera
                 </DropdownMenuItem>
               )}
-              {onDelete && (
+              {onDelete && canModify && (
                 <DropdownMenuItem
                   onClick={() => onDelete(expense.id)}
                   className="text-sm py-3 sm:py-2 text-destructive focus:text-destructive"

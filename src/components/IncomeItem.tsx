@@ -81,7 +81,7 @@ export const IncomeItem = memo(function IncomeItem({
       >
       <div
         className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 cursor-pointer"
-        onClick={() => canModify && onEdit?.(income)}
+        onClick={() => onEdit?.(income)}
       >
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ export const IncomeItem = memo(function IncomeItem({
           +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
         </span>
 
-        {canModify && (onEdit || onDelete) && (
+        {(onEdit || onDelete) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -135,7 +135,7 @@ export const IncomeItem = memo(function IncomeItem({
                   Redigera
                 </DropdownMenuItem>
               )}
-              {onDelete && (
+              {onDelete && canModify && (
                 <DropdownMenuItem
                   onClick={() => onDelete(income.id)}
                   className="text-sm py-3 sm:py-2 text-destructive focus:text-destructive"
