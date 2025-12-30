@@ -341,7 +341,7 @@ export function AddTransactionModal({
                       onChange={(e) => setAmount(e.target.value)}
                       required
                       autoFocus
-                      className="h-12 sm:h-10 text-base sm:text-sm"
+                      className="h-12 sm:h-11 text-base sm:text-sm"
                     />
                   </div>
 
@@ -379,7 +379,7 @@ export function AddTransactionModal({
                           value={description}
                           onChange={(e) => setDescription(e.target.value)}
                           required
-                          className="h-12 sm:h-10 text-base sm:text-sm"
+                          className="h-12 sm:h-11 text-base sm:text-sm"
                         />
                       </div>
 
@@ -393,7 +393,7 @@ export function AddTransactionModal({
                           value={date}
                           onChange={(e) => setDate(e.target.value)}
                           required
-                          className="h-12 sm:h-10 text-base sm:text-sm"
+                          className="h-12 sm:h-11 text-base sm:text-sm"
                         />
                       </div>
 
@@ -433,7 +433,7 @@ export function AddTransactionModal({
                                   placeholder="0.00"
                                   value={customSplits[member.user_id] || ""}
                                   onChange={(e) => handleSplitChange(member.user_id, e.target.value)}
-                                  className="w-28 sm:w-24 h-10 sm:h-9"
+                                  className="w-28 sm:w-24 h-11"
                                 />
                                 <span className="text-sm text-muted-foreground shrink-0">kr</span>
                               </div>
@@ -498,7 +498,7 @@ export function AddTransactionModal({
                           value={date}
                           onChange={(e) => setDate(e.target.value)}
                           required
-                          className="h-12 sm:h-10 text-base sm:text-sm"
+                          className="h-12 sm:h-11 text-base sm:text-sm"
                         />
                       </div>
 
@@ -511,7 +511,7 @@ export function AddTransactionModal({
                           placeholder="t.ex. Månadslön december"
                           value={note}
                           onChange={(e) => setNote(e.target.value)}
-                          className="h-12 sm:h-10 text-base sm:text-sm"
+                          className="h-12 sm:h-11 text-base sm:text-sm"
                         />
                       </div>
 
@@ -546,7 +546,7 @@ export function AddTransactionModal({
                 <Button 
                   type="submit" 
                   form="add-transaction-form"
-                  className="w-full h-12 sm:h-10 text-base sm:text-sm"
+                  className="w-full h-12 sm:h-11 text-base sm:text-sm"
                 >
                   Lägg till {transactionType === "expense" ? "utgift" : "inkomst"}
                 </Button>

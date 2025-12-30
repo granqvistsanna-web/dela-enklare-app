@@ -48,21 +48,21 @@ export function MonthSelector() {
   return (
     <div className="flex items-center justify-between gap-2 p-3 rounded-md border border-border/50 bg-muted/30 shadow-notion">
       {/* Navigation arrows */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1">
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={goToPreviousMonth}
-          className="h-7 w-7 hover:bg-secondary/80"
+          className="hover:bg-secondary/80"
         >
-          <ChevronLeft size={16} />
+          <ChevronLeft size={18} />
         </Button>
       </div>
 
       {/* Month and Year selectors */}
       <div className="flex items-center gap-1.5 flex-1 justify-center">
         <Select value={selectedMonth.toString()} onValueChange={handleMonthChange}>
-          <SelectTrigger className="w-[120px] h-8 border-border/50 text-sm">
+          <SelectTrigger className="w-[120px] h-9 border-border/50 text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -84,7 +84,7 @@ export function MonthSelector() {
         </Select>
 
         <Select value={selectedYear.toString()} onValueChange={handleYearChange}>
-          <SelectTrigger className="w-[85px] h-8 border-border/50 text-sm">
+          <SelectTrigger className="w-[85px] h-9 border-border/50 text-sm">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -98,28 +98,28 @@ export function MonthSelector() {
       </div>
 
       {/* Next month arrow and current month button */}
-      <div className="flex items-center gap-0.5">
+      <div className="flex items-center gap-1">
         <Button
           variant="ghost"
-          size="icon"
+          size="sm"
           onClick={goToNextMonth}
           disabled={!canGoNext}
           className={cn(
-            "h-7 w-7 hover:bg-secondary/80",
+            "hover:bg-secondary/80",
             !canGoNext && "opacity-40 cursor-not-allowed"
           )}
         >
-          <ChevronRight size={16} />
+          <ChevronRight size={18} />
         </Button>
         {!isCurrentMonth && (
           <Button
             variant="ghost"
-            size="icon"
+            size="sm"
             onClick={goToCurrentMonth}
-            className="h-7 w-7 hover:bg-secondary/80"
+            className="hover:bg-secondary/80"
             title="Gå till aktuell månad"
           >
-            <Calendar size={16} />
+            <Calendar size={18} />
           </Button>
         )}
       </div>
