@@ -229,21 +229,18 @@ const Index = () => {
         {/* Header */}
         <div className="mb-6 animate-fade-in">
           <div className="flex items-center justify-between gap-2">
-            <div className="flex items-center gap-3 min-w-0">
-              <h1 className="text-heading text-xl sm:text-2xl shrink-0">Hem</h1>
-              {allGroups.length > 1 && (
-                <div className="h-5 w-px bg-border/60 shrink-0 hidden sm:block" />
-              )}
+            <h1 className="text-heading text-xl sm:text-2xl">Hem</h1>
+            <div className="flex items-center gap-2">
               <GroupSelector
                 groups={allGroups}
                 selectedGroupId={household.id}
                 onSelectGroup={selectGroup}
               />
+              <HeaderMenu
+                onImportClick={() => setIsImportModalOpen(true)}
+                onSwishClick={() => setIsSwishModalOpen(true)}
+              />
             </div>
-            <HeaderMenu
-              onImportClick={() => setIsImportModalOpen(true)}
-              onSwishClick={() => setIsSwishModalOpen(true)}
-            />
           </div>
         </div>
 
