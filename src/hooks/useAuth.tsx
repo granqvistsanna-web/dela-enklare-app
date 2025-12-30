@@ -38,7 +38,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchProfile = useCallback(async (sessionUser: User) => {
+  const fetchProfile = async (sessionUser: User) => {
     try {
       const { data, error } = await supabase
         .from("profiles")
@@ -84,7 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error("Unexpected error in fetchProfile:", error);
     }
-  }, []); // No dependencies needed - uses setProfile which is stable
+  };
 
   useEffect(() => {
     let mounted = true;

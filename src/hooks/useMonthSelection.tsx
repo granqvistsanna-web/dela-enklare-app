@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useMemo, useCallback } from "react";
+import { createContext, useContext, useState, ReactNode } from "react";
 
 interface MonthSelectionContextType {
   selectedYear: number;
@@ -18,16 +18,16 @@ export const MonthSelectionProvider = ({ children }: { children: ReactNode }) =>
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1); // 1-12
 
-  const goToPreviousMonth = useCallback(() => {
+  const goToPreviousMonth = () => {
     if (selectedMonth === 1) {
       setSelectedMonth(12);
       setSelectedYear(selectedYear - 1);
     } else {
       setSelectedMonth(selectedMonth - 1);
     }
-  }, [selectedMonth, selectedYear]);
+  };
 
-  const goToNextMonth = useCallback(() => {
+  const goToNextMonth = () => {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth() + 1;
@@ -43,35 +43,32 @@ export const MonthSelectionProvider = ({ children }: { children: ReactNode }) =>
     } else {
       setSelectedMonth(selectedMonth + 1);
     }
-  }, [selectedMonth, selectedYear]);
+  };
 
-  const goToCurrentMonth = useCallback(() => {
+  const goToCurrentMonth = () => {
     const now = new Date();
     setSelectedYear(now.getFullYear());
     setSelectedMonth(now.getMonth() + 1);
-  }, []);
+  };
 
-  const isCurrentMonthValue = useMemo(() => {
+  const isCurrentMonth = () => {
     const now = new Date();
     return selectedYear === now.getFullYear() && selectedMonth === now.getMonth() + 1;
-  }, [selectedYear, selectedMonth]);
-
-  const value = useMemo(
-    () => ({
-      selectedYear,
-      selectedMonth,
-      setSelectedMonth,
-      setSelectedYear,
-      goToPreviousMonth,
-      goToNextMonth,
-      goToCurrentMonth,
-      isCurrentMonth: isCurrentMonthValue,
-    }),
-    [selectedYear, selectedMonth, goToPreviousMonth, goToNextMonth, goToCurrentMonth, isCurrentMonthValue]
-  );
+  };
 
   return (
-    <MonthSelectionContext.Provider value={value}>
+    <MonthSelectionContext.Provider
+      value={{
+        selectedYear,
+        selectedMonth,
+        setSelectedMonth,
+        setSelectedYear,
+        goToPreviousMonth,
+        goToNextMonth,
+        goToCurrentMonth,
+        isCurrentMonth: isCurrentMonth(),
+      }}
+    >
       {children}
     </MonthSelectionContext.Provider>
   );

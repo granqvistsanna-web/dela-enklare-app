@@ -124,13 +124,10 @@ export default function Aktivitet() {
   const groupedByMonth = useMemo(() => {
     const groups = new Map<string, typeof sortedItems>();
 
-    // Efficiently group items by pushing to arrays
     sortedItems.forEach(item => {
       const monthKey = `${item.date.getFullYear()}-${String(item.date.getMonth() + 1).padStart(2, '0')}`;
-      if (!groups.has(monthKey)) {
-        groups.set(monthKey, []);
-      }
-      groups.get(monthKey)!.push(item);
+      const existing = groups.get(monthKey) || [];
+      groups.set(monthKey, [...existing, item]);
     });
 
     // Sort month keys in descending order (newest first)
