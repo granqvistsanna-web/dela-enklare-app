@@ -12,11 +12,12 @@ interface EditExpenseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (expense: Expense) => void;
+  onDelete?: (expenseId: string) => void;
   expense: Expense | null;
   members: GroupMember[];
 }
 
-export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: EditExpenseModalProps) {
+export function EditExpenseModal({ isOpen, onClose, onSave, onDelete, expense, members }: EditExpenseModalProps) {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
@@ -298,9 +299,26 @@ export function EditExpenseModal({ isOpen, onClose, onSave, expense, members }: 
                   )}
                 </div>
 
-                <Button type="submit" className="w-full">
-                  Spara ändringar
-                </Button>
+                <div className="flex gap-3">
+                  {onDelete && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="flex-1 text-destructive hover:text-destructive hover:bg-destructive/10"
+                      onClick={() => {
+                        if (expense) {
+                          onDelete(expense.id);
+                          onClose();
+                        }
+                      }}
+                    >
+                      Ta bort
+                    </Button>
+                  )}
+                  <Button type="submit" className={onDelete ? "flex-1" : "w-full"}>
+                    Spara
+                  </Button>
+                </div>
               </form>
             </div>
           </motion.div>

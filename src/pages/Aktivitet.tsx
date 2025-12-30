@@ -376,6 +376,7 @@ export default function Aktivitet() {
           setEditingExpense(null);
         }}
         onSave={handleSaveExpense}
+        onDelete={handleDeleteExpense}
         expense={editingExpense}
         members={household.members}
       />
@@ -387,6 +388,7 @@ export default function Aktivitet() {
           setEditingIncome(null);
         }}
         onSave={handleSaveIncome}
+        onDelete={handleDeleteIncome}
         income={editingIncome}
         members={household.members}
       />
