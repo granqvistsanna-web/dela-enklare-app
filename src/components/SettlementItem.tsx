@@ -1,5 +1,4 @@
 import { motion } from "framer-motion";
-import { ArrowRightLeft, ChevronRight } from "lucide-react";
 import { Settlement } from "@/hooks/useSettlements";
 import { GroupMember } from "@/hooks/useGroups";
 
@@ -29,12 +28,12 @@ export function SettlementItem({
   return (
     <motion.button
       type="button"
-      whileTap={canEdit ? { scale: 0.995 } : undefined}
+      whileTap={canEdit ? { scale: 0.98 } : undefined}
       className={`
         group w-full text-left appearance-none border-0
-        flex items-center gap-3 py-3 sm:py-3.5 px-0
+        flex items-center justify-between gap-4 py-3
         bg-transparent transition-colors duration-150 touch-pan-y
-        ${canEdit ? "cursor-pointer active:bg-muted/30 focus:outline-none focus-visible:bg-muted/30 -mx-2 px-2 rounded-lg" : "cursor-default"}
+        ${canEdit ? "cursor-pointer active:bg-muted/30 focus:outline-none" : "cursor-default"}
       `}
       onClick={() => canEdit && onEdit(settlement)}
       tabIndex={canEdit ? 0 : -1}
@@ -45,45 +44,29 @@ export function SettlementItem({
         }
       }}
     >
-      {/* Icon */}
-      <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-        <ArrowRightLeft size={18} className="text-primary" strokeWidth={2} />
-      </div>
-
       {/* Content */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-[15px] font-medium text-foreground truncate">
+          <p className="text-[15px] font-medium text-foreground">
             Swish
           </p>
-          <span className="text-[10px] px-1.5 py-0.5 bg-primary/10 rounded-full text-primary font-medium shrink-0">
+          <span className="text-[11px] px-1.5 py-0.5 bg-primary/10 rounded text-primary shrink-0">
             Betalning
           </span>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-          <span className="font-medium">{fromMember?.name || "Okänd"}</span>
+        <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground mt-0.5">
+          <span>{fromMember?.name || "Okänd"}</span>
           <span className="opacity-60">→</span>
-          <span className="font-medium">{toMember?.name || "Okänd"}</span>
+          <span>{toMember?.name || "Okänd"}</span>
           <span className="opacity-40">•</span>
           <span>{formattedDate}</span>
         </div>
       </div>
 
       {/* Amount */}
-      <div className="flex items-center gap-2 shrink-0">
-        <div className="text-right">
-          <span className="text-base font-semibold text-primary tabular-nums">
-            {Math.round(settlement.amount).toLocaleString("sv-SE")}
-          </span>
-          <span className="text-xs text-muted-foreground ml-1">kr</span>
-        </div>
-        {canEdit && (
-          <ChevronRight 
-            size={16} 
-            className="text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" 
-          />
-        )}
-      </div>
+      <span className="text-[15px] font-semibold text-primary tabular-nums shrink-0">
+        {Math.round(settlement.amount).toLocaleString("sv-SE")} kr
+      </span>
     </motion.button>
   );
 }

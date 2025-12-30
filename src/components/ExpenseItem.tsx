@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { motion, PanInfo } from "framer-motion";
-import { ArrowUpRight, Repeat, ChevronRight } from "lucide-react";
+import { Repeat } from "lucide-react";
 import { Expense } from "@/hooks/useExpenses";
 import { GroupMember } from "@/hooks/useGroups";
 
@@ -62,17 +62,12 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
         onClick={() => canModify && onEdit?.(expense)}
         className={`
           w-full text-left appearance-none border-0
-          flex items-center gap-3 py-3 sm:py-3.5 px-0
+          flex items-center justify-between gap-4 py-3
           bg-transparent transition-colors duration-150
-          ${canModify && onEdit ? "cursor-pointer active:bg-muted/30 focus:outline-none focus-visible:bg-muted/30 -mx-2 px-2 rounded-lg" : ""}
+          ${canModify && onEdit ? "cursor-pointer active:bg-muted/30 focus:outline-none" : ""}
         `}
-        whileTap={canModify ? { scale: 0.995 } : undefined}
+        whileTap={canModify ? { scale: 0.98 } : undefined}
       >
-        {/* Icon */}
-        <div className="w-10 h-10 rounded-xl bg-expense/10 flex items-center justify-center shrink-0">
-          <ArrowUpRight size={18} className="text-expense" strokeWidth={2} />
-        </div>
-
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -80,39 +75,26 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
               {expense.description || "Utgift"}
             </p>
             {expense.repeat && expense.repeat !== "none" && (
-              <span className="inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 bg-primary/10 rounded-full text-primary font-medium shrink-0">
-                <Repeat size={10} strokeWidth={2.5} />
-              </span>
+              <Repeat size={12} className="text-primary shrink-0" strokeWidth={2.5} />
             )}
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-            <span className="font-medium">{payer?.name || "Okänd"}</span>
+          <div className="flex items-center gap-1.5 text-[13px] text-muted-foreground mt-0.5">
+            <span>{payer?.name || "Okänd"}</span>
             <span className="opacity-40">•</span>
             <span>{formattedDate}</span>
             {hasCustomSplit && (
               <>
                 <span className="opacity-40">•</span>
-                <span className="text-primary/80 font-medium">Delad</span>
+                <span className="text-primary/70">Delad</span>
               </>
             )}
           </div>
         </div>
 
         {/* Amount */}
-        <div className="flex items-center gap-2 shrink-0">
-          <div className="text-right">
-            <span className="text-base font-semibold text-expense tabular-nums">
-              -{safeAmount.toLocaleString("sv-SE")}
-            </span>
-            <span className="text-xs text-muted-foreground ml-1">kr</span>
-          </div>
-          {canModify && (
-            <ChevronRight 
-              size={16} 
-              className="text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors" 
-            />
-          )}
-        </div>
+        <span className="text-[15px] font-semibold text-expense tabular-nums shrink-0">
+          -{safeAmount.toLocaleString("sv-SE")} kr
+        </span>
       </motion.button>
     </div>
   );
