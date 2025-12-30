@@ -1,1 +1,7 @@
 project_id = "tqxqcnectpehslorwacj"
+
+[functions.categorize-transactions]
+verify_jwt = true
+
+[functions.check-duplicates]
+verify_jwt = true
