@@ -12,7 +12,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { useMonthSelection } from "@/hooks/useMonthSelection";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, ExternalLink, Palette, Sun, Moon, Monitor, Edit2, Check, X, Calendar } from "lucide-react";
+import { User, Lock, Tag, LogOut, Trash2, ChevronLeft, Users, Plus, Palette, Sun, Moon, Monitor, Edit2, Check, X, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   AlertDialog,
@@ -252,15 +252,6 @@ const Settings = () => {
                           >
                             <Plus size={14} />
                             <span className="hidden sm:inline">Bjud in</span>
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => navigate('/hushall')}
-                            className="gap-2"
-                          >
-                            <span className="hidden sm:inline">Öppna</span>
-                            <ExternalLink size={14} />
                           </Button>
                         </>
                       )}
