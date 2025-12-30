@@ -8,9 +8,11 @@ import { AddTransactionModal } from "@/components/AddTransactionModal";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { ImportModal } from "@/components/ImportModal";
+import { BalanceCard } from "@/components/BalanceCard";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes, Income, IncomeInput } from "@/hooks/useIncomes";
+import { useSettlements } from "@/hooks/useSettlements";
 import { useAuth } from "@/hooks/useAuth";
 import { useMonthSelection } from "@/hooks/useMonthSelection";
 import {
@@ -19,7 +21,6 @@ import {
   Calendar,
   TrendingUp,
   ArrowRight,
-  Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -46,6 +47,14 @@ const Index = () => {
     deleteIncome,
   } = useIncomes(household?.id);
 
+  const {
+    settlements,
+    loading: settlementsLoading,
+    addSettlement,
+  } = useSettlements(household?.id);
+
+  const [isSettling, setIsSettling] = useState(false);
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
@@ -54,7 +63,7 @@ const Index = () => {
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null);
   const [editingIncome, setEditingIncome] = useState<Income | null>(null);
 
-  const loading = householdLoading || expensesLoading || incomesLoading;
+  const loading = householdLoading || expensesLoading || incomesLoading || settlementsLoading;
 
   // Filter expenses and incomes by selected month
   const filteredExpenses = useMemo(() => {
@@ -124,6 +133,22 @@ const Index = () => {
   }[]) => {
     await addExpenses(newExpenses);
   }, [addExpenses]);
+
+  // Handle settlement
+  const handleSettle = useCallback(async (fromUser: string, toUser: string, amount: number) => {
+    if (!household?.id) return;
+    setIsSettling(true);
+    try {
+      await addSettlement({
+        group_id: household.id,
+        from_user: fromUser,
+        to_user: toUser,
+        amount,
+      });
+    } finally {
+      setIsSettling(false);
+    }
+  }, [household?.id, addSettlement]);
 
   // Calculate percentages for visual bar
   const visualPercentages = useMemo(() => {
@@ -299,6 +324,19 @@ const Index = () => {
               </CardContent>
             </Card>
           </div>
+        </div>
+
+        {/* Balance section */}
+        <div className="mb-6">
+          <BalanceCard
+            expenses={filteredExpenses}
+            members={household.members}
+            settlements={settlements}
+            selectedYear={selectedYear}
+            selectedMonth={selectedMonth}
+            onSettle={handleSettle}
+            isSettling={isSettling}
+          />
         </div>
 
         {/* Latest activities */}
