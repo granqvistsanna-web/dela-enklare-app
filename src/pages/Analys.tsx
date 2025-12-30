@@ -66,28 +66,37 @@ export default function Analys() {
 
   // Group by month for trend (last 6 months including current)
   const monthlyTrend = useMemo(() => {
-    const months: Array<{ month: string; expenses: number; incomes: number }> = [];
+    // First, group all data in a single pass
+    const groups = new Map<string, { expenses: number; incomes: number }>();
 
+    // Single pass through expenses
+    expenses.forEach(e => {
+      const expDate = new Date(e.date);
+      const monthKey = `${expDate.getFullYear()}-${String(expDate.getMonth() + 1).padStart(2, '0')}`;
+      const existing = groups.get(monthKey) || { expenses: 0, incomes: 0 };
+      existing.expenses += e.amount;
+      groups.set(monthKey, existing);
+    });
+
+    // Single pass through incomes
+    incomes.forEach(i => {
+      const incDate = new Date(i.date);
+      const monthKey = `${incDate.getFullYear()}-${String(incDate.getMonth() + 1).padStart(2, '0')}`;
+      const existing = groups.get(monthKey) || { expenses: 0, incomes: 0 };
+      existing.incomes += i.amount / 100;
+      groups.set(monthKey, existing);
+    });
+
+    // Extract last 6 months
+    const months: Array<{ month: string; expenses: number; incomes: number }> = [];
     for (let i = 5; i >= 0; i--) {
       const date = new Date(selectedYear, selectedMonth - 1 - i, 1);
       const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-
-      const monthExpenses = expenses.filter(e => {
-        const expDate = new Date(e.date);
-        return expDate.getFullYear() === date.getFullYear() &&
-               expDate.getMonth() === date.getMonth();
-      }).reduce((sum, e) => sum + e.amount, 0);
-
-      const monthIncomes = incomes.filter(i => {
-        const incDate = new Date(i.date);
-        return incDate.getFullYear() === date.getFullYear() &&
-               incDate.getMonth() === date.getMonth();
-      }).reduce((sum, i) => sum + i.amount / 100, 0);
-
+      const data = groups.get(monthKey) || { expenses: 0, incomes: 0 };
       months.push({
         month: monthKey,
-        expenses: monthExpenses,
-        incomes: monthIncomes
+        expenses: data.expenses,
+        incomes: data.incomes
       });
     }
 

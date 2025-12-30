@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 
@@ -10,40 +10,27 @@ export interface PublicUser {
 
 export function useAllUsers() {
   const { user } = useAuth();
-  const [users, setUsers] = useState<PublicUser[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchAllUsers = async () => {
-      if (!user) {
-        setUsers([]);
-        setLoading(false);
-        return;
-      }
+  const { data: users = [], isLoading: loading } = useQuery({
+    queryKey: ['allUsers'],
+    queryFn: async () => {
+      // Use the get_all_users RPC function
+      const { data, error } = await supabase.rpc("get_all_users") as {
+        data: PublicUser[] | null;
+        error: Error | null
+      };
 
-      try {
-        // Use the get_all_users RPC function
-        const { data, error } = await supabase.rpc("get_all_users") as { 
-          data: PublicUser[] | null; 
-          error: Error | null 
-        };
-
-        if (error) {
-          console.error("Error fetching all users:", error);
-          setUsers([]);
-        } else {
-          setUsers(data || []);
-        }
-      } catch (error) {
+      if (error) {
         console.error("Error fetching all users:", error);
-        setUsers([]);
-      } finally {
-        setLoading(false);
+        throw error;
       }
-    };
 
-    fetchAllUsers();
-  }, [user]);
+      return data || [];
+    },
+    enabled: !!user,
+    staleTime: 5 * 60 * 1000, // 5 minutes - users don't change frequently
+    gcTime: 10 * 60 * 1000, // 10 minutes
+  });
 
   return { users, loading };
 }
