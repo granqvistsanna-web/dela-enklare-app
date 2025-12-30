@@ -12,7 +12,7 @@ import { IncomeItem } from "@/components/IncomeItem";
 import { EditExpenseModal } from "@/components/EditExpenseModal";
 import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { useAuth } from "@/hooks/useAuth";
-import { Search, ArrowUpDown, Calendar } from "lucide-react";
+import { Search, ArrowUpDown, Calendar, List, Plus } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -204,11 +204,15 @@ export default function Aktivitet() {
   if (loading) {
     return (
       <div className="lg:pl-64">
-        <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
-          <div className="h-8 w-48 rounded bg-secondary animate-pulse mb-8" />
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+          <div className="h-8 w-32 rounded-md skeleton-shimmer mb-6" />
+          <div className="h-24 rounded-lg skeleton-shimmer mb-6" />
           <div className="space-y-4">
             {[1, 2, 3].map(i => (
-              <div key={i} className="h-32 rounded bg-secondary animate-pulse" />
+              <div key={i}>
+                <div className="h-6 w-32 rounded-md skeleton-shimmer mb-3" />
+                <div className="h-32 rounded-lg skeleton-shimmer" style={{ animationDelay: `${i * 100}ms` }} />
+              </div>
             ))}
           </div>
         </main>
@@ -219,8 +223,13 @@ export default function Aktivitet() {
   if (!household) {
     return (
       <div className="lg:pl-64">
-        <main className="container max-w-6xl py-8 px-4 sm:px-6 pb-24 lg:pb-8">
-          <p className="text-muted-foreground">Inget hushåll hittades.</p>
+        <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
+          <div className="flex flex-col items-center justify-center py-20 animate-fade-in">
+            <div className="rounded-full bg-muted p-4 mb-4">
+              <List size={28} className="text-muted-foreground" />
+            </div>
+            <p className="text-caption">Inget hushåll hittades.</p>
+          </div>
         </main>
       </div>
     );
@@ -229,10 +238,10 @@ export default function Aktivitet() {
   return (
     <div className="lg:pl-64">
       <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-24 lg:pb-8">
-        <h1 className="text-heading text-2xl mb-6">Aktivitet</h1>
+        <h1 className="text-heading text-2xl mb-6 animate-fade-in">Aktivitet</h1>
 
         {/* Search and filters */}
-        <Card className="mb-6">
+        <Card className="mb-6 shadow-notion animate-fade-in" style={{ animationDelay: '50ms' }}>
           <CardContent className="p-4">
             <div className="grid gap-3 md:grid-cols-3">
               {/* Search */}
@@ -258,7 +267,7 @@ export default function Aktivitet() {
                     <SelectItem value="category">Kategori</SelectItem>
                   </SelectContent>
                 </Select>
-                <Button variant="outline" size="icon" onClick={toggleSortDirection} className="h-9 w-9">
+                <Button variant="outline" size="icon" onClick={toggleSortDirection} className="h-9 w-9 shrink-0">
                   <ArrowUpDown size={16} />
                 </Button>
               </div>
@@ -275,14 +284,18 @@ export default function Aktivitet() {
         {/* Activity list grouped by month */}
         {groupedByMonth.length > 0 ? (
           <div className="space-y-6">
-            {groupedByMonth.map(({ monthKey, items }) => {
+            {groupedByMonth.map(({ monthKey, items }, groupIdx) => {
               const [year, month] = monthKey.split('-');
               const monthName = MONTHS[parseInt(month) - 1];
               const totalExpenses = items.filter(i => i.type === 'expense').reduce((sum, i) => sum + i.amount, 0);
               const totalIncomes = items.filter(i => i.type === 'income').reduce((sum, i) => sum + i.amount, 0);
 
               return (
-                <div key={monthKey}>
+                <div 
+                  key={monthKey} 
+                  className="animate-fade-in"
+                  style={{ animationDelay: `${100 + groupIdx * 50}ms` }}
+                >
                   {/* Month header */}
                   <div className="mb-3">
                     <div className="flex items-center justify-between mb-2">
@@ -302,7 +315,7 @@ export default function Aktivitet() {
                   </div>
 
                   {/* Items for this month */}
-                  <Card>
+                  <Card className="shadow-notion">
                     <CardContent className="p-0">
                       <div className="divide-y divide-border/40">
                         {items.map((item, index) => {
@@ -341,15 +354,23 @@ export default function Aktivitet() {
             })}
           </div>
         ) : (
-          <Card className="border-dashed">
+          <Card className="border-dashed border-2 bg-muted/20 animate-fade-in" style={{ animationDelay: '100ms' }}>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <div className="rounded-full bg-muted p-3 mb-3">
-                <Calendar size={24} className="text-muted-foreground" />
+              <div className="rounded-full bg-muted p-4 mb-4">
+                <Plus size={24} className="text-muted-foreground" />
               </div>
-              <p className="text-base font-medium text-foreground mb-1">Inga aktiviteter</p>
-              <p className="text-caption">
+              <p className="font-medium text-foreground mb-1">Inga aktiviteter</p>
+              <p className="text-caption text-center mb-4">
                 {searchQuery ? 'Inga resultat matchade din sökning' : 'Börja genom att lägga till en utgift eller inkomst'}
               </p>
+              {!searchQuery && (
+                <button
+                  onClick={() => setIsAddModalOpen(true)}
+                  className="text-sm font-medium text-primary hover:opacity-70 transition-opacity"
+                >
+                  Lägg till transaktion →
+                </button>
+              )}
             </CardContent>
           </Card>
         )}
