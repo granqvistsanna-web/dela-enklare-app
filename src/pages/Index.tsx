@@ -11,6 +11,7 @@ import { ImportModal } from "@/components/ImportModal";
 import { SwishModal } from "@/components/SwishModal";
 import { BalanceCard } from "@/components/BalanceCard";
 import { MemberSummaryCard } from "@/components/MemberSummaryCard";
+import { SmartInsights } from "@/components/SmartInsights";
 import { useGroups } from "@/hooks/useGroups";
 import { GroupSelector } from "@/components/GroupSelector";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
@@ -244,6 +245,19 @@ const Index = () => {
         {/* Month selector */}
         <div className="mb-6 animate-fade-in" style={{ animationDelay: '50ms' }}>
           <MonthSelector />
+        </div>
+
+        {/* Smart Insights */}
+        <div className="mb-6">
+          <SmartInsights
+            currentExpenses={filteredExpenses}
+            currentIncomes={filteredIncomes}
+            allExpenses={expenses}
+            allIncomes={incomes}
+            currentYear={selectedYear}
+            currentMonth={selectedMonth}
+            netto={totals.netto}
+          />
         </div>
 
         {/* Summary grid - 2 columns */}
