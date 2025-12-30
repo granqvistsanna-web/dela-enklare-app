@@ -73,7 +73,7 @@ export const IncomeItem = memo(function IncomeItem({
         dragElastic={0.1}
         onDrag={(_, info) => setDragX(info.offset.x)}
         onDragEnd={handleDragEnd}
-        onTap={() => canModify && onEdit?.(income)}
+        onClick={() => canModify && onEdit?.(income)}
         className={`w-full text-left appearance-none border-0 flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? 'cursor-pointer active:bg-secondary/50' : ''}`}
       >
         <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
