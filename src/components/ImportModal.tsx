@@ -367,27 +367,37 @@ export function ImportModal({
 
                 {step === "review" && (
                   <div className="space-y-3 sm:space-y-4">
+                    {/* Instructions */}
+                    <div className="bg-muted/50 rounded-lg p-3 text-sm text-muted-foreground">
+                      <p className="font-medium text-foreground mb-1">Granska och importera</p>
+                      <ul className="space-y-1 text-xs">
+                        <li>• Bocka i de transaktioner du vill importera</li>
+                        <li>• Klicka på pilen för att byta mellan utgift/inkomst</li>
+                        <li>• "Delad" = ingår i 50/50-delningen mellan hushållet</li>
+                      </ul>
+                    </div>
+
                     {/* Summary */}
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 sm:mb-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                       <p className="text-sm text-muted-foreground">
                         {totalSelected} av {transactions.length} valda
                       </p>
                       <div className="flex gap-3 text-sm">
                         {selectedExpenses.length > 0 && (
                           <span className="text-expense font-medium tabular-nums">
-                            -{totalExpenseAmount.toLocaleString("sv-SE")} kr
+                            {selectedExpenses.length} utgifter: -{totalExpenseAmount.toLocaleString("sv-SE")} kr
                           </span>
                         )}
                         {selectedIncomes.length > 0 && (
                           <span className="text-income font-medium tabular-nums">
-                            +{totalIncomeAmount.toLocaleString("sv-SE")} kr
+                            {selectedIncomes.length} inkomster: +{totalIncomeAmount.toLocaleString("sv-SE")} kr
                           </span>
                         )}
                       </div>
                     </div>
 
                     {/* Transactions list - mobile optimized */}
-                    <div className="space-y-2 max-h-[45vh] sm:max-h-[40vh] overflow-y-auto -mx-1 px-1">
+                    <div className="space-y-2 max-h-[40vh] sm:max-h-[35vh] overflow-y-auto -mx-1 px-1">
                       {transactions.map((t) => (
                         <TransactionRow
                           key={t.id}
@@ -521,11 +531,15 @@ function TransactionRow({
               onClick={onToggleShared}
               className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
                 transaction.isShared
-                  ? "bg-primary/10 text-primary"
-                  : "bg-muted text-muted-foreground"
+                  ? "bg-primary/10 text-primary border border-primary/20"
+                  : "bg-muted text-muted-foreground border border-transparent"
               }`}
+              title={transaction.isShared 
+                ? "Delad utgift - ingår i 50/50-delningen" 
+                : "Privat utgift - ingår ej i delningen"
+              }
             >
-              {transaction.isShared ? "Delad" : "Privat"}
+              {transaction.isShared ? "✓ Delad" : "Privat"}
             </button>
           </>
         )}
@@ -535,11 +549,15 @@ function TransactionRow({
             onClick={onToggleShared}
             className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
               transaction.isShared
-                ? "bg-primary/10 text-primary"
-                : "bg-muted text-muted-foreground"
+                ? "bg-primary/10 text-primary border border-primary/20"
+                : "bg-muted text-muted-foreground border border-transparent"
             }`}
+            title={transaction.isShared 
+              ? "Inkomsten ingår i 50/50-delningen" 
+              : "Inkomsten ingår ej i delningen"
+            }
           >
-            {transaction.isShared ? "Dela 50/50" : "Ej delad"}
+            {transaction.isShared ? "✓ Dela 50/50" : "Ej delad"}
           </button>
         )}
       </div>
