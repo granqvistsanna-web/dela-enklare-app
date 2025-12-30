@@ -335,8 +335,9 @@ export default function Analys() {
             {expensesByCategory.length > 0 ? (
               <div className="space-y-4">
                 {expensesByCategory.map((item, idx) => {
-                  const percentage = totals.totalExpenses > 0
-                    ? (item.amount / totals.totalExpenses) * 100
+                  const total = totals.totalExpenses + totals.totalIncomes;
+                  const percentage = total > 0
+                    ? (item.amount / total) * 100
                     : 0;
 
                   return (
