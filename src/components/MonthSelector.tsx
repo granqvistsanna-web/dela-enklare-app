@@ -1,26 +1,17 @@
 import { useMonthSelection } from "@/hooks/useMonthSelection";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Calendar } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
-const MONTHS = [
-  "Januari", "Februari", "Mars", "April", "Maj", "Juni",
-  "Juli", "Augusti", "September", "Oktober", "November", "December"
+const MONTHS_SHORT = [
+  "Jan", "Feb", "Mar", "Apr", "Maj", "Jun",
+  "Jul", "Aug", "Sep", "Okt", "Nov", "Dec"
 ];
 
 export function MonthSelector() {
   const {
     selectedYear,
     selectedMonth,
-    setSelectedMonth,
-    setSelectedYear,
     goToPreviousMonth,
     goToNextMonth,
     goToCurrentMonth,
@@ -34,95 +25,47 @@ export function MonthSelector() {
   // Check if we can go to next month (don't allow future months)
   const canGoNext = !(selectedYear === currentYear && selectedMonth === currentMonth);
 
-  // Generate year options (current year and 2 years back)
-  const yearOptions = Array.from({ length: 3 }, (_, i) => currentYear - i);
-
-  const handleMonthChange = (value: string) => {
-    setSelectedMonth(parseInt(value));
-  };
-
-  const handleYearChange = (value: string) => {
-    setSelectedYear(parseInt(value));
-  };
+  // Format display: "Dec 2025" or just "December" if current year
+  const monthDisplay = MONTHS_SHORT[selectedMonth - 1];
+  const yearDisplay = selectedYear !== currentYear ? ` ${selectedYear}` : "";
 
   return (
-    <div className="flex items-center justify-between gap-2 p-2 sm:p-2.5 rounded-lg bg-card">
-      {/* Navigation arrows */}
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={goToPreviousMonth}
-          className="hover:bg-secondary/80"
-        >
-          <ChevronLeft size={18} />
-        </Button>
-      </div>
+    <div className="flex items-center justify-center gap-1">
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={goToPreviousMonth}
+        className="h-8 w-8 hover:bg-secondary/80"
+      >
+        <ChevronLeft size={18} />
+      </Button>
 
-      {/* Month and Year selectors */}
-      <div className="flex items-center gap-1.5 flex-1 justify-center">
-        <Select value={selectedMonth.toString()} onValueChange={handleMonthChange}>
-          <SelectTrigger className="w-[120px] h-9 border-border/50 text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {MONTHS.map((month, index) => {
-              const monthNum = index + 1;
-              // Disable future months in current year
-              const isDisabled = selectedYear === currentYear && monthNum > currentMonth;
-              return (
-                <SelectItem
-                  key={monthNum}
-                  value={monthNum.toString()}
-                  disabled={isDisabled}
-                >
-                  {month}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-
-        <Select value={selectedYear.toString()} onValueChange={handleYearChange}>
-          <SelectTrigger className="w-[85px] h-9 border-border/50 text-sm">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {yearOptions.map((year) => (
-              <SelectItem key={year} value={year.toString()}>
-                {year}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Next month arrow and current month button */}
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={goToNextMonth}
-          disabled={!canGoNext}
-          className={cn(
-            "hover:bg-secondary/80",
-            !canGoNext && "opacity-40 cursor-not-allowed"
-          )}
-        >
-          <ChevronRight size={18} />
-        </Button>
-        {!isCurrentMonth && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={goToCurrentMonth}
-            className="hover:bg-secondary/80"
-            title="Gå till aktuell månad"
-          >
-            <Calendar size={18} />
-          </Button>
+      <button
+        onClick={goToCurrentMonth}
+        disabled={isCurrentMonth}
+        className={cn(
+          "px-3 py-1.5 text-sm font-medium rounded-md transition-colors min-w-[100px]",
+          isCurrentMonth 
+            ? "text-foreground cursor-default" 
+            : "text-foreground hover:bg-secondary/60 cursor-pointer"
         )}
-      </div>
+        title={!isCurrentMonth ? "Klicka för att gå till aktuell månad" : undefined}
+      >
+        {monthDisplay}{yearDisplay}
+      </button>
+
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={goToNextMonth}
+        disabled={!canGoNext}
+        className={cn(
+          "h-8 w-8 hover:bg-secondary/80",
+          !canGoNext && "opacity-40 cursor-not-allowed"
+        )}
+      >
+        <ChevronRight size={18} />
+      </Button>
     </div>
   );
 }

@@ -244,25 +244,25 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Month selector */}
-        <div className="mb-8 animate-fade-in" style={{ animationDelay: '50ms' }}>
-          <MonthSelector />
-        </div>
-
         {/* Hero Summary Card */}
-        <Card className="mb-6 animate-fade-in" style={{ animationDelay: '100ms' }}>
-          <CardContent className="p-6 sm:p-8">
+        <Card className="mb-6 animate-fade-in" style={{ animationDelay: '50ms' }}>
+          <CardContent className="p-5 sm:p-6">
+            {/* Month selector - integrated */}
+            <div className="mb-4">
+              <MonthSelector />
+            </div>
+
             {/* Netto - Hero focus */}
-            <div className="text-center mb-6">
-              <p className="text-label-mono mb-2">Netto denna månad</p>
-              <p className={`text-4xl sm:text-5xl font-bold tracking-tight ${totals.netto >= 0 ? 'text-income' : 'text-expense'}`}>
-                {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
+            <div className="text-center mb-5">
+              <p className="text-label-mono mb-1">Netto</p>
+              <p className={`text-3xl sm:text-4xl font-bold tracking-tight ${totals.netto >= 0 ? 'text-income' : 'text-expense'}`}>
+                {totals.netto >= 0 ? '+' : ''}{Math.round(totals.netto).toLocaleString("sv-SE")} kr
               </p>
             </div>
 
             {/* Horizontal split bar */}
-            <div className="mb-6">
-              <div className="h-3 rounded-full overflow-hidden flex bg-muted">
+            <div className="mb-5">
+              <div className="h-2.5 rounded-full overflow-hidden flex bg-muted">
                 {(totals.totalIncomes > 0 || totals.totalExpenses > 0) ? (
                   <>
                     <div
@@ -282,28 +282,22 @@ const Index = () => {
 
             {/* In/Out summary */}
             <div className="grid grid-cols-2 gap-4">
-              <div className="text-center sm:text-left">
-                <div className="flex items-center justify-center sm:justify-start gap-2 mb-1">
-                  <div className="w-2.5 h-2.5 rounded-full bg-income" />
-                  <span className="text-caption">Inkomster</span>
+              <div>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <div className="w-2 h-2 rounded-full bg-income" />
+                  <span className="text-caption text-xs">Inkomster</span>
                 </div>
-                <p className="text-xl sm:text-2xl font-semibold text-foreground">
-                  {totals.totalIncomes.toLocaleString("sv-SE")} kr
-                </p>
-                <p className="text-caption text-xs mt-0.5">
-                  {filteredIncomes.length} {filteredIncomes.length === 1 ? 'post' : 'poster'}
+                <p className="text-lg sm:text-xl font-semibold text-foreground">
+                  {Math.round(totals.totalIncomes).toLocaleString("sv-SE")} kr
                 </p>
               </div>
-              <div className="text-center sm:text-right">
-                <div className="flex items-center justify-center sm:justify-end gap-2 mb-1">
-                  <div className="w-2.5 h-2.5 rounded-full bg-expense" />
-                  <span className="text-caption">Utgifter</span>
+              <div className="text-right">
+                <div className="flex items-center justify-end gap-2 mb-0.5">
+                  <div className="w-2 h-2 rounded-full bg-expense" />
+                  <span className="text-caption text-xs">Utgifter</span>
                 </div>
-                <p className="text-xl sm:text-2xl font-semibold text-foreground">
-                  {totals.totalExpenses.toLocaleString("sv-SE")} kr
-                </p>
-                <p className="text-caption text-xs mt-0.5">
-                  {filteredExpenses.length} {filteredExpenses.length === 1 ? 'post' : 'poster'}
+                <p className="text-lg sm:text-xl font-semibold text-foreground">
+                  {Math.round(totals.totalExpenses).toLocaleString("sv-SE")} kr
                 </p>
               </div>
             </div>
