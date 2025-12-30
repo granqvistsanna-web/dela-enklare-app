@@ -72,7 +72,7 @@ export function SettlementItem({
           </p>
         </div>
         <div className="text-right flex items-center gap-2 shrink-0">
-          <p className="font-semibold text-primary text-money-sm">
+          <p className="text-number text-primary">
             {Math.round(settlement.amount).toLocaleString("sv-SE")} kr
           </p>
           {canEdit && (

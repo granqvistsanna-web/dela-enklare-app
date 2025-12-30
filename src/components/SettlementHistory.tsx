@@ -60,7 +60,7 @@ export function SettlementHistory({ settlements, members }: SettlementHistoryPro
                 <p className="text-xs text-muted-foreground">{settlement.month}</p>
               </div>
             </div>
-            <span className="text-money-sm font-semibold text-foreground">
+            <span className="text-number text-foreground">
               {settlement.amount.toLocaleString("sv-SE")} kr
             </span>
           </div>

@@ -72,7 +72,7 @@ export function IncomeOverviewCard({
           <p className="text-sm font-medium text-muted-foreground mb-2">
             Total inkomst
           </p>
-          <p className="text-money-xl font-semibold text-foreground">
+          <p className="text-number-display text-foreground">
             {formatAmount(settlement.totalIncome)}
           </p>
         </CardContent>
@@ -88,24 +88,24 @@ export function IncomeOverviewCard({
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Intjänat:</span>
-                <span className="font-medium text-money-sm">
+                <span className="text-number-sm">
                   {formatAmount(settlement.personAIncome)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Andel (50%):</span>
-                <span className="font-medium text-money-sm">
+                <span className="text-number-sm">
                   {formatAmount(settlement.shareA)}
                 </span>
               </div>
               <div className="flex justify-between pt-1 border-t border-border">
                 <span className="text-muted-foreground">Balans:</span>
                 <span
-                  className={`font-semibold text-money-sm ${
+                  className={`text-number-sm ${
                     settlement.balanceA > 0
-                      ? "text-orange-600"
+                      ? "text-warning"
                       : settlement.balanceA < 0
-                      ? "text-green-600"
+                      ? "text-income"
                       : "text-muted-foreground"
                   }`}
                 >
@@ -125,24 +125,24 @@ export function IncomeOverviewCard({
             <div className="space-y-1 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Intjänat:</span>
-                <span className="font-medium text-money-sm">
+                <span className="text-number-sm">
                   {formatAmount(settlement.personBIncome)}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Andel (50%):</span>
-                <span className="font-medium text-money-sm">
+                <span className="text-number-sm">
                   {formatAmount(settlement.shareB)}
                 </span>
               </div>
               <div className="flex justify-between pt-1 border-t border-border">
                 <span className="text-muted-foreground">Balans:</span>
                 <span
-                  className={`font-semibold text-money-sm ${
+                  className={`text-number-sm ${
                     settlement.balanceB > 0
-                      ? "text-orange-600"
+                      ? "text-warning"
                       : settlement.balanceB < 0
-                      ? "text-green-600"
+                      ? "text-income"
                       : "text-muted-foreground"
                   }`}
                 >
@@ -172,7 +172,7 @@ export function IncomeOverviewCard({
                   {transferTo.name}
                 </span>
               </p>
-              <p className="text-money-xl font-semibold text-foreground">
+              <p className="text-number-display text-foreground">
                 {formatAmount(settlement.transferAmount)}
               </p>
             </div>
