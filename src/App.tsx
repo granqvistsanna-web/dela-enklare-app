@@ -87,15 +87,15 @@ const AppContent = () => {
 
 const App = () => (
   <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-    <ThemeProvider>
-      <TooltipProvider>
-        <AuthProvider>
+    <AuthProvider>
+      <ThemeProvider>
+        <TooltipProvider>
           <MonthSelectionProvider>
             <AppContent />
           </MonthSelectionProvider>
-        </AuthProvider>
-      </TooltipProvider>
-    </ThemeProvider>
+        </TooltipProvider>
+      </ThemeProvider>
+    </AuthProvider>
   </PersistQueryClientProvider>
 );
 
