@@ -30,7 +30,7 @@ interface AddTransactionModalProps {
   defaultType?: "expense" | "income";
 }
 
-const INCOME_TYPES: IncomeType[] = ["salary", "bonus", "benefit", "other"];
+const INCOME_TYPES: IncomeType[] = ["salary", "bonus", "benefit", "fkassa", "bidrag", "other"];
 
 export function AddTransactionModal({
   isOpen,

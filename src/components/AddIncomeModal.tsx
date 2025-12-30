@@ -16,7 +16,7 @@ interface AddIncomeModalProps {
   groupId: string;
 }
 
-const INCOME_TYPES: IncomeType[] = ["salary", "bonus", "benefit", "other"];
+const INCOME_TYPES: IncomeType[] = ["salary", "bonus", "benefit", "fkassa", "bidrag", "other"];
 
 export function AddIncomeModal({
   isOpen,
