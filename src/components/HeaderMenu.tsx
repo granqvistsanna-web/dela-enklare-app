@@ -1,4 +1,4 @@
-import { Upload, MoreVertical } from "lucide-react";
+import { Upload, MoreVertical, Smartphone } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button";
 
 interface HeaderMenuProps {
   onImportClick: () => void;
+  onSwishClick: () => void;
 }
 
-export function HeaderMenu({ onImportClick }: HeaderMenuProps) {
+export function HeaderMenu({ onImportClick, onSwishClick }: HeaderMenuProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -21,6 +22,10 @@ export function HeaderMenu({ onImportClick }: HeaderMenuProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
+        <DropdownMenuItem onClick={onSwishClick}>
+          <Smartphone size={16} className="mr-2" />
+          Lägg till Swish
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={onImportClick}>
           <Upload size={16} className="mr-2" />
           Importera transaktioner

@@ -239,7 +239,10 @@ const Index = () => {
                 selectedGroupId={household.id}
                 onSelectGroup={selectGroup}
               />
-              <HeaderMenu onImportClick={() => setIsImportModalOpen(true)} />
+              <HeaderMenu
+                onImportClick={() => setIsImportModalOpen(true)}
+                onSwishClick={() => setIsSwishModalOpen(true)}
+              />
             </div>
           </div>
         </div>

@@ -3,8 +3,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { AddFab } from "@/components/AddFab";
+import { HeaderMenu } from "@/components/HeaderMenu";
 import { AddTransactionModal } from "@/components/AddTransactionModal";
 import { SwishModal } from "@/components/SwishModal";
+import { ImportModal } from "@/components/ImportModal";
 import { useGroups } from "@/hooks/useGroups";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
 import { useIncomes, Income, IncomeInput } from "@/hooks/useIncomes";
@@ -36,7 +38,7 @@ const MONTHS = [
 export default function Aktivitet() {
   const { user } = useAuth();
   const { household, loading: householdLoading } = useGroups();
-  const { expenses, loading: expensesLoading, updateExpense, deleteExpense, addExpense } = useExpenses(household?.id);
+  const { expenses, loading: expensesLoading, updateExpense, deleteExpense, addExpense, addExpenses } = useExpenses(household?.id);
   const { incomes, loading: incomesLoading, updateIncome, deleteIncome, addIncome } = useIncomes(household?.id);
   const { settlements, loading: settlementsLoading, addSettlement, updateSettlement, deleteSettlement } = useSettlements(household?.id);
 
@@ -44,6 +46,7 @@ export default function Aktivitet() {
   const [sortBy, setSortBy] = useState<SortOption>("date");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
   const [isSwishModalOpen, setIsSwishModalOpen] = useState(false);
   const [isEditExpenseModalOpen, setIsEditExpenseModalOpen] = useState(false);
   const [isEditIncomeModalOpen, setIsEditIncomeModalOpen] = useState(false);
@@ -255,6 +258,17 @@ export default function Aktivitet() {
     return await addIncome(newIncome);
   }, [addIncome]);
 
+  const handleImportExpenses = useCallback(async (newExpenses: {
+    group_id: string;
+    amount: number;
+    paid_by: string;
+    category: string;
+    description: string;
+    date: string;
+  }[]) => {
+    await addExpenses(newExpenses);
+  }, [addExpenses]);
+
   if (loading) {
     return (
       <div className="pt-14 lg:pt-0 lg:pl-64">
@@ -292,7 +306,16 @@ export default function Aktivitet() {
   return (
     <div className="pt-14 lg:pt-0 lg:pl-64">
       <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
-        <h1 className="text-heading text-2xl mb-6 animate-fade-in">Aktivitet</h1>
+        {/* Header */}
+        <div className="mb-6 animate-fade-in">
+          <div className="flex items-center justify-between gap-3">
+            <h1 className="text-heading text-2xl">Aktivitet</h1>
+            <HeaderMenu
+              onImportClick={() => setIsImportModalOpen(true)}
+              onSwishClick={() => setIsSwishModalOpen(true)}
+            />
+          </div>
+        </div>
 
         {/* Search and filters */}
         <Card className="mb-6 shadow-notion animate-fade-in" style={{ animationDelay: '50ms' }}>
@@ -461,6 +484,14 @@ export default function Aktivitet() {
         onClose={() => setIsSwishModalOpen(false)}
         onSubmit={handleAddSwish}
         members={household.members}
+        currentUserId={user?.id || ""}
+      />
+
+      <ImportModal
+        isOpen={isImportModalOpen}
+        onClose={() => setIsImportModalOpen(false)}
+        onImportExpenses={handleImportExpenses}
+        groupId={household.id}
         currentUserId={user?.id || ""}
       />
 
