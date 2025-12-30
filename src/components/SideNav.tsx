@@ -142,9 +142,9 @@ export function SideNav() {
                   )}
                 >
                   {isActive && (
-                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-5 bg-foreground rounded-full" />
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-r-full" />
                   )}
-                  <Icon 
+                  <Icon
                     size={18} 
                     className={cn(
                       "shrink-0 transition-transform",
