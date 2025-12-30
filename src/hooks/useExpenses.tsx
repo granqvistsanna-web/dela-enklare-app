@@ -31,6 +31,20 @@ export function useExpenses(groupId?: string) {
       return;
     }
 
+    const parseSplits = (value: unknown): ExpenseSplit | null => {
+      if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+      const record = value as Record<string, unknown>;
+      const out: ExpenseSplit = {};
+
+      for (const [userId, raw] of Object.entries(record)) {
+        const n = typeof raw === "number" ? raw : typeof raw === "string" ? Number(raw) : NaN;
+        if (!Number.isFinite(n)) return null;
+        out[userId] = n;
+      }
+
+      return out;
+    };
+
     try {
       let query = supabase.from("expenses").select("*");
 
@@ -42,7 +56,12 @@ export function useExpenses(groupId?: string) {
 
       if (error) throw error;
 
-      setExpenses(data || []);
+      const normalized = (data ?? []).map((row: any) => ({
+        ...row,
+        splits: parseSplits(row.splits),
+      })) as Expense[];
+
+      setExpenses(normalized);
     } catch (error) {
       console.error("Error fetching expenses:", error);
       toast.error("Kunde inte hämta utgifter");
