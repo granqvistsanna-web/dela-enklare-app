@@ -7,7 +7,7 @@ import { Income } from "@/hooks/useIncomes";
 import { Settlement } from "@/hooks/useSettlements";
 import { calculateBalance, getBalanceBreakdown } from "@/lib/balanceUtils";
 import { SettlementModal } from "@/components/SettlementModal";
-import { Check, Users, Loader2 } from "lucide-react";
+import { Check, Users, Loader2, ChevronDown, ChevronUp } from "lucide-react";
 
 interface BalanceCardProps {
   expenses: Expense[];
@@ -31,6 +31,7 @@ export function BalanceCard({
   isSettling = false,
 }: BalanceCardProps) {
   const [isSettleModalOpen, setIsSettleModalOpen] = useState(false);
+  const [isBreakdownExpanded, setIsBreakdownExpanded] = useState(false);
 
   // Filter settlements for the selected month
   const monthlySettlements = useMemo(() => {
@@ -167,42 +168,65 @@ export function BalanceCard({
               </p>
             </div>
 
-            {/* Breakdown explanation */}
+            {/* Breakdown explanation - Collapsible */}
             <div className="pt-3 sm:pt-4 border-t border-border/60">
-              <p className="text-xs text-muted-foreground mb-2 sm:mb-3">Så här räknas det ut</p>
-              <div className="space-y-3">
-                {breakdown.map((b) => (
-                  <div key={b.userId} className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <div className="h-5 w-5 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue shrink-0">
-                        {b.name.charAt(0).toUpperCase()}
+              <button
+                onClick={() => setIsBreakdownExpanded(!isBreakdownExpanded)}
+                className="w-full flex items-center justify-between text-xs text-muted-foreground mb-2 sm:mb-3 hover:text-foreground transition-colors"
+              >
+                <span>Så här räknas det ut</span>
+                {isBreakdownExpanded ? (
+                  <ChevronUp size={16} className="text-muted-foreground" />
+                ) : (
+                  <ChevronDown size={16} className="text-muted-foreground" />
+                )}
+              </button>
+
+              {isBreakdownExpanded && (
+                <div className="space-y-3 animate-fade-in">
+                  {breakdown.length > 0 ? (
+                    <>
+                      {breakdown.map((b) => (
+                        <div key={b.userId} className="space-y-1.5">
+                          <div className="flex items-center gap-2">
+                            <div className="h-5 w-5 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue shrink-0">
+                              {b.name.charAt(0).toUpperCase()}
+                            </div>
+                            <span className="text-sm font-medium text-foreground">{b.name}</span>
+                          </div>
+                          <div className="ml-7 grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
+                            <span className="text-muted-foreground">Inkomst:</span>
+                            <span className="text-right tabular-nums text-income">
+                              +{Math.round(b.incomeReceived).toLocaleString("sv-SE")} kr
+                            </span>
+                            <span className="text-muted-foreground">Utgifter:</span>
+                            <span className="text-right tabular-nums text-expense">
+                              −{Math.round(b.expensesPaid).toLocaleString("sv-SE")} kr
+                            </span>
+                            <span className="text-muted-foreground">Netto:</span>
+                            <span className={`text-right tabular-nums font-medium ${b.netResult >= 0 ? 'text-income' : 'text-expense'}`}>
+                              {b.netResult >= 0 ? '+' : ''}{Math.round(b.netResult).toLocaleString("sv-SE")} kr
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Target explanation */}
+                      <div className="pt-2 border-t border-border/40">
+                        <p className="text-xs text-muted-foreground">
+                          Mål: Båda ska ha samma nettoresultat ({Math.round(breakdown[0]?.targetNet || 0).toLocaleString("sv-SE")} kr)
+                        </p>
                       </div>
-                      <span className="text-sm font-medium text-foreground">{b.name}</span>
+                    </>
+                  ) : (
+                    <div className="text-center py-4">
+                      <p className="text-sm text-muted-foreground">
+                        Ingen data att visa för denna månad
+                      </p>
                     </div>
-                    <div className="ml-7 grid grid-cols-2 gap-x-4 gap-y-0.5 text-xs">
-                      <span className="text-muted-foreground">Inkomst:</span>
-                      <span className="text-right text-money-sm text-income">
-                        +{Math.round(b.incomeReceived).toLocaleString("sv-SE")} kr
-                      </span>
-                      <span className="text-muted-foreground">Utgifter:</span>
-                      <span className="text-right text-money-sm text-expense">
-                        −{Math.round(b.expensesPaid).toLocaleString("sv-SE")} kr
-                      </span>
-                      <span className="text-muted-foreground">Netto:</span>
-                      <span className={`text-right text-money-sm font-medium ${b.netResult >= 0 ? 'text-income' : 'text-expense'}`}>
-                        {b.netResult >= 0 ? '+' : ''}{Math.round(b.netResult).toLocaleString("sv-SE")} kr
-                      </span>
-                    </div>
-                  </div>
-                ))}
-                
-                {/* Target explanation */}
-                <div className="pt-2 border-t border-border/40">
-                  <p className="text-xs text-muted-foreground">
-                    Mål: Båda ska ha samma nettoresultat ({Math.round(breakdown[0]?.targetNet || 0).toLocaleString("sv-SE")} kr)
-                  </p>
+                  )}
                 </div>
-              </div>
+              )}
             </div>
 
             {/* Individual balances - simplified */}
