@@ -164,36 +164,6 @@ export type Database = {
           },
         ]
       }
-      invitations: {
-        Row: {
-          created_at: string
-          email: string
-          expires_at: string
-          group_id: string
-          id: string
-          inviter_id: string
-          status: string
-        }
-        Insert: {
-          created_at?: string
-          email: string
-          expires_at?: string
-          group_id: string
-          id?: string
-          inviter_id: string
-          status?: string
-        }
-        Update: {
-          created_at?: string
-          email?: string
-          expires_at?: string
-          group_id?: string
-          id?: string
-          inviter_id?: string
-          status?: string
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
