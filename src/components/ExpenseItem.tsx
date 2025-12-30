@@ -72,48 +72,48 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
         onClick={() => canModify && onEdit?.(expense)}
         className={`
           w-full text-left appearance-none border-0
-          flex items-center justify-between py-3.5 px-0 min-h-[68px]
-          bg-background transition-all duration-150
+          flex items-center justify-between py-4 px-0 min-h-[72px]
+          bg-background transition-all duration-200
           ${canModify && onEdit
-            ? "cursor-pointer hover:bg-secondary/30 active:bg-secondary/50 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+            ? "cursor-pointer hover:bg-secondary/40 active:bg-secondary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset rounded-md"
             : ""}
         `}
-        whileHover={canModify ? { x: 2 } : undefined}
-        whileTap={canModify ? { scale: 0.99 } : undefined}
+        whileHover={canModify ? { x: 3 } : undefined}
+        whileTap={canModify ? { scale: 0.985 } : undefined}
       >
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 pointer-events-none">
-          <div className="p-1.5 rounded-md bg-expense-bg shrink-0">
-            <ArrowUpRight size={16} className="text-expense" />
+        <div className="flex items-center gap-3.5 sm:gap-4 min-w-0 flex-1 pointer-events-none">
+          <div className="p-2 rounded-lg bg-expense-bg shrink-0 ring-1 ring-expense/10">
+            <ArrowUpRight size={18} className="text-expense" strokeWidth={2.5} />
           </div>
           <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <p className="text-sm font-medium text-foreground truncate">{expense.description || "Utgift"}</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <p className="text-[15px] font-semibold text-foreground truncate leading-tight">{expense.description || "Utgift"}</p>
               {expense.repeat && expense.repeat !== "none" && (
-                <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 bg-primary/10 rounded text-primary">
-                  <Repeat size={10} />
+                <span className="inline-flex items-center gap-1 text-[11px] px-2 py-0.5 bg-primary/10 rounded-full text-primary font-medium">
+                  <Repeat size={11} strokeWidth={2.5} />
                   {expense.repeat === "monthly" ? "Månadsvis" : "Årlig"}
                 </span>
               )}
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-0.5">
-              <span className="font-medium text-foreground/80">{payer?.name || "Okänd"}</span>
-              <span>·</span>
+            <div className="flex items-center gap-1.5 text-xs text-muted-foreground mt-1">
+              <span className="font-semibold text-foreground/70">{payer?.name || "Okänd"}</span>
+              <span className="opacity-50">•</span>
               <span>{formattedDate}</span>
               {hasCustomSplit && (
                 <>
-                  <span>·</span>
-                  <span className="text-primary font-medium">Delad</span>
+                  <span className="opacity-50">•</span>
+                  <span className="text-primary font-semibold">Delad</span>
                 </>
               )}
             </div>
             {hasCustomSplit && (
-              <div className="mt-1.5 flex flex-wrap gap-x-2.5 gap-y-0.5 text-xs">
+              <div className="mt-2 flex flex-wrap gap-x-3 gap-y-1 text-xs">
                 {Object.entries(expense.splits!).map(([userId, amount]) => {
                   const member = members.find((m) => m.user_id === userId);
                   const safeSplitAmount = Number.isFinite(amount) && amount >= 0 ? amount : 0;
                   return (
-                    <span key={userId} className="text-muted-foreground/80 whitespace-nowrap">
-                      {member?.name || "?"}: <span className="font-medium text-foreground/70 tabular-nums">{safeSplitAmount.toLocaleString("sv-SE")}</span>
+                    <span key={userId} className="text-muted-foreground/70 whitespace-nowrap">
+                      {member?.name || "?"}: <span className="font-semibold text-foreground/60 tabular-nums">{safeSplitAmount.toLocaleString("sv-SE")}</span>
                     </span>
                   );
                 })}
@@ -122,15 +122,15 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
           </div>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0 pointer-events-none">
+        <div className="flex items-center gap-3 shrink-0 pointer-events-none">
           <div className="text-right">
-            <span className="text-base sm:text-lg font-semibold text-foreground tabular-nums block">
+            <span className="text-lg sm:text-xl font-bold text-foreground tabular-nums block leading-tight">
               {safeAmount.toLocaleString("sv-SE")}
             </span>
-            <span className="text-xs text-muted-foreground">kr</span>
+            <span className="text-[11px] text-muted-foreground/70 font-medium">kr</span>
           </div>
           {canModify && (
-            <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-xl transition-all duration-150">
+            <span className="text-muted-foreground/30 group-hover:text-muted-foreground/70 text-2xl transition-all duration-200 leading-none">
               ›
             </span>
           )}
