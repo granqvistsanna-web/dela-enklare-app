@@ -78,7 +78,7 @@ export function AddFab({ onClick, onImportClick, onSwishClick }: AddFabProps) {
                   size="sm"
                   className="gap-2 shadow-notion-lg hover:shadow-xl bg-background border-border"
                 >
-                  <Smartphone size={16} className="text-[#0CA677]" />
+                  <Smartphone size={16} />
                   <span>Swish</span>
                 </Button>
               </motion.div>

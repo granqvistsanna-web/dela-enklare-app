@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { ArrowRightLeft } from "lucide-react";
+import { Smartphone } from "lucide-react";
 import { Settlement } from "@/hooks/useSettlements";
 import { GroupMember } from "@/hooks/useGroups";
 
@@ -52,12 +52,17 @@ export function SettlementItem({
           className="p-1.5 rounded-md bg-primary/10 shrink-0"
           whileHover={canEdit ? { scale: 1.05 } : undefined}
         >
-          <ArrowRightLeft size={16} className="text-primary pointer-events-none" />
+          <Smartphone size={16} className="text-primary pointer-events-none" />
         </motion.div>
         <div className="flex-1 min-w-0">
-          <p className="font-medium text-foreground text-sm truncate">
-            Swish
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="font-medium text-foreground text-sm truncate">
+              Swish
+            </p>
+            <span className="text-xs px-1.5 py-0.5 rounded bg-primary/10 text-primary font-medium shrink-0">
+              Betalning
+            </span>
+          </div>
           <p className="text-caption truncate">
             {fromMember?.name || "Okänd"} → {toMember?.name || "Okänd"} •{" "}
             {new Date(settlement.date).toLocaleDateString("sv-SE", {
