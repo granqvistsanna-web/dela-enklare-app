@@ -7,7 +7,7 @@ import { Income } from "@/hooks/useIncomes";
 import { Settlement } from "@/hooks/useSettlements";
 import { calculateBalance, getBalanceBreakdown } from "@/lib/balanceUtils";
 import { SettlementModal } from "@/components/SettlementModal";
-import { Check, Users, Loader2, ChevronDown, ChevronUp } from "lucide-react";
+import { Check, Users, Loader2, ChevronDown, ChevronUp, Smartphone } from "lucide-react";
 
 interface BalanceCardProps {
   expenses: Expense[];
@@ -309,7 +309,10 @@ export function BalanceCard({
                   Registrerar...
                 </>
               ) : (
-                "Registrera betalning"
+                <>
+                  <Smartphone size={16} className="mr-2" />
+                  Swisha {Math.round(oweAmount).toLocaleString("sv-SE")} kr
+                </>
               )}
             </Button>
           </div>

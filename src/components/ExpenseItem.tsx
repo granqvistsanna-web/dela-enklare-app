@@ -48,11 +48,11 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
   };
 
   return (
-    <div className="group relative overflow-hidden">
+    <div className="group relative overflow-hidden rounded-lg">
       {/* Delete background - shown when swiping */}
       {canModify && onDelete && (
         <div
-          className="absolute inset-0 bg-destructive flex items-center justify-end px-6 pointer-events-none"
+          className="absolute inset-0 bg-destructive flex items-center justify-end px-6 pointer-events-none rounded-lg"
           style={{
             opacity: Math.min(Math.abs(dragX) / 100, 1),
           }}
@@ -71,11 +71,11 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
         onDragEnd={handleDragEnd}
         onClick={() => canModify && onEdit?.(expense)}
         className={`
-          w-full text-left appearance-none border-0 
-          flex items-center justify-between py-4 px-4 sm:px-6 
+          w-full text-left appearance-none border-0 rounded-lg
+          flex items-center justify-between py-4 px-4 sm:px-6
           bg-background transition-all duration-150
-          ${canModify && onEdit 
-            ? "cursor-pointer hover:bg-secondary/40 active:bg-secondary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset" 
+          ${canModify && onEdit
+            ? "cursor-pointer hover:bg-secondary/40 active:bg-secondary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
             : ""}
         `}
         whileHover={canModify ? { scale: 1.005 } : undefined}
@@ -120,7 +120,7 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
             {safeAmount.toLocaleString("sv-SE")} kr
           </span>
           {canModify && (
-            <span className="text-muted-foreground text-lg transition-transform duration-150 group-hover:translate-x-0.5">
+            <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-lg transition-all duration-150 group-hover:translate-x-0.5">
               ›
             </span>
           )}

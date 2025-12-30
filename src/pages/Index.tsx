@@ -2,6 +2,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { MonthSelector } from "@/components/MonthSelector";
 import { AddFab } from "@/components/AddFab";
+import { HeaderMenu } from "@/components/HeaderMenu";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AddTransactionModal } from "@/components/AddTransactionModal";
@@ -22,7 +23,6 @@ import { useCountAnimation } from "@/hooks/useCountAnimation";
 import {
   ArrowDownLeft,
   ArrowUpRight,
-  DollarSign,
   ArrowRight,
   Home,
   Plus,
@@ -233,11 +233,14 @@ const Index = () => {
               <h1 className="text-heading text-2xl mb-1">Hem</h1>
               <p className="text-caption">{household.name}</p>
             </div>
-            <GroupSelector
-              groups={allGroups}
-              selectedGroupId={household.id}
-              onSelectGroup={selectGroup}
-            />
+            <div className="flex items-center gap-2">
+              <GroupSelector
+                groups={allGroups}
+                selectedGroupId={household.id}
+                onSelectGroup={selectGroup}
+              />
+              <HeaderMenu onImportClick={() => setIsImportModalOpen(true)} />
+            </div>
           </div>
         </div>
 
@@ -255,45 +258,30 @@ const Index = () => {
             </h2>
 
             <Card className="shadow-notion hover-lift">
-              <CardContent className="p-5 space-y-3">
+              <CardContent className="p-5 space-y-4">
                 {/* Total in */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-md bg-income-bg">
-                      <ArrowDownLeft size={18} className="text-income" />
-                    </div>
-                    <span className="text-caption font-medium">Total in</span>
-                  </div>
-                  <span className="text-money-lg font-semibold text-foreground">
+                <div className="space-y-1">
+                  <p className="text-subheading">Total in</p>
+                  <p className="text-money-xl font-semibold text-income">
                     {totals.totalIncomes.toLocaleString("sv-SE")} kr
-                  </span>
+                  </p>
                 </div>
 
                 {/* Total ut */}
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="p-1.5 rounded-md bg-expense-bg">
-                      <ArrowUpRight size={18} className="text-expense" />
-                    </div>
-                    <span className="text-caption font-medium">Total ut</span>
-                  </div>
-                  <span className="text-money-lg font-semibold text-foreground">
+                <div className="space-y-1">
+                  <p className="text-subheading">Total ut</p>
+                  <p className="text-money-xl font-semibold text-expense">
                     {totals.totalExpenses.toLocaleString("sv-SE")} kr
-                  </span>
+                  </p>
                 </div>
 
                 <div className="pt-3 border-t border-border/60">
                   {/* Netto */}
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className={`p-1.5 rounded-md ${animatedNetto >= 0 ? 'bg-income-bg' : 'bg-icon-pink-bg'}`}>
-                        <DollarSign size={18} className={animatedNetto >= 0 ? 'text-income' : 'text-icon-pink'} />
-                      </div>
-                      <span className="text-caption font-medium">Netto</span>
-                    </div>
-                    <span className={`text-money-xl font-bold ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
+                  <div className="space-y-1">
+                    <p className="text-subheading">Netto</p>
+                    <p className={`text-money-xl font-bold ${totals.netto >= 0 ? 'text-income' : 'text-icon-pink'}`}>
                       {totals.netto >= 0 ? '+' : ''}{totals.netto.toLocaleString("sv-SE")} kr
-                    </span>
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -414,7 +402,7 @@ const Index = () => {
                         return (
                           <div
                             key={`expense-${expense.id}`}
-                            className={`p-3.5 list-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
+                            className={`group p-3.5 list-hover rounded-lg ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
                             style={{ animationDelay: `${idx * 50}ms` }}
                             onClick={() => {
                               if (!canEdit) return;
@@ -437,7 +425,7 @@ const Index = () => {
                                 <p className="font-semibold text-expense text-money-sm">
                                   -{expense.amount.toLocaleString('sv-SE')} kr
                                 </p>
-                                {canEdit && <span className="text-muted-foreground text-lg transition-transform group-hover:translate-x-0.5">›</span>}
+                                {canEdit && <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-lg transition-all group-hover:translate-x-0.5">›</span>}
                               </div>
                             </div>
                           </div>
@@ -449,7 +437,7 @@ const Index = () => {
                         return (
                           <div
                             key={`income-${income.id}`}
-                            className={`p-3.5 list-hover ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
+                            className={`group p-3.5 list-hover rounded-lg ${canEdit ? "cursor-pointer" : "cursor-default opacity-90"}`}
                             style={{ animationDelay: `${idx * 50}ms` }}
                             onClick={() => {
                               if (!canEdit) return;
@@ -472,7 +460,7 @@ const Index = () => {
                                 <p className="font-semibold text-income text-money-sm">
                                   +{(income.amount / 100).toLocaleString('sv-SE')} kr
                                 </p>
-                                {canEdit && <span className="text-muted-foreground text-lg transition-transform group-hover:translate-x-0.5">›</span>}
+                                {canEdit && <span className="text-muted-foreground/40 group-hover:text-muted-foreground text-lg transition-all group-hover:translate-x-0.5">›</span>}
                               </div>
                             </div>
                           </div>
@@ -503,11 +491,7 @@ const Index = () => {
       </main>
 
       {/* Add FAB */}
-      <AddFab
-        onClick={() => setIsAddModalOpen(true)}
-        onImportClick={() => setIsImportModalOpen(true)}
-        onSwishClick={() => setIsSwishModalOpen(true)}
-      />
+      <AddFab onClick={() => setIsAddModalOpen(true)} />
 
       {/* Add transaction modal */}
       <AddTransactionModal
