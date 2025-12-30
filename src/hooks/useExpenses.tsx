@@ -7,6 +7,8 @@ export interface ExpenseSplit {
   [userId: string]: number;
 }
 
+export type ExpenseRepeat = "none" | "monthly" | "yearly";
+
 export interface Expense {
   id: string;
   group_id: string;
@@ -17,6 +19,7 @@ export interface Expense {
   date: string;
   created_at: string;
   splits?: ExpenseSplit | null;
+  repeat: ExpenseRepeat;
 }
 
 export function useExpenses(groupId?: string) {
@@ -82,6 +85,7 @@ export function useExpenses(groupId?: string) {
     description: string;
     date: string;
     splits?: ExpenseSplit | null;
+    repeat?: ExpenseRepeat;
   }) => {
     if (!user) {
       toast.error("Du måste vara inloggad");
@@ -98,6 +102,7 @@ export function useExpenses(groupId?: string) {
         description: string;
         date: string;
         splits?: ExpenseSplit | null;
+        repeat: ExpenseRepeat;
       } = {
         group_id: expense.group_id,
         amount: expense.amount,
@@ -105,6 +110,7 @@ export function useExpenses(groupId?: string) {
         category: expense.category,
         description: expense.description,
         date: expense.date,
+        repeat: expense.repeat || "none",
       };
 
       // Only add splits if it's not null/undefined
@@ -146,6 +152,7 @@ export function useExpenses(groupId?: string) {
     description: string;
     date: string;
     splits?: ExpenseSplit | null;
+    repeat?: ExpenseRepeat;
   }[]) => {
     if (!user) {
       toast.error("Du måste vara inloggad");

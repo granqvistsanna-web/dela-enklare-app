@@ -6,9 +6,10 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { GroupMember } from "@/hooks/useGroups";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
-import { ExpenseSplit } from "@/hooks/useExpenses";
+import { ExpenseSplit, ExpenseRepeat } from "@/hooks/useExpenses";
 import { IncomeType, IncomeRepeat, IncomeInput, Income } from "@/hooks/useIncomes";
 import { getIncomeTypeIcon, getIncomeTypeLabel } from "@/lib/incomeUtils";
+import { RecurringSection, RepeatInterval } from "@/components/RecurringSection";
 import { toast } from "sonner";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -23,6 +24,7 @@ interface AddTransactionModalProps {
     description: string;
     date: string;
     splits?: ExpenseSplit | null;
+    repeat?: ExpenseRepeat;
   }) => void;
   onAddIncome: (income: IncomeInput) => Promise<Income | null>;
   groupId: string;
@@ -49,6 +51,7 @@ export function AddTransactionModal({
   // Common fields
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [repeat, setRepeat] = useState<RepeatInterval>("none");
 
   // Expense-specific fields
   const [category, setCategory] = useState(DEFAULT_CATEGORIES[0].id);
@@ -59,7 +62,6 @@ export function AddTransactionModal({
   // Income-specific fields
   const [incomeType, setIncomeType] = useState<IncomeType>("salary");
   const [note, setNote] = useState("");
-  const [repeat, setRepeat] = useState<IncomeRepeat>("none");
   const [includedInSplit, setIncludedInSplit] = useState(true);
 
   // Initialize custom splits for expenses
@@ -93,13 +95,13 @@ export function AddTransactionModal({
   const resetForm = () => {
     setAmount("");
     setDate(new Date().toISOString().split("T")[0]);
+    setRepeat("none");
     setCategory(DEFAULT_CATEGORIES[0].id);
     setDescription("");
     setUseCustomSplit(false);
     setCustomSplits({});
     setIncomeType("salary");
     setNote("");
-    setRepeat("none");
     setIncludedInSplit(true);
   };
 
@@ -180,6 +182,7 @@ export function AddTransactionModal({
         description,
         date,
         splits,
+        repeat: repeat as ExpenseRepeat,
       });
 
       return true;
@@ -232,7 +235,7 @@ export function AddTransactionModal({
         type: incomeType,
         note: note.trim() || undefined,
         date,
-        repeat,
+        repeat: repeat as IncomeRepeat,
         included_in_split: includedInSplit,
       });
 
@@ -278,10 +281,11 @@ export function AddTransactionModal({
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
             transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
           >
-            <div className="bg-background border border-border rounded-md w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto p-4 sm:p-6">
-              <div className="flex items-center justify-between mb-6">
+            <div className="bg-background border border-border rounded-t-xl sm:rounded-xl w-full sm:max-w-md max-h-[90vh] sm:max-h-[calc(100vh-2rem)] flex flex-col">
+              {/* Header */}
+              <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-4 shrink-0">
                 <h2 className="text-lg font-medium text-foreground">
                   Lägg till transaktion
                 </h2>
@@ -293,246 +297,260 @@ export function AddTransactionModal({
                 </button>
               </div>
 
-              {/* Transaction Type Selector */}
-              <div className="flex gap-2 mb-6 p-1 bg-muted rounded-md">
-                <button
-                  type="button"
-                  onClick={() => setTransactionType("expense")}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                    transactionType === "expense"
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Utgift
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTransactionType("income")}
-                  className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
-                    transactionType === "income"
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  Inkomst
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* Amount - Common field */}
-                <div className="space-y-2">
-                  <Label htmlFor="amount" className="text-sm text-muted-foreground">
-                    Belopp (kr)
-                  </Label>
-                  <Input
-                    id="amount"
-                    type="number"
-                    step="0.01"
-                    placeholder="0.00"
-                    value={amount}
-                    onChange={(e) => setAmount(e.target.value)}
-                    required
-                    autoFocus
-                  />
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 pb-4">
+                {/* Transaction Type Selector */}
+                <div className="flex gap-2 mb-6 p-1 bg-muted rounded-md">
+                  <button
+                    type="button"
+                    onClick={() => setTransactionType("expense")}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      transactionType === "expense"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Utgift
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTransactionType("income")}
+                    className={`flex-1 py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                      transactionType === "income"
+                        ? "bg-background text-foreground shadow-sm"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Inkomst
+                  </button>
                 </div>
 
-                {/* Expense-specific fields */}
-                {transactionType === "expense" && (
-                  <>
-                    <div className="space-y-2">
-                      <Label className="text-sm text-muted-foreground">Kategori</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {DEFAULT_CATEGORIES.map((cat) => (
-                          <button
-                            key={cat.id}
-                            type="button"
-                            onClick={() => setCategory(cat.id)}
-                            className={`flex items-center gap-2 rounded-md border px-3 py-2 sm:py-1.5 text-sm transition-colors active:scale-95 ${
-                              category === cat.id
-                                ? "border-foreground bg-secondary"
-                                : "border-border hover:border-muted-foreground"
-                            }`}
-                          >
-                            <span>{cat.icon}</span>
-                            <span className="text-foreground">{cat.name}</span>
-                          </button>
-                        ))}
-                      </div>
-                    </div>
+                <form id="add-transaction-form" onSubmit={handleSubmit} className="space-y-5">
+                  {/* Amount - Common field */}
+                  <div className="space-y-2">
+                    <Label htmlFor="amount" className="text-sm text-muted-foreground">
+                      Belopp (kr)
+                    </Label>
+                    <Input
+                      id="amount"
+                      type="number"
+                      step="0.01"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={amount}
+                      onChange={(e) => setAmount(e.target.value)}
+                      required
+                      autoFocus
+                      className="h-12 sm:h-10 text-base sm:text-sm"
+                    />
+                  </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="description" className="text-sm text-muted-foreground">
-                        Beskrivning
-                      </Label>
-                      <Input
-                        id="description"
-                        placeholder="t.ex. ICA Maxi"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="date" className="text-sm text-muted-foreground">
-                        Datum
-                      </Label>
-                      <Input
-                        id="date"
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-sm text-muted-foreground">Fördelning</Label>
-                        <button
-                          type="button"
-                          onClick={() => setUseCustomSplit(!useCustomSplit)}
-                          className="text-sm text-primary hover:underline"
-                        >
-                          {useCustomSplit ? "Jämn delning" : "Anpassad delning"}
-                        </button>
-                      </div>
-
-                      {useCustomSplit && amount && (
-                        <div className="space-y-3 p-3 sm:p-3 border border-border rounded-md bg-secondary/20">
-                          <p className="text-xs text-muted-foreground mb-2">
-                            Fördela {parseFloat(amount).toFixed(2)} kr mellan gruppmedlemmar:
-                          </p>
-                          {members.map((member) => (
-                            <div key={member.user_id} className="flex items-center gap-2">
-                              <Label className="text-sm flex-1 text-foreground">
-                                {member.name}
-                              </Label>
-                              <Input
-                                type="number"
-                                step="0.01"
-                                min="0"
-                                placeholder="0.00"
-                                value={customSplits[member.user_id] || ""}
-                                onChange={(e) => handleSplitChange(member.user_id, e.target.value)}
-                                className="w-28 sm:w-24 h-10 sm:h-9"
-                              />
-                              <span className="text-sm text-muted-foreground shrink-0">kr</span>
-                            </div>
+                  {/* Expense-specific fields */}
+                  {transactionType === "expense" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label className="text-sm text-muted-foreground">Kategori</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {DEFAULT_CATEGORIES.map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => setCategory(cat.id)}
+                              className={`flex items-center gap-2 rounded-md border px-3 py-2 sm:py-1.5 text-sm transition-colors active:scale-95 ${
+                                category === cat.id
+                                  ? "border-foreground bg-secondary"
+                                  : "border-border hover:border-muted-foreground"
+                              }`}
+                            >
+                              <span>{cat.icon}</span>
+                              <span className="text-foreground">{cat.name}</span>
+                            </button>
                           ))}
-                          <div className="pt-2 border-t border-border mt-2">
-                            <div className="flex items-center justify-between text-sm">
-                              <span className="text-muted-foreground">Summa:</span>
-                              <span className={`font-medium ${
-                                Math.abs(calculateSplitSum() - (parseFloat(amount) || 0)) < 0.01
-                                  ? "text-green-600"
-                                  : "text-destructive"
-                              }`}>
-                                {calculateSplitSum().toFixed(2)} kr
-                              </span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="description" className="text-sm text-muted-foreground">
+                          Beskrivning
+                        </Label>
+                        <Input
+                          id="description"
+                          placeholder="t.ex. ICA Maxi"
+                          value={description}
+                          onChange={(e) => setDescription(e.target.value)}
+                          required
+                          className="h-12 sm:h-10 text-base sm:text-sm"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="date" className="text-sm text-muted-foreground">
+                          Datum
+                        </Label>
+                        <Input
+                          id="date"
+                          type="date"
+                          value={date}
+                          onChange={(e) => setDate(e.target.value)}
+                          required
+                          className="h-12 sm:h-10 text-base sm:text-sm"
+                        />
+                      </div>
+
+                      {/* Recurring section for expenses */}
+                      <RecurringSection
+                        value={repeat}
+                        onChange={setRepeat}
+                      />
+
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-sm text-muted-foreground">Fördelning</Label>
+                          <button
+                            type="button"
+                            onClick={() => setUseCustomSplit(!useCustomSplit)}
+                            className="text-sm text-primary hover:underline"
+                          >
+                            {useCustomSplit ? "Jämn delning" : "Anpassad delning"}
+                          </button>
+                        </div>
+
+                        {useCustomSplit && amount && (
+                          <div className="space-y-3 p-3 sm:p-3 border border-border rounded-md bg-secondary/20">
+                            <p className="text-xs text-muted-foreground mb-2">
+                              Fördela {parseFloat(amount).toFixed(2)} kr mellan gruppmedlemmar:
+                            </p>
+                            {members.map((member) => (
+                              <div key={member.user_id} className="flex items-center gap-2">
+                                <Label className="text-sm flex-1 text-foreground">
+                                  {member.name}
+                                </Label>
+                                <Input
+                                  type="number"
+                                  step="0.01"
+                                  min="0"
+                                  inputMode="decimal"
+                                  placeholder="0.00"
+                                  value={customSplits[member.user_id] || ""}
+                                  onChange={(e) => handleSplitChange(member.user_id, e.target.value)}
+                                  className="w-28 sm:w-24 h-10 sm:h-9"
+                                />
+                                <span className="text-sm text-muted-foreground shrink-0">kr</span>
+                              </div>
+                            ))}
+                            <div className="pt-2 border-t border-border mt-2">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="text-muted-foreground">Summa:</span>
+                                <span className={`font-medium ${
+                                  Math.abs(calculateSplitSum() - (parseFloat(amount) || 0)) < 0.01
+                                    ? "text-income"
+                                    : "text-destructive"
+                                }`}>
+                                  {calculateSplitSum().toFixed(2)} kr
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      )}
+                        )}
 
-                      {!useCustomSplit && (
-                        <p className="text-xs text-muted-foreground">
-                          Delas lika mellan alla gruppmedlemmar
-                        </p>
-                      )}
-                    </div>
-                  </>
-                )}
-
-                {/* Income-specific fields */}
-                {transactionType === "income" && (
-                  <>
-                    <div className="space-y-2">
-                      <Label className="text-sm text-muted-foreground">Typ</Label>
-                      <div className="flex flex-wrap gap-2">
-                        {INCOME_TYPES.map((type) => (
-                          <button
-                            key={type}
-                            type="button"
-                            onClick={() => setIncomeType(type)}
-                            className={`flex items-center gap-2 rounded-md border px-3 py-2 sm:py-1.5 text-sm transition-colors active:scale-95 ${
-                              incomeType === type
-                                ? "border-foreground bg-secondary"
-                                : "border-border hover:border-muted-foreground"
-                            }`}
-                          >
-                            <span>{getIncomeTypeIcon(type)}</span>
-                            <span className="text-foreground">
-                              {getIncomeTypeLabel(type)}
-                            </span>
-                          </button>
-                        ))}
+                        {!useCustomSplit && (
+                          <p className="text-xs text-muted-foreground">
+                            Delas lika mellan alla gruppmedlemmar
+                          </p>
+                        )}
                       </div>
-                    </div>
+                    </>
+                  )}
 
-                    <div className="space-y-2">
-                      <Label htmlFor="income-date" className="text-sm text-muted-foreground">
-                        Datum
-                      </Label>
-                      <Input
-                        id="income-date"
-                        type="date"
-                        value={date}
-                        onChange={(e) => setDate(e.target.value)}
-                        required
-                      />
-                    </div>
+                  {/* Income-specific fields */}
+                  {transactionType === "income" && (
+                    <>
+                      <div className="space-y-2">
+                        <Label className="text-sm text-muted-foreground">Typ</Label>
+                        <div className="flex flex-wrap gap-2">
+                          {INCOME_TYPES.map((type) => (
+                            <button
+                              key={type}
+                              type="button"
+                              onClick={() => setIncomeType(type)}
+                              className={`flex items-center gap-2 rounded-md border px-3 py-2 sm:py-1.5 text-sm transition-colors active:scale-95 ${
+                                incomeType === type
+                                  ? "border-foreground bg-secondary"
+                                  : "border-border hover:border-muted-foreground"
+                              }`}
+                            >
+                              <span>{getIncomeTypeIcon(type)}</span>
+                              <span className="text-foreground">
+                                {getIncomeTypeLabel(type)}
+                              </span>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
 
-                    <div className="space-y-2">
-                      <Label htmlFor="repeat" className="text-sm text-muted-foreground">
-                        Upprepa
-                      </Label>
-                      <select
-                        id="repeat"
+                      <div className="space-y-2">
+                        <Label htmlFor="income-date" className="text-sm text-muted-foreground">
+                          Datum
+                        </Label>
+                        <Input
+                          id="income-date"
+                          type="date"
+                          value={date}
+                          onChange={(e) => setDate(e.target.value)}
+                          required
+                          className="h-12 sm:h-10 text-base sm:text-sm"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor="note" className="text-sm text-muted-foreground">
+                          Anteckning (valfritt)
+                        </Label>
+                        <Input
+                          id="note"
+                          placeholder="t.ex. Månadslön december"
+                          value={note}
+                          onChange={(e) => setNote(e.target.value)}
+                          className="h-12 sm:h-10 text-base sm:text-sm"
+                        />
+                      </div>
+
+                      {/* Recurring section for incomes */}
+                      <RecurringSection
                         value={repeat}
-                        onChange={(e) => setRepeat(e.target.value as IncomeRepeat)}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                      >
-                        <option value="none">Ingen</option>
-                        <option value="monthly">Månadsvis</option>
-                      </select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="note" className="text-sm text-muted-foreground">
-                        Anteckning (valfritt)
-                      </Label>
-                      <Input
-                        id="note"
-                        placeholder="t.ex. Månadslön december"
-                        value={note}
-                        onChange={(e) => setNote(e.target.value)}
+                        onChange={setRepeat}
                       />
-                    </div>
 
-                    <div className="flex items-center space-x-2 p-3 border border-border rounded-md">
-                      <Checkbox
-                        id="includedInSplit"
-                        checked={includedInSplit}
-                        onCheckedChange={(checked) =>
-                          setIncludedInSplit(checked === true)
-                        }
-                      />
-                      <Label
-                        htmlFor="includedInSplit"
-                        className="text-sm font-normal text-foreground cursor-pointer"
-                      >
-                        Inkludera i 50/50-delning
-                      </Label>
-                    </div>
-                  </>
-                )}
+                      <div className="flex items-center space-x-2 p-3 border border-border rounded-md">
+                        <Checkbox
+                          id="includedInSplit"
+                          checked={includedInSplit}
+                          onCheckedChange={(checked) =>
+                            setIncludedInSplit(checked === true)
+                          }
+                        />
+                        <Label
+                          htmlFor="includedInSplit"
+                          className="text-sm font-normal text-foreground cursor-pointer"
+                        >
+                          Inkludera i 50/50-delning
+                        </Label>
+                      </div>
+                    </>
+                  )}
+                </form>
+              </div>
 
-                <Button type="submit" className="w-full">
+              {/* Sticky footer with save button */}
+              <div className="shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-background safe-area-pb">
+                <Button 
+                  type="submit" 
+                  form="add-transaction-form"
+                  className="w-full h-12 sm:h-10 text-base sm:text-sm"
+                >
                   Lägg till {transactionType === "expense" ? "utgift" : "inkomst"}
                 </Button>
-              </form>
+              </div>
             </div>
           </motion.div>
         </>

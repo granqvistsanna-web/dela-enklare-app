@@ -24,6 +24,7 @@ export type Database = {
           group_id: string
           id: string
           paid_by: string
+          repeat: string
           splits: Json | null
         }
         Insert: {
@@ -35,6 +36,7 @@ export type Database = {
           group_id: string
           id?: string
           paid_by: string
+          repeat?: string
           splits?: Json | null
         }
         Update: {
@@ -46,6 +48,7 @@ export type Database = {
           group_id?: string
           id?: string
           paid_by?: string
+          repeat?: string
           splits?: Json | null
         }
         Relationships: [
