@@ -189,7 +189,7 @@ export function BalanceCard({
                       {breakdown.map((b) => (
                         <div key={b.userId} className="space-y-1.5">
                           <div className="flex items-center gap-2">
-                            <div className="h-5 w-5 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue shrink-0">
+                            <div className="h-7 w-7 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue shrink-0">
                               {b.name.charAt(0).toUpperCase()}
                             </div>
                             <span className="text-sm font-medium text-foreground">{b.name}</span>
@@ -244,7 +244,7 @@ export function BalanceCard({
                       className="flex items-center justify-between gap-2"
                     >
                       <div className="flex items-center gap-2 min-w-0">
-                        <div className="h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue shrink-0">
+                        <div className="h-8 w-8 sm:h-9 sm:w-9 rounded-full bg-icon-blue-bg flex items-center justify-center text-xs font-semibold text-icon-blue shrink-0">
                           {(member?.name || "?").charAt(0).toUpperCase()}
                         </div>
                         <span className="text-sm text-foreground truncate">
