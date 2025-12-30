@@ -57,17 +57,6 @@ export function AddTransactionModal({
   const [customSplits, setCustomSplits] = useState<Record<string, string>>({});
 
   // Income-specific fields
-  const getInitialRecipient = useCallback(() => {
-    if (members.length > 0) return members[0].user_id;
-    if (user?.id) return user.id;
-    return "";
-  }, [members, user]);
-
-  const [recipient, setRecipient] = useState(() => {
-    if (members.length > 0) return members[0].user_id;
-    if (user?.id) return user.id;
-    return "";
-  });
   const [incomeType, setIncomeType] = useState<IncomeType>("salary");
   const [note, setNote] = useState("");
   const [repeat, setRepeat] = useState<IncomeRepeat>("none");
@@ -86,13 +75,6 @@ export function AddTransactionModal({
     }
   }, [useCustomSplit, members, amount, transactionType]);
 
-  // Update recipient when members or user changes
-  useEffect(() => {
-    const newRecipient = getInitialRecipient();
-    if (newRecipient && newRecipient !== recipient) {
-      setRecipient(newRecipient);
-    }
-  }, [getInitialRecipient, recipient]);
 
   const handleSplitChange = (userId: string, value: string) => {
     setCustomSplits((prev) => ({
@@ -115,7 +97,6 @@ export function AddTransactionModal({
     setDescription("");
     setUseCustomSplit(false);
     setCustomSplits({});
-    setRecipient(getInitialRecipient());
     setIncomeType("salary");
     setNote("");
     setRepeat("none");
@@ -223,15 +204,8 @@ export function AddTransactionModal({
     }
 
     // Validate required fields
-    if (!amount || !recipient) {
-      if (!amount) {
-        toast.error("Ange ett belopp");
-        return false;
-      }
-      if (!recipient) {
-        toast.error("Välj mottagare");
-        return false;
-      }
+    if (!amount) {
+      toast.error("Ange ett belopp");
       return false;
     }
 
@@ -254,7 +228,7 @@ export function AddTransactionModal({
       const result = await onAddIncome({
         group_id: groupId,
         amount: amountCents,
-        recipient,
+        recipient: user.id,
         type: incomeType,
         note: note.trim() || undefined,
         date,
@@ -474,31 +448,6 @@ export function AddTransactionModal({
                 {/* Income-specific fields */}
                 {transactionType === "income" && (
                   <>
-                    <div className="space-y-2">
-                      <Label htmlFor="recipient" className="text-sm text-muted-foreground">
-                        Mottagare
-                      </Label>
-                      <select
-                        id="recipient"
-                        value={recipient}
-                        onChange={(e) => setRecipient(e.target.value)}
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                        required
-                      >
-                        {members.length > 0 ? (
-                          members.map((member) => (
-                            <option key={member.user_id} value={member.user_id}>
-                              {member.name}
-                            </option>
-                          ))
-                        ) : user?.id ? (
-                          <option value={user.id}>Mig själv</option>
-                        ) : (
-                          <option value="">Välj mottagare</option>
-                        )}
-                      </select>
-                    </div>
-
                     <div className="space-y-2">
                       <Label className="text-sm text-muted-foreground">Typ</Label>
                       <div className="flex flex-wrap gap-2">

@@ -1,12 +1,12 @@
-import { type FormEvent, type MouseEvent, useState, useEffect } from "react";
+import { type FormEvent, type MouseEvent, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { GroupMember } from "@/hooks/useGroups";
 import { IncomeType, IncomeRepeat, IncomeInput, Income } from "@/hooks/useIncomes";
 import { getIncomeTypeIcon, getIncomeTypeLabel } from "@/lib/incomeUtils";
+import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
 
 interface AddIncomeModalProps {
@@ -14,7 +14,6 @@ interface AddIncomeModalProps {
   onClose: () => void;
   onAdd: (income: IncomeInput) => Promise<Income | null>;
   groupId: string;
-  members: GroupMember[];
 }
 
 const INCOME_TYPES: IncomeType[] = ["salary", "bonus", "benefit", "other"];
@@ -24,26 +23,17 @@ export function AddIncomeModal({
   onClose,
   onAdd,
   groupId,
-  members,
 }: AddIncomeModalProps) {
+  const { user } = useAuth();
   const [amount, setAmount] = useState("");
-  const [recipient, setRecipient] = useState("");
   const [type, setType] = useState<IncomeType>("salary");
   const [note, setNote] = useState("");
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [repeat, setRepeat] = useState<IncomeRepeat>("none");
   const [includedInSplit, setIncludedInSplit] = useState(true);
 
-  // Set default recipient when members load or modal opens
-  useEffect(() => {
-    if (isOpen && members.length > 0 && !recipient) {
-      setRecipient(members[0].user_id);
-    }
-  }, [isOpen, members, recipient]);
-
   const resetForm = () => {
     setAmount("");
-    setRecipient(""); // Will be set by useEffect when modal reopens
     setType("salary");
     setNote("");
     setDate(new Date().toISOString().split("T")[0]);
@@ -57,16 +47,14 @@ export function AddIncomeModal({
   ) => {
     e.preventDefault();
 
+    if (!user) {
+      toast.error("Du måste vara inloggad");
+      return;
+    }
+
     // Validate required fields
-    if (!amount || !recipient) {
-      if (!amount) {
-        toast.error("Ange ett belopp");
-        return;
-      }
-      if (!recipient) {
-        toast.error("Välj mottagare");
-        return;
-      }
+    if (!amount) {
+      toast.error("Ange ett belopp");
       return;
     }
 
@@ -88,7 +76,7 @@ export function AddIncomeModal({
     const result = await onAdd({
       group_id: groupId,
       amount: amountCents,
-      recipient,
+      recipient: user.id,
       type,
       note: note.trim() || undefined,
       date,
@@ -159,25 +147,6 @@ export function AddIncomeModal({
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="recipient" className="text-sm text-muted-foreground">
-                    Mottagare
-                  </Label>
-                  <select
-                    id="recipient"
-                    value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-base sm:text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 appearance-none cursor-pointer"
-                    style={{ fontSize: '16px' }}
-                    required
-                  >
-                    {members.map((member) => (
-                      <option key={member.user_id} value={member.user_id}>
-                        {member.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
 
                 <div className="space-y-2">
                   <Label className="text-sm text-muted-foreground">Typ</Label>

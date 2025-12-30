@@ -549,7 +549,6 @@ const Index = () => {
           setEditingIncome(null);
         }}
         income={editingIncome}
-        members={household.members}
       />
     </div>
   );
