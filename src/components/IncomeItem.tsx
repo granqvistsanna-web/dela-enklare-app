@@ -80,8 +80,8 @@ export const IncomeItem = memo(function IncomeItem({
         className="group flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background"
       >
       <div
-        className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 cursor-pointer"
-        onClick={() => onEdit?.(income)}
+        className={`flex items-center gap-3 sm:gap-4 min-w-0 flex-1 ${canModify ? 'cursor-pointer' : ''}`}
+        onClick={() => canModify && onEdit?.(income)}
       >
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
@@ -115,7 +115,7 @@ export const IncomeItem = memo(function IncomeItem({
           +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
         </span>
 
-        {(onEdit || onDelete) && (
+        {canModify && (onEdit || onDelete) && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -135,7 +135,7 @@ export const IncomeItem = memo(function IncomeItem({
                   Redigera
                 </DropdownMenuItem>
               )}
-              {onDelete && canModify && (
+              {onDelete && (
                 <DropdownMenuItem
                   onClick={() => onDelete(income.id)}
                   className="text-sm py-3 sm:py-2 text-destructive focus:text-destructive"

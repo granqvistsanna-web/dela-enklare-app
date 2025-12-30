@@ -184,11 +184,29 @@ export function useExpenses(groupId?: string) {
     expenseId: string,
     updates: Partial<Omit<Expense, "id" | "created_at">>
   ) => {
+    if (!user) {
+      toast.error("Du måste vara inloggad");
+      return;
+    }
+
     try {
+      // First, verify the user owns this expense
+      const expense = expenses.find(e => e.id === expenseId);
+      if (!expense) {
+        toast.error("Utgiften hittades inte");
+        return;
+      }
+
+      if (expense.paid_by !== user.id) {
+        toast.error("Du kan bara redigera utgifter du själv betalat");
+        return;
+      }
+
       const { error } = await supabase
         .from("expenses")
         .update(updates)
-        .eq("id", expenseId);
+        .eq("id", expenseId)
+        .eq("paid_by", user.id); // Additional safety check at DB level
 
       if (error) throw error;
 

@@ -138,18 +138,9 @@ export function EditIncomeModal({
                   <Label className="text-sm text-muted-foreground">
                     Mottagare
                   </Label>
-                  <select
-                    value={recipient}
-                    onChange={(e) => setRecipient(e.target.value)}
-                    className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                    required
-                  >
-                    {members.map((member) => (
-                      <option key={member.user_id} value={member.user_id}>
-                        {member.name}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="rounded-md border border-border bg-secondary/50 py-2 px-3 text-foreground">
+                    {recipientMember?.name || "Okänd"}
+                  </div>
                 </div>
 
                 <div className="space-y-2">
