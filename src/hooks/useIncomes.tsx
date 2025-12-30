@@ -3,7 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./useAuth";
 import { toast } from "sonner";
 
-export type IncomeType = "salary" | "bonus" | "benefit" | "other";
+export type IncomeType = "salary" | "bonus" | "benefit" | "fkassa" | "bidrag" | "other";
 export type IncomeRepeat = "none" | "monthly";
 
 export interface Income {

@@ -157,6 +157,8 @@ export function getIncomeTypeLabel(type: string): string {
     salary: "Lön",
     bonus: "Bonus",
     benefit: "Förmån",
+    fkassa: "F-kassa",
+    bidrag: "Bidrag",
     other: "Övrigt",
   };
   return labels[type] || type;
@@ -170,6 +172,8 @@ export function getIncomeTypeIcon(type: string): string {
     salary: "💰",
     bonus: "🎁",
     benefit: "🏥",
+    fkassa: "💼",
+    bidrag: "📋",
     other: "💵",
   };
   return icons[type] || "💵";
