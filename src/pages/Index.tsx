@@ -10,6 +10,7 @@ import { EditIncomeModal } from "@/components/EditIncomeModal";
 import { ImportModal } from "@/components/ImportModal";
 import { SwishModal } from "@/components/SwishModal";
 import { BalanceCard } from "@/components/BalanceCard";
+import { MemberSummaryCard } from "@/components/MemberSummaryCard";
 import { useGroups } from "@/hooks/useGroups";
 import { GroupSelector } from "@/components/GroupSelector";
 import { useExpenses, Expense } from "@/hooks/useExpenses";
@@ -351,8 +352,17 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Balance section */}
+        {/* Member summary */}
         <div className="mb-6 animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <MemberSummaryCard
+            expenses={filteredExpenses}
+            incomes={filteredIncomes}
+            members={household.members}
+          />
+        </div>
+
+        {/* Balance section */}
+        <div className="mb-6 animate-fade-in" style={{ animationDelay: '250ms' }}>
           <BalanceCard
             expenses={filteredExpenses}
             members={household.members}
@@ -365,7 +375,7 @@ const Index = () => {
         </div>
 
         {/* Latest activities */}
-        <div className="mb-6 animate-fade-in" style={{ animationDelay: '250ms' }}>
+        <div className="mb-6 animate-fade-in" style={{ animationDelay: '300ms' }}>
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-subheading">
               Senaste aktiviteter
