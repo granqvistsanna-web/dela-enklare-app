@@ -21,9 +21,9 @@ export function GroupSelector({ groups, selectedGroupId, onSelectGroup }: GroupS
 
   return (
     <div className="flex items-center gap-2">
-      <Users className="h-4 w-4 text-muted-foreground" />
+      <Users className="h-4 w-4 text-muted-foreground hidden sm:block" />
       <Select value={selectedGroupId} onValueChange={onSelectGroup}>
-        <SelectTrigger className="w-[180px] h-9 bg-background/50 border-border/50">
+        <SelectTrigger className="w-[140px] sm:w-[180px] h-9 bg-background/50 border-border/50">
           <SelectValue placeholder="Välj grupp" />
         </SelectTrigger>
         <SelectContent>
