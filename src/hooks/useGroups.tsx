@@ -332,6 +332,112 @@ export function useGroups() {
     }
   };
 
+  const createGroup = async (name: string) => {
+    if (!user) {
+      toast.error("Du måste vara inloggad");
+      return null;
+    }
+
+    try {
+      // Create the group
+      const { data: groupData, error: groupError } = await supabase
+        .from("groups")
+        .insert({
+          name,
+          is_temporary: false,
+        } as { name: string; is_temporary: boolean; invite_code: string })
+        .select()
+        .single();
+
+      if (groupError) throw groupError;
+
+      // Add user as member
+      const { error: memberError } = await supabase
+        .from("group_members")
+        .insert({
+          group_id: groupData.id,
+          user_id: user.id,
+        });
+
+      if (memberError) throw memberError;
+
+      await fetchGroups();
+      
+      // Select the new group
+      localStorage.setItem(SELECTED_GROUP_KEY, groupData.id);
+      setHousehold({
+        ...groupData,
+        members: [{
+          id: user.id,
+          user_id: user.id,
+          name: "Du",
+        }],
+      });
+
+      toast.success("Ny grupp skapad");
+      return groupData;
+    } catch (error) {
+      console.error("Error creating group:", error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : "Kunde inte skapa grupp";
+      toast.error(errorMessage);
+      return null;
+    }
+  };
+
+  const deleteGroup = async (groupId: string) => {
+    if (!user) {
+      toast.error("Du måste vara inloggad");
+      return false;
+    }
+
+    try {
+      // Check if user is the creator of the group
+      const groupToDelete = allGroups.find(g => g.id === groupId);
+      if (!groupToDelete) {
+        toast.error("Gruppen finns inte");
+        return false;
+      }
+
+      if (groupToDelete.created_by !== user.id) {
+        toast.error("Endast gruppens skapare kan ta bort den");
+        return false;
+      }
+
+      // Delete the group (cascade will handle members)
+      const { error } = await supabase
+        .from("groups")
+        .delete()
+        .eq("id", groupId);
+
+      if (error) throw error;
+
+      // If we deleted the current household, select another one
+      if (household?.id === groupId) {
+        const remainingGroups = allGroups.filter(g => g.id !== groupId);
+        if (remainingGroups.length > 0) {
+          localStorage.setItem(SELECTED_GROUP_KEY, remainingGroups[0].id);
+          setHousehold(remainingGroups[0]);
+        } else {
+          localStorage.removeItem(SELECTED_GROUP_KEY);
+          setHousehold(null);
+        }
+      }
+
+      await fetchGroups();
+      toast.success("Grupp borttagen");
+      return true;
+    } catch (error) {
+      console.error("Error deleting group:", error);
+      const errorMessage = error instanceof Error
+        ? error.message
+        : "Kunde inte ta bort grupp";
+      toast.error(errorMessage);
+      return false;
+    }
+  };
+
   return {
     household,
     allGroups,
@@ -341,6 +447,8 @@ export function useGroups() {
     removeMember,
     regenerateInviteCode,
     updateHouseholdName,
+    createGroup,
+    deleteGroup,
     refetch: fetchGroups,
   };
 }
