@@ -89,12 +89,32 @@ export function useExpenses(groupId?: string) {
     }
 
     try {
+      // Build insert payload - only include splits if it has a value
+      const insertData: {
+        group_id: string;
+        amount: number;
+        paid_by: string;
+        category: string;
+        description: string;
+        date: string;
+        splits?: ExpenseSplit | null;
+      } = {
+        group_id: expense.group_id,
+        amount: expense.amount,
+        paid_by: user.id, // Always use current user
+        category: expense.category,
+        description: expense.description,
+        date: expense.date,
+      };
+
+      // Only add splits if it's not null/undefined
+      if (expense.splits) {
+        insertData.splits = expense.splits;
+      }
+
       const { data, error } = await supabase
         .from("expenses")
-        .insert({
-          ...expense,
-          paid_by: user.id, // Always use current user
-        })
+        .insert(insertData)
         .select()
         .single();
 
