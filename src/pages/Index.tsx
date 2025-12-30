@@ -257,7 +257,7 @@ const Index = () => {
               Översikt
             </h2>
 
-            <Card className="shadow-notion hover-lift">
+            <Card>
               <CardContent className="p-5 space-y-4">
                 {/* Total in */}
                 <div className="space-y-1">
@@ -294,7 +294,7 @@ const Index = () => {
               Fördelning
             </h2>
 
-            <Card className="shadow-notion hover-lift">
+            <Card>
               <CardContent className="p-5">
                 {/* Circular/bar visualization */}
                 <div className="space-y-5">
@@ -307,9 +307,9 @@ const Index = () => {
                           {Math.round(animatedIncomeWidth)}%
                         </span>
                       </div>
-                      <div className="h-7 bg-muted rounded-md overflow-hidden">
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-income transition-all duration-300"
+                          className="h-full bg-income rounded-full transition-all duration-300"
                           style={{ width: `${animatedIncomeWidth}%` }}
                         />
                       </div>
@@ -322,9 +322,9 @@ const Index = () => {
                           {Math.round(animatedExpenseWidth)}%
                         </span>
                       </div>
-                      <div className="h-7 bg-muted rounded-md overflow-hidden">
+                      <div className="h-2 bg-muted rounded-full overflow-hidden">
                         <div
-                          className="h-full bg-expense transition-all duration-300"
+                          className="h-full bg-expense rounded-full transition-all duration-300"
                           style={{ width: `${animatedExpenseWidth}%` }}
                         />
                       </div>
@@ -391,7 +391,7 @@ const Index = () => {
           </div>
 
           {latestActivities.length > 0 ? (
-            <Card className="shadow-notion">
+            <Card>
               <CardContent className="p-0">
                 <div className="divide-y divide-border/40">
                     {latestActivities.map((item, idx) => {

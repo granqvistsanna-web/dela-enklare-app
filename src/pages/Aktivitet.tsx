@@ -318,7 +318,7 @@ export default function Aktivitet() {
         </div>
 
         {/* Search and filters */}
-        <Card className="mb-6 shadow-notion animate-fade-in" style={{ animationDelay: '50ms' }}>
+        <Card className="mb-6 animate-fade-in" style={{ animationDelay: '50ms' }}>
           <CardContent className="p-4">
             <div className="grid gap-3 md:grid-cols-3">
               {/* Search */}
@@ -392,7 +392,7 @@ export default function Aktivitet() {
                   </div>
 
                   {/* Items for this month */}
-                  <Card className="shadow-notion">
+                  <Card>
                     <CardContent className="p-0">
                       <div className="divide-y divide-border/40">
                         {items.map((item, index) => {

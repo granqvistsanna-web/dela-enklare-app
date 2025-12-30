@@ -4,11 +4,11 @@
 
 @layer base {
   :root {
-    /* Notion-inspired grayscale palette - refined */
-    --background: 0 0% 100%;
+    /* Notion-inspired warm gray palette */
+    --background: 40 6% 97%;
     --foreground: 0 0% 9%;
 
-    --card: 0 0% 100%;
+    --card: 40 6% 99%;
     --card-foreground: 0 0% 9%;
 
     --popover: 0 0% 100%;
@@ -19,15 +19,15 @@
     --primary-foreground: 0 0% 98%;
 
     /* Secondary - subtle hover states */
-    --secondary: 0 0% 96%;
+    --secondary: 40 4% 93%;
     --secondary-foreground: 0 0% 9%;
 
     /* Muted - subdued text and backgrounds */
-    --muted: 0 0% 96%;
+    --muted: 40 4% 94%;
     --muted-foreground: 0 0% 45%;
 
-    /* Accent - subtle blue highlights */
-    --accent: 210 40% 96.1%;
+    /* Accent - subtle warm highlights */
+    --accent: 40 6% 94%;
     --accent-foreground: 0 0% 9%;
 
     /* Semantic colors */
@@ -41,8 +41,8 @@
     --warning-foreground: 0 0% 98%;
 
     /* Borders and inputs */
-    --border: 0 0% 92%;
-    --input: 0 0% 90%;
+    --border: 40 4% 90%;
+    --input: 40 4% 88%;
     --ring: 0 0% 9%;
 
     /* Grayscale data visualization tokens */
@@ -78,13 +78,13 @@
     --radius: 0.375rem;
 
     /* Sidebar - Notion-inspired navigation */
-    --sidebar-background: 0 0% 98.5%;
+    --sidebar-background: 40 6% 96%;
     --sidebar-foreground: 0 0% 35%;
     --sidebar-primary: 0 0% 9%;
     --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 0 0% 94%;
+    --sidebar-accent: 40 4% 92%;
     --sidebar-accent-foreground: 0 0% 9%;
-    --sidebar-border: 0 0% 93%;
+    --sidebar-border: 40 4% 90%;
     --sidebar-ring: 0 0% 9%;
   }
 

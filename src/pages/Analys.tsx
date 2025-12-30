@@ -157,7 +157,7 @@ export default function Analys() {
         </div>
 
         {/* Time Filter - Persistent Month Selection */}
-        <Card className="mb-6 shadow-notion animate-fade-in" style={{ animationDelay: '50ms' }}>
+        <Card className="mb-6 animate-fade-in" style={{ animationDelay: '50ms' }}>
           <CardContent className="p-5">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
@@ -207,7 +207,7 @@ export default function Analys() {
         {/* Summary Metrics - Grid Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           {/* Income */}
-          <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '100ms' }}>
+          <Card className="animate-fade-in" style={{ animationDelay: '100ms' }}>
             <CardContent className="p-5">
               <div className="space-y-1">
                 <p className="text-label-mono">
@@ -221,7 +221,7 @@ export default function Analys() {
           </Card>
 
           {/* Expenses */}
-          <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '150ms' }}>
+          <Card className="animate-fade-in" style={{ animationDelay: '150ms' }}>
             <CardContent className="p-5">
               <div className="space-y-1">
                 <p className="text-label-mono">
@@ -235,7 +235,7 @@ export default function Analys() {
           </Card>
 
           {/* Balance */}
-          <Card className="shadow-notion hover-lift animate-fade-in" style={{ animationDelay: '200ms' }}>
+          <Card className="animate-fade-in" style={{ animationDelay: '200ms' }}>
             <CardContent className="p-5">
               <div className="space-y-1">
                 <p className="text-label-mono">
@@ -250,7 +250,7 @@ export default function Analys() {
         </div>
 
         {/* Trend Visualization - 6 Month View */}
-        <Card className="mb-6 shadow-notion animate-fade-in" style={{ animationDelay: '250ms' }}>
+        <Card className="mb-6 animate-fade-in" style={{ animationDelay: '250ms' }}>
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-semibold">Utveckling</CardTitle>
             <p className="text-caption mt-1">Senaste 6 månaderna</p>
@@ -324,7 +324,7 @@ export default function Analys() {
         </Card>
 
         {/* Category Breakdown */}
-        <Card className="shadow-notion animate-fade-in" style={{ animationDelay: '300ms' }}>
+        <Card className="animate-fade-in" style={{ animationDelay: '300ms' }}>
           <CardHeader className="pb-4">
             <CardTitle className="text-base font-semibold">Utgifter per kategori</CardTitle>
             <p className="text-caption mt-1">
