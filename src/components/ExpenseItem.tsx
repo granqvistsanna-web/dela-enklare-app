@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { motion, PanInfo } from "framer-motion";
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUpRight, Repeat } from "lucide-react";
 import { Expense } from "@/hooks/useExpenses";
 import { GroupMember } from "@/hooks/useGroups";
 
@@ -86,7 +86,15 @@ export const ExpenseItem = memo(function ExpenseItem({ expense, members, onEdit,
             <ArrowUpRight size={16} className="text-expense" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-foreground truncate">{expense.description || "Utgift"}</p>
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-foreground truncate">{expense.description || "Utgift"}</p>
+              {expense.repeat && expense.repeat !== "none" && (
+                <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 bg-primary/10 rounded text-primary">
+                  <Repeat size={10} />
+                  {expense.repeat === "monthly" ? "Månadsvis" : "Årlig"}
+                </span>
+              )}
+            </div>
             <p className="text-xs text-muted-foreground mt-0.5">
               {payer?.name || "Okänd"} · {formattedDate}
               {hasCustomSplit && <span className="ml-1 text-primary">· Anpassad delning</span>}

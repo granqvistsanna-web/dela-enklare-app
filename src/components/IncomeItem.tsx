@@ -1,6 +1,6 @@
 import { memo, useState } from "react";
 import { motion, PanInfo } from "framer-motion";
-import { ArrowDownLeft } from "lucide-react";
+import { ArrowDownLeft, Repeat } from "lucide-react";
 import { Income } from "@/hooks/useIncomes";
 import { GroupMember } from "@/hooks/useGroups";
 import { getIncomeTypeLabel } from "@/lib/incomeUtils";
@@ -105,9 +105,10 @@ export const IncomeItem = memo(function IncomeItem({
                   Ej delad
                 </span>
               )}
-              {income.repeat === "monthly" && (
-                <span className="text-xs px-1.5 py-0.5 bg-primary/10 rounded text-primary">
-                  Månadsvis
+              {income.repeat && income.repeat !== "none" && (
+                <span className="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 bg-primary/10 rounded text-primary">
+                  <Repeat size={10} />
+                  {income.repeat === "monthly" ? "Månadsvis" : "Årlig"}
                 </span>
               )}
             </div>
