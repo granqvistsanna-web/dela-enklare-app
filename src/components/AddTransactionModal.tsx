@@ -283,7 +283,7 @@ export function AddTransactionModal({
             transition={{ duration: 0.15 }}
             className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4"
           >
-            <div className="bg-background border border-border rounded-t-xl sm:rounded-xl w-full sm:max-w-md max-h-[90vh] sm:max-h-[calc(100vh-2rem)] flex flex-col">
+            <div className="bg-background border border-border rounded-t-xl sm:rounded-xl w-full sm:max-w-md max-h-[90vh] sm:max-h-[calc(100vh-2rem)] flex flex-col overflow-x-hidden">
               {/* Header */}
               <div className="flex items-center justify-between px-4 sm:px-6 pt-4 sm:pt-6 pb-4 shrink-0">
                 <h2 className="text-lg font-medium text-foreground">
@@ -422,7 +422,7 @@ export function AddTransactionModal({
                             </p>
                             {members.map((member) => (
                               <div key={member.user_id} className="flex items-center gap-2">
-                                <Label className="text-sm flex-1 text-foreground">
+                                <Label className="text-sm flex-1 text-foreground truncate min-w-0">
                                   {member.name}
                                 </Label>
                                 <Input
@@ -433,7 +433,7 @@ export function AddTransactionModal({
                                   placeholder="0.00"
                                   value={customSplits[member.user_id] || ""}
                                   onChange={(e) => handleSplitChange(member.user_id, e.target.value)}
-                                  className="w-28 sm:w-24 h-11"
+                                  className="w-20 sm:w-24 h-11"
                                 />
                                 <span className="text-sm text-muted-foreground shrink-0">kr</span>
                               </div>
