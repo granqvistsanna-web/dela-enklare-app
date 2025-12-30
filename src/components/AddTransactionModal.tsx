@@ -684,25 +684,15 @@ export function AddTransactionModal({
                 </form>
               </div>
 
-              {/* Sticky footer with cancel and save buttons */}
+              {/* Sticky footer with save button */}
               <div className="shrink-0 px-4 sm:px-6 py-4 border-t border-border bg-card safe-area-pb">
-                <div className="flex gap-2 sm:gap-3">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={onClose}
-                    className="flex-1 h-12 sm:h-11 text-base sm:text-sm"
-                  >
-                    Avbryt
-                  </Button>
-                  <Button
-                    type="submit"
-                    form="add-transaction-form"
-                    className="flex-1 h-12 sm:h-11 text-base sm:text-sm"
-                  >
-                    Lägg till {transactionType === "expense" ? "utgift" : "inkomst"}
-                  </Button>
-                </div>
+                <Button
+                  type="submit"
+                  form="add-transaction-form"
+                  className="w-full h-12 sm:h-11 text-base sm:text-sm"
+                >
+                  Lägg till {transactionType === "expense" ? "utgift" : "inkomst"}
+                </Button>
               </div>
             </div>
           </motion.div>
