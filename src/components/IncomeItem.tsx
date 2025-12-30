@@ -56,7 +56,7 @@ export const IncomeItem = memo(function IncomeItem({
       {/* Delete background - shown when swiping */}
       {canModify && onDelete && (
         <div
-          className="absolute inset-0 bg-destructive flex items-center justify-end px-6"
+          className="absolute inset-0 bg-destructive flex items-center justify-end px-6 pointer-events-none"
           style={{
             opacity: Math.min(Math.abs(dragX) / 100, 1),
           }}
@@ -74,9 +74,18 @@ export const IncomeItem = memo(function IncomeItem({
         onDrag={(_, info) => setDragX(info.offset.x)}
         onDragEnd={handleDragEnd}
         onClick={() => canModify && onEdit?.(income)}
-        className={`w-full text-left appearance-none border-0 flex items-center justify-between py-4 px-4 sm:px-6 hover:bg-secondary/30 transition-colors bg-background ${canModify && onEdit ? 'cursor-pointer active:bg-secondary/50' : ''}`}
+        className={`
+          w-full text-left appearance-none border-0 
+          flex items-center justify-between py-4 px-4 sm:px-6 
+          bg-background transition-all duration-150
+          ${canModify && onEdit 
+            ? "cursor-pointer hover:bg-secondary/40 active:bg-secondary/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset" 
+            : ""}
+        `}
+        whileHover={canModify ? { scale: 1.005 } : undefined}
+        whileTap={canModify ? { scale: 0.995 } : undefined}
       >
-        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0 flex-1 pointer-events-none">
           <div className="relative shrink-0">
             <div className="p-1.5 rounded-md bg-income-bg">
               <ArrowDownLeft size={16} className="text-income" />
@@ -115,11 +124,15 @@ export const IncomeItem = memo(function IncomeItem({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0 pointer-events-none">
           <span className="text-sm font-semibold text-income tabular-nums">
             +{amountKr.toLocaleString("sv-SE", { minimumFractionDigits: 2 })} kr
           </span>
-          {canModify && <span className="text-muted-foreground text-lg">›</span>}
+          {canModify && (
+            <span className="text-muted-foreground text-lg transition-transform duration-150 group-hover:translate-x-0.5">
+              ›
+            </span>
+          )}
         </div>
       </motion.button>
     </div>
