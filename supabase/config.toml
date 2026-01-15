@@ -1,4 +1,4 @@
-project_id = "tqxqcnectpehslorwacj"
+project_id = "qswvgfslsginwpqkbbki"
 
 [functions.categorize-transactions]
 verify_jwt = true
