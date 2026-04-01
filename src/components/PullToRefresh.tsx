@@ -1,5 +1,4 @@
-import { ReactNode, useRef, useState } from "react";
-import { motion, PanInfo } from "framer-motion";
+import { ReactNode, useRef, useState, useCallback, useEffect } from "react";
 import { RefreshCw } from "lucide-react";
 
 interface PullToRefreshProps {
@@ -9,38 +8,43 @@ interface PullToRefreshProps {
 }
 
 export function PullToRefresh({ onRefresh, children, threshold = 80 }: PullToRefreshProps) {
-  const [isPulling, setIsPulling] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [pullDistance, setPullDistance] = useState(0);
   const startY = useRef(0);
+  const isPulling = useRef(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  const handleDragStart = () => {
+  const handleTouchStart = useCallback((e: TouchEvent) => {
     // Only allow pull-to-refresh if scrolled to top
-    if (containerRef.current) {
-      const scrollTop = containerRef.current.scrollTop || window.scrollY;
-      if (scrollTop === 0) {
-        setIsPulling(true);
-      }
+    if (window.scrollY === 0 && !isRefreshing) {
+      startY.current = e.touches[0].clientY;
+      isPulling.current = true;
     }
-  };
+  }, [isRefreshing]);
 
-  const handleDrag = (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (!isPulling) return;
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    if (!isPulling.current) return;
 
-    // Only pull down, not up
-    if (info.offset.y > 0) {
-      setPullDistance(info.offset.y);
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - startY.current;
+
+    // Only pull down, and only when at scroll top
+    if (diff > 0 && window.scrollY === 0) {
+      // Apply resistance to make it feel natural
+      const distance = Math.min(diff * 0.4, threshold * 1.5);
+      setPullDistance(distance);
+    } else {
+      // User is scrolling up normally, cancel pull
+      isPulling.current = false;
+      setPullDistance(0);
     }
-  };
+  }, [threshold]);
 
-  const handleDragEnd = async (_: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (!isPulling) return;
+  const handleTouchEnd = useCallback(async () => {
+    if (!isPulling.current) return;
+    isPulling.current = false;
 
-    setIsPulling(false);
-
-    // Trigger refresh if pulled past threshold
-    if (info.offset.y >= threshold) {
+    if (pullDistance >= threshold) {
       setIsRefreshing(true);
       try {
         await onRefresh();
@@ -48,15 +52,28 @@ export function PullToRefresh({ onRefresh, children, threshold = 80 }: PullToRef
         console.error("Refresh failed:", error);
       } finally {
         setIsRefreshing(false);
-        setPullDistance(0);
       }
-    } else {
-      setPullDistance(0);
     }
-  };
+    setPullDistance(0);
+  }, [pullDistance, threshold, onRefresh]);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+
+    el.addEventListener("touchstart", handleTouchStart, { passive: true });
+    el.addEventListener("touchmove", handleTouchMove, { passive: true });
+    el.addEventListener("touchend", handleTouchEnd);
+
+    return () => {
+      el.removeEventListener("touchstart", handleTouchStart);
+      el.removeEventListener("touchmove", handleTouchMove);
+      el.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [handleTouchStart, handleTouchMove, handleTouchEnd]);
 
   const progress = Math.min(pullDistance / threshold, 1);
-  const showIndicator = isPulling || isRefreshing;
+  const showIndicator = pullDistance > 0 || isRefreshing;
 
   return (
     <div ref={containerRef} className="relative">
@@ -81,24 +98,14 @@ export function PullToRefresh({ onRefresh, children, threshold = 80 }: PullToRef
       )}
 
       {/* Content */}
-      <motion.div
-        drag={!isRefreshing ? "y" : false}
-        dragConstraints={{ top: 0, bottom: 0 }}
-        dragElastic={0.2}
-        onDragStart={handleDragStart}
-        onDrag={handleDrag}
-        onDragEnd={handleDragEnd}
-        animate={{
-          y: isRefreshing ? threshold : 0,
-        }}
-        transition={{
-          type: "spring",
-          stiffness: 300,
-          damping: 30,
+      <div
+        style={{
+          transform: `translateY(${isRefreshing ? threshold : pullDistance}px)`,
+          transition: pullDistance === 0 ? "transform 0.3s ease-out" : "none",
         }}
       >
         {children}
-      </motion.div>
+      </div>
     </div>
   );
 }

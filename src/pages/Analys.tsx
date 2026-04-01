@@ -168,8 +168,8 @@ export default function Analys() {
   );
 
   return (
-    <div className="pt-14 lg:pt-0 lg:pl-64">
-      <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8">
+    <div className="pt-14 lg:pt-0 lg:pl-64 overflow-x-hidden">
+      <main className="container max-w-6xl py-6 px-4 sm:px-6 pb-6 lg:pb-8 overflow-x-hidden">
         {/* Header */}
         <div className="mb-6 animate-fade-in">
           <h1 className="text-heading text-2xl mb-1">Analys</h1>
@@ -289,11 +289,11 @@ export default function Analys() {
                       className="space-y-2 animate-fade-in"
                       style={{ animationDelay: `${300 + idx * 50}ms` }}
                     >
-                      <div className="flex items-baseline justify-between">
-                        <span className={`text-sm font-medium ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}`}>
+                      <div className="flex items-baseline justify-between gap-2 min-w-0">
+                        <span className={`text-sm font-medium truncate ${isCurrentMonth ? 'text-foreground' : 'text-muted-foreground'}`}>
                           {MONTHS[parseInt(item.month.split('-')[1]) - 1]} {item.month.split('-')[0]}
                         </span>
-                        <div className="flex gap-4 text-xs text-numeric">
+                        <div className="flex gap-3 text-xs text-numeric shrink-0">
                           <span className="text-income">
                             +{item.incomes.toLocaleString("sv-SE")}
                           </span>
@@ -368,20 +368,20 @@ export default function Analys() {
                       style={{ animationDelay: `${350 + idx * 30}ms` }}
                     >
                       <div
-                        className="flex items-baseline justify-between cursor-pointer hover:opacity-80 transition-opacity"
+                        className="flex items-baseline justify-between gap-2 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
                         onClick={() => toggleCategory(item.category)}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 min-w-0">
                           {isExpanded ? (
-                            <ChevronDown size={16} className="text-muted-foreground" />
+                            <ChevronDown size={16} className="text-muted-foreground shrink-0" />
                           ) : (
-                            <ChevronRight size={16} className="text-muted-foreground" />
+                            <ChevronRight size={16} className="text-muted-foreground shrink-0" />
                           )}
-                          <span className="text-sm font-medium text-foreground">
+                          <span className="text-sm font-medium text-foreground truncate">
                             {item.category}
                           </span>
                         </div>
-                        <span className="text-caption text-numeric">
+                        <span className="text-caption text-numeric shrink-0">
                           {item.amount.toLocaleString("sv-SE")} kr · {percentage.toFixed(0)}%
                         </span>
                       </div>
